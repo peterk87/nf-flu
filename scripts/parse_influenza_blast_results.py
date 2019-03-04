@@ -24,21 +24,21 @@ LOG_FORMAT = '%(asctime)s %(levelname)s: %(message)s [in %(filename)s:%(lineno)d
 logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
 
 # Column names/types/final report names
-blast_cols = [('qaccver', str),
+blast_cols = [('qaccver', 'category'),
               ('saccver', str), 
               ('pident', float), 
-              ('length', int),
-              ('mismatch', int),
-              ('gapopen', int),
-              ('qstart', int),
-              ('qend', int),
-              ('sstart', int),
-              ('send', int),
-              ('evalue', float),
-              ('bitscore', float),
-              ('qlen', int),
-              ('slen', int),
-              ('qcovs', float),
+              ('length', 'uint16'),
+              ('mismatch', 'uint16'),
+              ('gapopen', 'uint16'),
+              ('qstart', 'uint16'),
+              ('qend', 'uint16'),
+              ('sstart', 'uint16'),
+              ('send', 'uint16'),
+              ('evalue', np.float16),
+              ('bitscore', np.float16),
+              ('qlen', 'uint16'),
+              ('slen', 'uint16'),
+              ('qcovs', np.float16),
               ('stitle', str)]
 
 blast_results_report_columns = [('sample', 'Sample'),
@@ -173,55 +173,39 @@ def parse_blast_result(blast_result: str,
     if df.shape[0] == 0:
         logging.error(f'No BLASTN results in {blast_result}!')
         return
-    df['sample'] = df.qaccver.str.extract(r'(.+)_\d$')
+    # Assuming that all BLAST result entries have the same sample name so
+    # extracting the sample name from the first entry qaccver field
+    sample_name: str = re.sub(r'^(.+)_\d$', r'\1', df['qaccver'][0])
     logging.info(f'Parsed {df.shape[0]} BLAST results from {blast_result}')
-    logging.info(f'{blast_result} | n={df.shape[0]} | Filtering for hits above {pident_threshold}% identity.')
-    df_filtered = df.query(f'pident > {pident_threshold}').copy()
-    del df
-    logging.info(f'{blast_result} | n={df_filtered.shape[0]} | Filtered for hits above {pident_threshold}% identity.')
+    logging.info(f'{sample_name} | n={df.shape[0]} | Filtering for hits above {pident_threshold}% identity.')
+    df_filtered = df.query(f'pident > {pident_threshold}')
+    logging.info(f'{sample_name} | n={df_filtered.shape[0]} | Filtered for hits above {pident_threshold}% identity.')
     df_filtered['accession'] = df_filtered.saccver.str.extract(r'gi\|\d+\|gb\|(\w+)\|\w+')
-    df_filtered['sample'] = df_filtered.qaccver.str.extract(r'(.+)_\d$')
-    df_filtered['sample_segment'] = df_filtered.qaccver.str.extract(r'.+_(\d)$')
+    df_filtered['sample'] = sample_name
+    df_filtered['sample'] = pd.Categorical(df_filtered['sample'])
+    df_filtered['sample_segment'] = df_filtered.qaccver.str.extract(r'.+_(\d)$').astype('category')
+    df_filtered['sample_segment'] = pd.Categorical(df_filtered['sample_segment'])
     segments = df_filtered['sample_segment'].unique()
-    df_filtered['subtype_from_match_title'] = df_filtered['stitle'].str.extract(regex_subtype_pattern)
-    logging.info(f'{blast_result} | Merging NCBI Influenza DB genome metadata with BLAST results on accession.')
+    df_filtered['subtype_from_match_title'] = df_filtered['stitle'].str.extract(regex_subtype_pattern).astype('category')
+    df_filtered['subtype_from_match_title'] = pd.Categorical(df_filtered['subtype_from_match_title'])
+    logging.info(f'{sample_name} | Merging NCBI Influenza DB genome metadata with BLAST results on accession.')
     df_merge = pd.merge(df_filtered, df_metadata, on='accession', how='left')
-    df_merge['subtype'] = df_merge['subtype'].combine_first(df_merge['subtype_from_match_title'])
+    del df_filtered
+    del df_metadata
+    df_merge['subtype'] = pd.Categorical(df_merge['subtype'].combine_first(df_merge['subtype_from_match_title']))
     df_merge = df_merge.sort_values(by=['sample_segment', 'bitscore'], ascending=[True, False]).set_index('sample_segment')
     subtype_results_summary = {}
-    df_H_blast_results = None
-    df_N_blast_results = None
-    h_results = None
-    n_results = None
+    H_results = None
+    N_results = None
     if '4' in df_merge.index:
-        df_H_blast_results, h_results = find_h_or_n_type(df_merge, '4')
-        subtype_results_summary.update(h_results)
+        H_results = find_h_or_n_type(df_merge, '4')
+        subtype_results_summary.update(H_results)
     if '6' in df_merge.index:
-        df_N_blast_results, n_results = find_h_or_n_type(df_merge, '6')
-        subtype_results_summary.update(n_results)
+        N_results = find_h_or_n_type(df_merge, '6')
+        subtype_results_summary.update(N_results)
 
-    subtype_results_summary['sample'] = df_filtered['sample'][0]
-    subtype_value = ''
-    if h_results is None and n_results is None:
-        subtype_value = '-'
-    elif h_results is not None and n_results is None:
-        h_value = h_results.get('H_type', '')
-        subtype_value = 'H' + h_value if h_value != '' else '-'
-    elif h_results is  None and n_results is not None:
-        n_value = n_results.get('N_type', '')
-        subtype_value = 'N' + n_value if n_value != '' else '-'
-    else:
-        h_value = h_results.get('H_type', '')
-        n_value = n_results.get('N_type', '')
-        if h_value == '' and n_value == '':
-            subtype_value = '-'
-        else:
-            if h_value != '':
-                h_value = 'H' + h_value
-            if n_value != '':
-                n_value = 'N' + n_value
-            subtype_value = h_value + n_value
-    subtype_results_summary['subtype'] = subtype_value
+    subtype_results_summary['sample'] = sample_name
+    subtype_results_summary['subtype'] = get_subtype_value(H_results, N_results)
     dfs = []
     segments = df_merge.index.unique()
     for seg in segments:
@@ -230,7 +214,31 @@ def parse_blast_result(blast_result: str,
     cols = pd.Series([x for x,_ in blast_results_report_columns])
     cols = cols[cols.isin(df_top_seg_matches.columns)]
     df_top_seg_matches = df_top_seg_matches[cols]
-    return df_top_seg_matches, df_H_blast_results, df_N_blast_results, subtype_results_summary
+    return df_top_seg_matches, subtype_results_summary
+
+
+def get_subtype_value(H_results: Optional[Dict], N_results: Optional[Dict]) -> str:
+    subtype = ''
+    if H_results is None and N_results is None:
+        subtype = '-'
+    elif H_results is not None and N_results is None:
+        H: str = H_results.get('H_type', '')
+        subtype = f'H{H}' if H != '' else '-'
+    elif H_results is None and N_results is not None:
+        N: str = N_results.get('N_type', '')
+        subtype = f'N{N}' if N != '' else '-'
+    else:
+        H: str = H_results.get('H_type', '')
+        N: str = N_results.get('N_type', '')
+        if H == '' and N == '':
+            subtype = '-'
+        else:
+            if H != '':
+                H = f'H{H}'
+            if N != '':
+                N = f'N{N}'
+            subtype = f'{H}{N}'
+    return subtype
 
 
 def find_h_or_n_type(df_merge, seg):
@@ -243,7 +251,7 @@ def find_h_or_n_type(df_merge, seg):
     df_type_counts.columns = [type_name]
     df_type_counts['count'] = type_counts.values
     df_type_counts['subtype'] = type_counts.index
-    logging.info(f'{df_type_counts}')
+    logging.debug(f'{df_type_counts}')
     type_to_count = defaultdict(int)
     for _, x in df_type_counts.iterrows():
         if pd.isna(x[type_name]): continue
@@ -254,26 +262,26 @@ def find_h_or_n_type(df_merge, seg):
     total_count = type_counts.sum()
     logging.info(f'{h_or_n}{top_type} n={top_type_count}/{total_count} ({top_type_count / total_count:.1%})')
     df_seg_top_type = df_segment[df_segment.subtype.str.match(r'.*' + h_or_n + top_type + r'.*', na=False)]
-    df_top_result = df_seg_top_type.head(1)
+    top_result: pd.Series = [r for _, r in df_seg_top_type.head(1).iterrows()][0]
     results_summary = {f'{h_or_n}_type': top_type,
-                       f'{h_or_n}_sample_segment_length': df_top_result.qlen[0],
-                       f'{h_or_n}_top_pident': df_top_result.pident[0],
-                       f'{h_or_n}_top_mismatch': df_top_result.mismatch[0],
-                       f'{h_or_n}_top_gaps': df_top_result.gapopen[0],
-                       f'{h_or_n}_top_bitscore': df_top_result.bitscore[0],
-                       f'{h_or_n}_top_align_length': df_top_result['length'][0],
-                       f'{h_or_n}_top_accession': df_top_result['accession'][0],
-                       f'{h_or_n}_top_host': df_top_result['host'][0],
-                       f'{h_or_n}_top_country': df_top_result['country'][0],
-                       f'{h_or_n}_top_date': df_top_result['date'][0],
-                       f'{h_or_n}_top_seq_length': df_top_result['slen'][0],
-                       f'{h_or_n}_virus_name': df_top_result['virus_name'][0],
+                       f'{h_or_n}_sample_segment_length': top_result['qlen'],
+                       f'{h_or_n}_top_pident': top_result['pident'],
+                       f'{h_or_n}_top_mismatch': top_result['mismatch'],
+                       f'{h_or_n}_top_gaps': top_result['gapopen'],
+                       f'{h_or_n}_top_bitscore': top_result['bitscore'],
+                       f'{h_or_n}_top_align_length': top_result['length'],
+                       f'{h_or_n}_top_accession': top_result['accession'],
+                       f'{h_or_n}_top_host': top_result['host'],
+                       f'{h_or_n}_top_country': top_result['country'],
+                       f'{h_or_n}_top_date': top_result['date'],
+                       f'{h_or_n}_top_seq_length': top_result['slen'],
+                       f'{h_or_n}_virus_name': top_result['virus_name'],
                        f'{h_or_n}_NCBI_Influenza_DB_subtype_matches': top_type_count,
                        f'{h_or_n}_NCBI_Influenza_DB_total_matches': total_count,
                        f'{h_or_n}_NCBI_Influenza_DB_proportion_matches': top_type_count /total_count,
                        }
-    logging.info(f'results: {results_summary}')
-    return df_seg_top_type, results_summary
+    logging.info(f'Seg {seg} results: {results_summary}')
+    return results_summary
 
 
 @click.command()
@@ -286,16 +294,16 @@ def find_h_or_n_type(df_merge, seg):
 def report(flu_metadata, blast_results, excel_report, top, pident_threshold, threads):
     logging.info(f'Parsing Influenza metadata file "{flu_metadata}"')
     md_cols = [('accession', str),
-               ('host', str),
-               ('segment', str),
-               ('subtype', str),
-               ('country', str),
-               ('date', str),
-               ('seq_length', int),
-               ('virus_name', str),
-               ('age', str),
-               ('gender', str),
-               ('group_id', int),]
+               ('host', 'category'),
+               ('segment', 'category'),
+               ('subtype', 'category'),
+               ('country', 'category'),
+               ('date', 'category'),
+               ('seq_length', 'uint16'),
+               ('virus_name', 'category'),
+               ('age', 'category'),
+               ('gender', 'category'),
+               ('group_id', 'category'),]
     df_md = pd.read_csv(flu_metadata, sep='\t', names=[name for name, _ in md_cols], dtype={name:t for name,t in md_cols})
     unique_subtypes = df_md.subtype.unique()
     unique_subtypes = unique_subtypes[~pd.isna(unique_subtypes)]
@@ -309,19 +317,13 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold, thr
     results = [x.get() for x in async_objects]
     logging.info(f'Got {len(results)} async parsing results. Merging into report "{excel_report}".')
     dfs_blast = []
-    dfs_H = []
-    dfs_N = []
     all_subtype_results = {}
     for parsed_result in results:
         if parsed_result is None:
             continue
-        df_blast, df_H_blast_results, df_N_blast_results, subtype_results_summary = parsed_result
+        df_blast, subtype_results_summary = parsed_result
         if df_blast is not None:
             dfs_blast.append(df_blast)
-        if df_H_blast_results is not None:
-            dfs_H.append(df_H_blast_results)
-        if df_N_blast_results is not None:
-            dfs_N.append(df_N_blast_results)
         sample = subtype_results_summary['sample']
         all_subtype_results[sample] = subtype_results_summary
     df_subtype_results = pd.DataFrame(all_subtype_results).transpose()

@@ -19,7 +19,6 @@ params.help = false
 
 outdir = params.outdir
 
-log.info "log=$log, ${log.getClass()}"
 def helpMessage() {
     log.info"""
     ===================================
