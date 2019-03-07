@@ -251,6 +251,7 @@ def find_h_or_n_type(df_merge, seg):
     df_type_counts.columns = [type_name]
     df_type_counts['count'] = type_counts.values
     df_type_counts['subtype'] = type_counts.index
+    df_type_counts = df_type_counts[~pd.isnull(df_type_counts[type_name])]
     logging.debug(f'{df_type_counts}')
     type_to_count = defaultdict(int)
     for _, x in df_type_counts.iterrows():
@@ -261,7 +262,9 @@ def find_h_or_n_type(df_merge, seg):
     top_type, top_type_count = type_to_count[0]
     total_count = type_counts.sum()
     logging.info(f'{h_or_n}{top_type} n={top_type_count}/{total_count} ({top_type_count / total_count:.1%})')
-    df_seg_top_type = df_segment[df_segment.subtype.str.match(r'.*' + h_or_n + top_type + r'.*', na=False)]
+    type_mask = df_segment.subtype.str.match(r'.*' + h_or_n + top_type + r'.*', na=False)
+    type_mask[pd.isnull(type_mask)] = False
+    df_seg_top_type = df_segment[type_mask]
     top_result: pd.Series = [r for _, r in df_seg_top_type.head(1).iterrows()][0]
     results_summary = {f'{h_or_n}_type': top_type,
                        f'{h_or_n}_sample_segment_length': top_result['qlen'],
