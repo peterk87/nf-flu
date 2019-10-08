@@ -14,7 +14,7 @@ This repo contains a [Nextflow] workflow for the [IRMA] assembly and H/N subtypi
 
 ## Getting Started
 
-1. Install [Nextflow] (Java 8 or later must be installed)
+1. Install [Nextflow][] (Java 8 or later must be installed; Conda provides an easy way to install Nextflow with all dependencies required)
 
 ```bash
 curl -s https://get.nextflow.io | bash
@@ -25,7 +25,7 @@ mkdir -p ~/bin
 mv nextflow ~/bin/
 ```
 
-2. Install [Singularity] (required for running [IRMA])
+2. Install [Singularity][] 
 
 3. Run this workflow
 
@@ -55,23 +55,22 @@ nextflow run peterk87/nf-iav-illumina --help
 ```
 
 ```
-===================================
-peterk87/nf-iav-illumina  ~  version 1.0.0
-===================================
+===========================================
+peterk87/nf-iav-illumina  ~  version 1.1.0
+===========================================
 
 Git info: null - null [null]
 
 Usage:
 The typical command for running the pipeline is as follows:
-nextflow run peterk87/nf-iav-illumina --reads_dir /path/to/illumina/reads/directory/ -profile standard
+nextflow run peterk87/nf-iav-illumina --reads_dir "/path/to/reads/*R{1,2}*.fastq.gz" --outdir /path/to/results
 Mandatory arguments:
-  --reads_dir                   Path to Illumina FASTQ file directory
+  --reads                   Illumina FASTQ reads
 Other options:
-  --outdir                      The output directory where the results will be saved
-  -w/--work-dir                 The temporary directory where intermediate data will be saved
-  --reads_pattern               Glob pattern to match reads (default for raw Illumina Gzipped FASTQ ("*_S*_L???_R{1,2}_001.fastq.gz"))
-  --slurm_queue                 Name of SLURM queue to run workflow on (default "")
-  -profile                      Configuration profile to use. [standard, slurm] (default 'standard')
+  --outdir                  The output directory where the results will be saved
+  -w/--work-dir             The temporary directory where intermediate data will be saved
+  --slurm_queue             Name of SLURM queue to run workflow on (default "")
+  -profile                  Configuration profile to use. [standard, slurm] (default 'standard')
 ```
 
 
