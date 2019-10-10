@@ -20,6 +20,7 @@ steps:
     sudo make -C builddir install
     cd ..
     singularity --version
+  displayName: Compile and install Singularity
 - bash: echo "##vso[task.prependpath]$CONDA/bin"
   displayName: Add conda to PATH
 - bash: sudo chown -R $USER /usr/share/miniconda
@@ -41,7 +42,7 @@ steps:
     nextflow run main.nf --help
   displayName: Print help message for workflow
 - script: |
-    mkdir reads/original
+    mkdir -p reads/original
     cd reads/original
     echo "Download paired end Illumina reads for ERR3338653"
     fasterq-dump ERR3338653
@@ -52,3 +53,4 @@ steps:
     cd ..
     nextflow run peterk87/nf-iav-illumina --reads "reads/*_{1,2}.fastq" --outdir results
     wc -l results/consensus/*/*.fa
+  displayName: Run workflow on test data from NCBI SRA
