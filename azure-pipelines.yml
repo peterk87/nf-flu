@@ -12,7 +12,7 @@ steps:
   displayName: Install system dependencies for Singularity
 - script: |
     export VERSION=3.4.1
-    wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz
+    wget --quiet https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz
     tar -xzf singularity-${VERSION}.tar.gz
     cd singularity
     ./mconfig
@@ -35,8 +35,20 @@ steps:
     conda install conda=4.7.12 -y
   displayName: Update Conda
 - script: |
-    conda install nextflow -y
-  displayName: Install Nextflow
+    conda install nextflow sra-tools -y
+  displayName: Install Nextflow and NCBI SRA Tools
 - script: |
     nextflow run main.nf --help
   displayName: Print help message for workflow
+- script: |
+    mkdir reads/original
+    cd reads/original
+    echo "Download paired end Illumina reads for ERR3338653"
+    fasterq-dump ERR3338653
+    cd ..
+    cat original/ERR3338653_1.fastq | perl -pe 's/^@([\w\.]+) (\S+) (\S+)/@\2 1:N:0:51/' > ERR3338653_1.fastq
+    cat original/ERR3338653_2.fastq | perl -pe 's/^@([\w\.]+) (\S+) (\S+)/@\2 2:N:0:51/' > ERR3338653_2.fastq
+    echo "Fixed FASTQ headers in ERR3338653 for IRMA"
+    cd ..
+    nextflow run peterk87/nf-iav-illumina --reads "reads/*_{1,2}.fastq" --outdir results
+    wc -l results/consensus/*/*.fa
