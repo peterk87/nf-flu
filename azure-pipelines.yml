@@ -5,8 +5,8 @@ steps:
 - script: printenv
   displayName: Print Environment
 - script: |
-    apt-get update 
-    apt-get install -y build-essential libssl-dev uuid-dev \
+    sudo apt-get update 
+    sudo apt-get install -y build-essential libssl-dev uuid-dev \
         libgpgme11-dev squashfs-tools libseccomp-dev wget \
         pkg-config git
   displayName: Install system dependencies for Singularity
@@ -17,7 +17,7 @@ steps:
     cd singularity
     ./mconfig
     make -C builddir
-    make -C builddir install
+    sudo make -C builddir install
     cd ..
     singularity --version
 - bash: echo "##vso[task.prependpath]$CONDA/bin"
