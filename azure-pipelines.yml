@@ -40,6 +40,7 @@ steps:
     nextflow run peterk87/nf-iav-illumina \
       --reads "reads/*_{1,2}.fastq" \
       --outdir results \
-      --max_cpus 2
+      --max_cpus 2 \
+      --max_memory "6 GB"
     wc -l results/consensus/*/*.fa
   displayName: Run workflow on test data from NCBI SRA
