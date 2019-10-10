@@ -18,6 +18,8 @@ steps:
     ./mconfig
     make -C builddir
     make -C builddir install
+    cd ..
+    singularity --version
 - bash: echo "##vso[task.prependpath]$CONDA/bin"
   displayName: Add conda to PATH
 - bash: sudo chown -R $USER /usr/share/miniconda
