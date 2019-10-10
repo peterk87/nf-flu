@@ -6,7 +6,7 @@ This repo contains a [Nextflow] workflow for the [IRMA] assembly and H/N subtypi
 
 ## Pipeline Steps
 
-| Step                                                | Main program/s                      |
+| Step                                                | Main program                        |
 |-----------------------------------------------------|-------------------------------------|
 | IRMA iterative assembly of genome segments          | IRMA                                |
 | H/N subtyping                                       | BLAST+                              |
@@ -15,6 +15,19 @@ This repo contains a [Nextflow] workflow for the [IRMA] assembly and H/N subtypi
 ## Getting Started
 
 1. Install [Nextflow][] (Java 8 or later must be installed; Conda provides an easy way to install Nextflow with all dependencies required)
+
+Conda install:
+
+```
+# Setup Conda channels for Bioconda and Conda Forge
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+# Install Nextflow with Conda
+conda install nextflow
+```
+
+Manual install:
 
 ```bash
 curl -s https://get.nextflow.io | bash
@@ -25,28 +38,54 @@ mkdir -p ~/bin
 mv nextflow ~/bin/
 ```
 
-2. Install [Singularity][] 
+2. Install [Singularity][] (required for running workflow both locally and in a high-performance computing cluster)
 
-3. Run this workflow
+3. Try to show help info for this workflow
 
 ```bash
 nextflow run peterk87/nf-iav-illumina --help
 ```
 
+4. Run on some test data
+
+Download reads for Influenza A virus (A/England/195/2009(H1N1)) (ERR3338653; https://www.ncbi.nlm.nih.gov/sra/ERX3363362[accn]) with [fasterq-dump](https://github.com/ncbi/sra-tools/wiki/HowTo:-fasterq-dump) and this Nextflow workflow:
+```
+mkdir -p test/reads && cd test/reads
+fasterq-dump ERR3338653
+cd ..
+nextflow run peterk87/nf-iav-illumina --reads "reads/*_{1,2}.fastq" --outdir results
+```
+
+You should find the subtype to be H1N1 for ERR3338653.
+
 ## Usage
 
-### Run on directory of Illumina paired-end reads
+### Run locally on directory of Illumina paired-end reads
+
+*NOTE: Please ensure that your workstation has [Singularity][] installed! Run `which singularity` and `singularity --version` to ensure that a recent version of Singularity has been installed.*
 
 ```
-nextflow run peterk87/nf-iav-illumina --reads_dir /path/to/reads --outdir /path/to/results/outdir
+nextflow run peterk87/nf-iav-illumina \
+  --reads "reads/*_R{1,2}*.fastq.gz" \
+  --outdir /path/to/results/outdir
 ```
 
-### Run on a cluster with SLURM
+### Run on a high-performance computing (HPC) cluster with SLURM
+
+*NOTE: Please ensure that your cluster has [Singularity][] installed! Run `which singularity` and `singularity --version` to ensure that a recent version of Singularity has been installed.*
 
 ```
-nextflow run peterk87/nf-iav-illumina --reads_dir /path/to/reads -profile slurm --slurm_queue SLURM_QUEUE_NAME --outdir /path/to/results/outdir
+nextflow run peterk87/nf-iav-illumina \
+  --reads "reads/*_R{1,2}*.fastq.gz" \
+  --outdir /path/to/results/outdir \
+  -profile slurm \
+  --slurm_queue SLURM_QUEUE_NAME 
 ```
 
+Replace `SLURM_QUEUE_NAME` with the name of the queue or partition you can submit to on your cluster.
+Contact your cluster tech support to find out which queue you can submit to on the cluster. 
+
+Show SLURM info about your cluster with the `sinfo` command and `squeue` to show how busy the cluster is. 
 
 ### Show help info
 
@@ -59,18 +98,24 @@ nextflow run peterk87/nf-iav-illumina --help
 peterk87/nf-iav-illumina  ~  version 1.1.0
 ===========================================
 
-Git info: null - null [null]
+  Git info: null - null [null]
 
 Usage:
+
 The typical command for running the pipeline is as follows:
-nextflow run peterk87/nf-iav-illumina --reads_dir "/path/to/reads/*R{1,2}*.fastq.gz" --outdir /path/to/results
-Mandatory arguments:
-  --reads                   Illumina FASTQ reads
-Other options:
-  --outdir                  The output directory where the results will be saved
-  -w/--work-dir             The temporary directory where intermediate data will be saved
-  --slurm_queue             Name of SLURM queue to run workflow on (default "")
-  -profile                  Configuration profile to use. [standard, slurm] (default 'standard')
+
+  nextflow run peterk87/nf-iav-illumina --reads "reads/*R{1,2}*.fastq.gz" --outdir results
+
+NOTE: Please ensure you have Singularity installed prior to running this workflow. (https://sylabs.io/guides/3.3/user-guide/quick_start.html#quick-installation-steps)
+
+Mandatory Options:
+  --reads           Input paired-end Illumina FASTQ reads; quotes required! (default: "reads/*R{1,2}*.fastq.gz")
+Other Options:
+  --outdir          Output results directory (default: results)
+  -w/--work-dir     The temporary directory where intermediate data will be saved (default: work)
+  -profile          Configuration profile to use [standard, slurm] (default: "standard")
+Cluster Options:
+  --slurm_queue     Name of SLURM queue to run workflow on; use with -profile slurm
 ```
 
 
