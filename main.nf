@@ -247,10 +247,22 @@ ch_blast
 
 process subtyping_report {
   publishDir "$outdir/", mode: 'copy'
-  tag "$mem_reqs GB"
-  memory {
-   "${mem_reqs} GB" 
- }
+  memory { 
+    // Dynamically determine how much memory is required for this task based on 
+    // overall size of tabular blastn inputs. For a single input, allocate 2GB
+    if (blastn_results instanceof nextflow.processor.TaskPath) {
+      // single input file allocate 2GB
+      "2 GB"
+    } else if (blastn_results instanceof nextflow.util.BlankSeparatedList) {
+      // multiple input files
+      // mem reqs = half of sum of GB file sizes plus 2GB wiggle room
+      mem_reqs = Math.ceil(0.5 * (blastn_results.collect { it.size() }.sum()) / (1024**3)) + 2
+      "${mem_reqs} GB" 
+    } else {
+      // not TaskPath or BlankSeparatedList, then default 2GB for memory
+      "2 GB"
+    }
+  }
 
   input:
   file('genomeset.dat') from ch_influenza_db_metadata
@@ -260,7 +272,6 @@ process subtyping_report {
   file('subtyping_report.xlsx')
 
   script:
-  mem_reqs = Math.ceil(2 * (blastn_results.collect { it.size() }.sum()) / (1024**3)) + 2
   """
   parse_influenza_blast_results.py \\
    --threads ${task.cpus} \\
