@@ -52,13 +52,29 @@ Download reads for Influenza A virus (A/England/195/2009(H1N1)) (ERR3338653; htt
 ```
 mkdir -p test/reads && cd test/reads
 fasterq-dump ERR3338653
+# change FASTQ headers to make them compatible with IRMA/LABEL, otherwise, 
+# empty consensus sequences are produced and the only log message produced is
+# "Irregular header for fastQ read pairs"
+mkdir original && mv ERR3338653*.fastq original/
+cat original/ERR3338653_1.fastq | perl -pe 's/^@([\w\.]+) (\S+) (\S+)/@\2 1:N:0:51/' > ERR3338653_1.fastq
+cat original/ERR3338653_2.fastq | perl -pe 's/^@([\w\.]+) (\S+) (\S+)/@\2 2:N:0:51/' > ERR3338653_2.fastq
 cd ..
+# Run the workflow!
 nextflow run peterk87/nf-iav-illumina --reads "reads/*_{1,2}.fastq" --outdir results
 ```
 
 You should find the subtype to be H1N1 for ERR3338653.
 
 ## Usage
+
+It's a good idea to run the latest version of the workflow if possible. 
+You can update the workflow with:
+
+```
+nextflow pull peterk87/nf-iav-illumina
+```
+
+This will pull the latest version of the workflow from GitHub.
 
 ### Run locally on directory of Illumina paired-end reads
 

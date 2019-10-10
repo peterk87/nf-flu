@@ -1,0 +1,40 @@
+pool:
+  vmImage: 'ubuntu-16.04'
+
+steps:
+- script: printenv
+  displayName: Print Environment
+- script: |
+    apt-get update 
+    apt-get install -y build-essential libssl-dev uuid-dev \
+        libgpgme11-dev squashfs-tools libseccomp-dev wget \
+        pkg-config git
+  displayName: Install system dependencies for Singularity
+- script: |
+    export VERSION=3.4.1
+    wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz
+    tar -xzf singularity-${VERSION}.tar.gz
+    cd singularity
+    ./mconfig
+    make -C builddir
+    make -C builddir install
+- bash: echo "##vso[task.prependpath]$CONDA/bin"
+  displayName: Add conda to PATH
+- bash: sudo chown -R $USER /usr/share/miniconda
+  displayName: Take ownership of Conda installation
+- script: java -version
+  displayName: Java version
+- script: |
+    conda config --add channels defaults
+    conda config --add channels bioconda
+    conda config --add channels conda-forge
+  displayName: Configure Conda channels
+- script: |
+    conda install conda=4.7.12 -y
+  displayName: Update Conda
+- script: |
+    conda install nextflow -y
+  displayName: Install Nextflow
+- script: |
+    nextflow run main.nf --help
+  displayName: Print help message for workflow
