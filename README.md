@@ -26,7 +26,7 @@ Singularity containers used in this workflow:
 
 Conda install:
 
-```
+```bash
 # Setup Conda channels for Bioconda and Conda Forge
 conda config --add channels defaults
 conda config --add channels bioconda
@@ -57,7 +57,8 @@ nextflow run peterk87/nf-iav-illumina --help
 4. Run on some test data
 
 Download reads for Influenza A virus (A/England/195/2009(H1N1)) (ERR3338653; https://www.ncbi.nlm.nih.gov/sra/ERX3363362[accn]) with [fasterq-dump](https://github.com/ncbi/sra-tools/wiki/HowTo:-fasterq-dump) and this Nextflow workflow:
-```
+
+```bash
 mkdir -p test/reads && cd test/reads
 fasterq-dump ERR3338653
 # change FASTQ headers to make them compatible with IRMA/LABEL, otherwise, 
@@ -78,7 +79,7 @@ You should find the subtype to be H1N1 for ERR3338653.
 It's a good idea to run the latest version of the workflow if possible. 
 You can update the workflow with:
 
-```
+```bash
 nextflow pull peterk87/nf-iav-illumina
 ```
 
@@ -88,7 +89,7 @@ This will pull the latest version of the workflow from GitHub.
 
 *NOTE: Please ensure that your workstation has [Singularity][] installed! Run `which singularity` and `singularity --version` to ensure that a recent version of Singularity has been installed.*
 
-```
+```bash
 nextflow run peterk87/nf-iav-illumina \
   --reads "reads/*_R{1,2}*.fastq.gz" \
   --outdir /path/to/results/outdir
@@ -98,7 +99,7 @@ nextflow run peterk87/nf-iav-illumina \
 
 *NOTE: Please ensure that your cluster has [Singularity][] installed! Run `which singularity` and `singularity --version` to ensure that a recent version of Singularity has been installed.*
 
-```
+```bash
 nextflow run peterk87/nf-iav-illumina \
   --reads "reads/*_R{1,2}*.fastq.gz" \
   --outdir /path/to/results/outdir \
@@ -113,7 +114,7 @@ Show SLURM info about your cluster with the `sinfo` command and `squeue` to show
 
 ### Show help info
 
-```
+```bash
 nextflow run peterk87/nf-iav-illumina --help
 ```
 
