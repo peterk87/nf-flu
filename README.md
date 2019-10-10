@@ -1,8 +1,10 @@
 # Influenza Genome Analysis Nextflow Workflow
 
+[![Build Status](https://dev.azure.com/peterkruczkiewicz/nf-iav-illumina/_apis/build/status/peterk87.nf-iav-illumina?branchName=master)](https://dev.azure.com/peterkruczkiewicz/nf-iav-illumina/_build/latest?definitionId=1&branchName=master)
+
 ## Introduction
 
-This repo contains a [Nextflow] workflow for the [IRMA] assembly and H/N subtyping by nucleotide [BLAST] against the [NCBI Influenza DB] of Illumina sequenced influenza virus genomes.
+This repo contains a [Nextflow][] workflow for the [IRMA][] assembly and H/N subtyping by nucleotide [BLAST][] against the [NCBI Influenza DB][].
 
 ## Pipeline Steps
 
@@ -11,6 +13,12 @@ This repo contains a [Nextflow] workflow for the [IRMA] assembly and H/N subtypi
 | IRMA iterative assembly of genome segments          | IRMA                                |
 | H/N subtyping                                       | BLAST+                              |
 
+Singularity containers used in this workflow:
+
+| Singularity container | Hosted At | Description |
+|-----------------------|-----------|-------------|
+| [peterk87/nf-iav-illumina](https://singularity-hub.org/collections/3633) | [![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/3633) | Singularity container for [BLAST][]+ and [BLAST][] result parsing processes |
+| [peterk87/irma-singularity](https://singularity-hub.org/collections/2385) | [![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/2385) | Singularity container for [IRMA][] |
 
 ## Getting Started
 
@@ -176,7 +184,6 @@ This workflow outputs results in an output directory with the following structur
 ### Workflow Execution Graph
 
 ![Workflow execution directed-acyclic graph](dag.svg)
-
 
 
 
