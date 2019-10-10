@@ -179,15 +179,113 @@ This workflow outputs results in an output directory with the following structur
 - `irma-consensus-report.tsv` is a tab-delimited table of the number of [IRMA] consensus genome segments obtained for each sample
 - `subtyping_report.xlsx` is summary report of H/N subtyping by [BLAST] containing subtyping results for all input samples
 
+### Subtyping report spreadsheet
+
+`subtyping_report.xlsx` is summary report of H/N subtyping by [BLAST] containing subtyping results for all input samples. 
+
+The subtyping report spreadsheet contains four sheets:
+
+- **1_Subtype Predictions**: H/N subtype prediction results for each sample along with top matching [NCBI Influenza DB][] segment for the H and N segments
+- **2_Top Segment Matches**: Top 3 [NCBI Influenza DB][] sequence matches for each segment of each sample along with BLASTN hit values and reference sequence metadata. 
+- **3_H Segment Results**: Top H subtype prediction, BLASTN results and top matching sequence metadata for each sample.
+- **4_N Segment Results**: Top N subtype prediction, BLASTN results and top matching sequence metadata for each sample.
+
+#### Sheet: 1_Subtype Predictions
+
+This sheet contains the H/N subtype prediction results for each sample along with top matching [NCBI Influenza DB][] segment for the H and N segments
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| Sample | Sample name | ERR3338653 | 
+| Subtype Prediction | H/N subtype prediction based on BLAST+ against the [NCBI Influenza DB][]. If a type could not be assigned to either H or N segment or both, then the subtype prediction will be missing the H or N value or if both the H and N cannot be assigned then the subtype prediction will be null or an empty cell value  | H1N1 |
+| H: top match accession | NCBI accession of top matching [NCBI Influenza DB] sequence for the H segment | CY147779 |
+| H: type prediction | H subtype prediction number. Value is a number. | 1 |
+| H: top match virus name | Top matching sequence virus name | Influenza A virus (A/Mexico/24036/2009(H1N1)) |
+| H: NCBI Influenza DB subtype match proportion | Proportion of BLAST matches that support the H subtype prediction. This value is a decimal number where 1.0 indicates 100% of matches support the subtype prediction. | 0.9980057896 | 
+| N: top match accession | NCBI accession of top matching [NCBI Influenza DB] sequence for the N segment | MN371610 |
+| N: type prediction | N subtype prediction. Value is a number. | 1 |
+| N: top match virus name  | Top matching sequence virus name | Influenza A virus (A/California/04/2009) |
+| N: NCBI Influenza DB subtype match proportion | Proportion of BLAST matches that support the N subtype prediction. This value is a decimal number where 1.0 indicates 100% of matches support the subtype prediction. | 0.9993240503 |
 
 
-### Workflow Execution Graph
+
+#### Sheet: 2_Top Segment Matches
+
+This sheet contains the top 3 [NCBI Influenza DB][] sequence matches for each segment of each sample along with BLASTN hit values and reference sequence metadata. 
+
+
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| Sample | Sample name | ERR3338653 |
+| Sample Genome Segment Number | Influenza genome segment number | 4 | 
+| Reference NCBI Accession | Matching sequence NCBI accession | CY147779 |
+| Reference Subtype | Matching sequence subtype | H1N1 |
+| BLASTN Percent Identity | BLASTN percent identity | 99.941 |
+| BLASTN Alignment Length | BLASTN alignment length | 1701 |
+| BLASTN Mismatches | BLASTN number of mismatches | 1 |
+| BLASTN Gaps | BLASTN number of gaps | 0 |
+| BLASTN Sample Start Index | Sample sequence alignment start index | 1 |
+| BLASTN Sample End Index | Sample sequence alignment end index | 1701 |
+| BLASTN Reference Start Index | Matching reference sequence start index | 1 |
+| BLASTN Reference End Index | Matching reference sequence end index | 1701 |
+| BLASTN E-value | BLASTN alignment e-value | 0 |
+| BLASTN Bitscore | BLASTN alignment bitscore | 3136 |
+| Sample Sequence Length | Length of sample sequence segment | 1701 |
+| Reference Sequence Length | Length of matching reference sequence segment | 1701 |
+| Sample Sequence Coverage of Reference Sequence | Sample segment sequence coverage of reference sequence  | 100 |
+| Reference Sequence ID | Matching reference sequence identifier | gi|525340040|gb|CY147779|Influenza A virus (A/Mexico/24036/2009(H1N1)) hemagglutinin (HA) gene, complete cds |
+| Reference Genome Segment Number | Reference sequence segment number | 4 |
+| Reference Virus Name | Reference sequence virus name | Influenza A virus (A/Mexico/24036/2009(H1N1)) |
+| Reference Host | Reference sequence host organism | Human |
+| Reference Country | Reference sequence country of isolation | Mexico |
+| Reference Collection Date | Reference sequence date of collection | 2009/04/27 |
+| Reference Patient Age | Reference sequence patient age | 152 |
+| Reference Patient Gender | Reference sequence patient gender | Female |
+| Reference Group ID | [NCBI Influenza DB][] reference sequence internal genome ID | 1018714 |
+
+
+#### Sheets: "3_H Segment Results" and "4_N Segment Results"
+
+These sheets ("3_H Segment Results" and "4_N Segment Results") contain the subtype prediction, BLASTN results and top matching sequence metadata for each sample.  
+
+Below are shown the fields for the "3_H Segment Results" sheet. The fields are nearly identical for the "4_N Segment Results" sheet except "N:" instead of "H:" in the field names.
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| Sample | Sample name | ERR3338653 |
+| Subtype Prediction | Overall subtype prediction | H1N1 |
+| H: NCBI Influenza DB subtype match proportion | Proportion of BLAST matches that support the N subtype prediction. This value is a decimal number where 1.0 indicates 100% of matches support the subtype prediction. | 0.9980057896 |
+| H: NCBI Influenza DB subtype match count | Number of reference sequences that have a  BLASTN match to the sequence of this sample and have the same H subtype as the top prediction. | 31028 |
+| H: NCBI Influenza DB total count | Total number of reference sequences that have a  BLASTN match to the sequence of this sample. | 31090 |
+| H: top match BLASTN % identity | BLASTN alignment percent identity | 99.941 |
+| H: top match BLASTN alignment length | BLASTN alignment length | 1701 |
+| H: top match BLASTN mismatches | BLASTN alignment mismatches | 1 |
+| H: top match BLASTN gaps | BLASTN alignment gaps | 0 |
+| H: top match BLASTN bitscore | BLASTN alignment bitscore | 3136 |
+| H: sample segment length | Sample sequence length | 1701 |
+| H: top match sequence length | Reference sequence length | 1701 |
+| H: top match accession | Matching sequence NCBI accession | CY147779 |
+| H: top match virus name | Reference sequence virus name | Influenza A virus (A/Mexico/24036/2009(H1N1)) |
+| H: top match host | Reference sequence host organism | Human |
+| H: top match country | Reference sequence country of isolation | Mexico |
+| H: top match collection date | Reference sequence date of collection | 2009/04/27 |
+| H: type prediction | H segment subtype prediction | 1 |
+
+
+## Workflow Execution Graph
 
 ![Workflow execution directed-acyclic graph](dag.svg)
 
+## Resources
+
+- NCBI Influenza FTP site: ftp://ftp.ncbi.nih.gov/genomes/INFLUENZA/
+- [IRMA][] Iterative Refinement Meta-Assembler
+  - [IRMA Publication](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3030-6)
 
 
-[NCBI Influenza DB]: ftp://ftp.ncbi.nih.gov/genomes/INFLUENZA/
+
+[NCBI Influenza DB]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
 [BLAST]: https://blast.ncbi.nlm.nih.gov/Blast.cgi
 [IRMA]: https://wonder.cdc.gov/amd/flu/irma/
 [Nextflow]: https://www.nextflow.io/
