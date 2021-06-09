@@ -89,8 +89,8 @@ def main(input_path: Path, output_sample_sheet: Path):
             fastq2_paths.append(None)
         elif fastq1_isnull and not fastq2_isnull:
             single_ends.append(True)
-            fastq1_paths.append(None)
-            fastq2_paths.append(adjust_reads_path(fastq2))
+            fastq1_paths.append(adjust_reads_path(fastq2))
+            fastq2_paths.append(None)
         else:
             err_msg = f'Forward and/or reverse reads paths NOT specified for sample "{row.sample}"'
             raise ValueError(err_msg)
