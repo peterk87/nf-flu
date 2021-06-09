@@ -1,0 +1,251 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/peterk87/nf-iav-illumina/master/nextflow_schema.json",
+    "title": "peterk87/nf-iav-illumina pipeline parameters",
+    "description": "Influenza genome assembly with IRMA and consensus sequence analysis",
+    "type": "object",
+    "definitions": {
+        "input_output_options": {
+            "title": "Input/output options",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Define where the pipeline should find input data and save output data.",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-csv",
+                    "description": "Sample sheet with sample names and paths to reads."
+                },
+                "outdir": {
+                    "type": "string",
+                    "description": "The output directory where the results will be saved.",
+                    "default": "./results",
+                    "fa_icon": "fas fa-folder-open"
+                }
+            },
+            "required": [
+                "input"
+            ]
+        },
+        "irma_assembly_options": {
+            "title": "IRMA assembly options",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "irma_module": {
+                    "type": "string",
+                    "default": "FLU-utr",
+                    "fa_icon": "fas fa-cube",
+                    "description": "IRMA module to use for analysis.",
+                    "enum": [
+                        "FLU",
+                        "FLU-utr",
+                        "FLU-alt",
+                        "FLU-avian",
+                        "FLU-lowQC",
+                        "FLU-pacbio",
+                        "FLU-ref",
+                        "FLU-secondary",
+                        "FLU",
+                        "FLU-avian-residual",
+                        "FLU-fast",
+                        "FLU-minion",
+                        "FLU-pgm",
+                        "FLU-roche",
+                        "FLU-sensitive"
+                    ]
+                },
+                "keep_ref_deletions": {
+                    "type": "boolean",
+                    "default": "true",
+                    "fa_icon": "fas fa-trash-alt",
+                    "description": "Set \"DEL_TYPE=NNN\" to keep deletions to reference sequence as N characters in consensus."
+                }
+            },
+            "required": [
+                "irma_module"
+            ],
+            "fa_icon": "fas fa-cogs"
+        },
+        "h_n_subtyping_options": {
+            "title": "H/N subtyping options",
+            "type": "object",
+            "description": "Hemaglutinin and neuraminase subtype prediction options",
+            "default": "",
+            "properties": {
+                "pident_threshold": {
+                    "type": "number",
+                    "default": 0.85,
+                    "description": "Minimum % identity of nucleotide BLAST results to consider for determining H/N subtypes.",
+                    "fa_icon": "fas fa-balance-scale-left"
+                },
+                "min_aln_length": {
+                    "type": "integer",
+                    "default": 50,
+                    "description": "Minimum alignment length of nucleotide BLAST results to consider for determining H/N subtypes.",
+                    "fa_icon": "fas fa-balance-scale-right"
+                },
+                "ncbi_influenza_fasta": {
+                    "type": "string",
+                    "default": "https://ftp.ncbi.nih.gov/genomes/INFLUENZA/influenza.fna.gz",
+                    "description": "Path/URL to NCBI Influenza DB sequences FASTA file.",
+                    "fa_icon": "fas fa-file-alt"
+                },
+                "ncbi_influenza_metadata": {
+                    "type": "string",
+                    "default": "https://ftp.ncbi.nih.gov/genomes/INFLUENZA/genomeset.dat.gz",
+                    "description": "Path/URL to NCBI Influenza DB metadata file.",
+                    "fa_icon": "fas fa-file-csv"
+                }
+            },
+            "fa_icon": "fas fa-virus"
+        },
+        "generic_options": {
+            "title": "Generic options",
+            "type": "object",
+            "fa_icon": "fas fa-file-import",
+            "description": "Less common options for the pipeline, typically set in a config file.",
+            "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
+            "properties": {
+                "help": {
+                    "type": "boolean",
+                    "description": "Display help text.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-question-circle"
+                },
+                "publish_dir_mode": {
+                    "type": "string",
+                    "default": "copy",
+                    "hidden": true,
+                    "description": "Method used to save pipeline results to output directory.",
+                    "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
+                    "fa_icon": "fas fa-copy",
+                    "enum": [
+                        "symlink",
+                        "rellink",
+                        "link",
+                        "copy",
+                        "copyNoFollow",
+                        "move"
+                    ]
+                },
+                "monochrome_logs": {
+                    "type": "boolean",
+                    "description": "Do not use coloured log outputs.",
+                    "fa_icon": "fas fa-palette",
+                    "hidden": true,
+                    "help_text": "Set to disable colourful command line output and live life in monochrome."
+                },
+                "tracedir": {
+                    "type": "string",
+                    "description": "Directory to keep pipeline Nextflow logs and reports.",
+                    "default": "${params.outdir}/pipeline_info",
+                    "fa_icon": "fas fa-cogs",
+                    "hidden": true
+                },
+                "enable_conda": {
+                    "type": "boolean",
+                    "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-bacon"
+                },
+                "singularity_pull_docker_container": {
+                    "type": "boolean",
+                    "description": "Instead of directly downloading Singularity images for use with Singularity, force the workflow to pull and convert Docker containers instead.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-toolbox"
+                },
+                "validate_params": {
+                    "type": "boolean",
+                    "description": "Boolean whether to validate parameters against the schema at runtime",
+                    "default": true,
+                    "fa_icon": "fas fa-check-square",
+                    "hidden": true
+                },
+                "show_hidden_params": {
+                    "type": "boolean",
+                    "fa_icon": "far fa-eye-slash",
+                    "description": "Show all params when using `--help`",
+                    "hidden": true,
+                    "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
+                }
+            }
+        },
+        "slurm_scheduler_options": {
+            "title": "Slurm scheduler options",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "slurm_queue": {
+                    "type": "string",
+                    "description": "Slurm queue/partition to submit pipeline jobs to",
+                    "fa_icon": "fas fa-road"
+                },
+                "slurm_queue_size": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Slurm queue size. Max number of jobs to queue at once.",
+                    "fa_icon": "fas fa-arrows-alt-v"
+                }
+            },
+            "fa_icon": "far fa-clock"
+        },
+        "max_job_request_options": {
+            "title": "Max job request options",
+            "type": "object",
+            "fa_icon": "fab fa-acquisitions-incorporated",
+            "description": "Set the top limit for requested resources for any single job.",
+            "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details.",
+            "properties": {
+                "max_cpus": {
+                    "type": "integer",
+                    "description": "Maximum number of CPUs that can be requested    for any single job.",
+                    "default": 16,
+                    "fa_icon": "fas fa-microchip",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the CPU requirement for each process. Should be an integer e.g. `--max_cpus 1`"
+                },
+                "max_memory": {
+                    "type": "string",
+                    "description": "Maximum amount of memory that can be requested for any single job.",
+                    "default": "128.GB",
+                    "fa_icon": "fas fa-memory",
+                    "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
+                },
+                "max_time": {
+                    "type": "string",
+                    "description": "Maximum amount of time that can be requested for any single job.",
+                    "default": "240.h",
+                    "fa_icon": "far fa-clock",
+                    "pattern": "^(\\d+\\.?\\s*(s|m|h|day)\\s*)+$",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/input_output_options"
+        },
+        {
+            "$ref": "#/definitions/irma_assembly_options"
+        },
+        {
+            "$ref": "#/definitions/h_n_subtyping_options"
+        },
+        {
+            "$ref": "#/definitions/generic_options"
+        },
+        {
+            "$ref": "#/definitions/slurm_scheduler_options"
+        },
+        {
+            "$ref": "#/definitions/max_job_request_options"
+        }
+    ]
+}
