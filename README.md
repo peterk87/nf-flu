@@ -63,7 +63,7 @@ The nf-iav-illumina pipeline comes with:
 
 ## Resources
 
-* NCBI Influenza FTP site: <ftp://ftp.ncbi.nih.gov/genomes/INFLUENZA/>
+* NCBI Influenza FTP site: https://ftp.ncbi.nih.gov/genomes/INFLUENZA/
 * [IRMA][] Iterative Refinement Meta-Assembler
   * [IRMA Publication](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3030-6)
 
