@@ -1,15 +1,4 @@
 #!/usr/bin/env nextflow
-/*
- *
- ===========================================
- nf-iav-illumina: Influenza genome analysis
- ===========================================
- # Homepage / Documentation
- https://github.com/peterk87/nf-iav-illumina
- # Authors
- Peter Kruczkiewicz
- -------------------------------------------
- */
 
 nextflow.enable.dsl = 2
 
@@ -20,7 +9,6 @@ if (params.help){
   log.info NfcoreSchema.params_help(workflow, params, json_schema, command)
   exit 0
 }
-
 
 if (params.validate_params) {
   NfcoreSchema.validateParameters(params, json_schema, log)
@@ -46,8 +34,16 @@ def modules = params.modules.clone()
 def summary_params = NfcoreSchema.params_summary_map(workflow, params, json_schema)
 log.info NfcoreSchema.params_summary_log(workflow, params, json_schema)
 
+//=============================================================================
+// NCBI Influenza DB reference data
+//=============================================================================
+
 ch_influenza_db_fasta = file(params.ncbi_influenza_fasta)
 ch_influenza_metadata = file(params.ncbi_influenza_metadata)
+
+//=============================================================================
+// MODULES
+//=============================================================================
 
 include { IRMA } from './modules/local/irma'
 include { CHECK_SAMPLE_SHEET } from './modules/local/check_sample_sheet'

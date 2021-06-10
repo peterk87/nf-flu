@@ -78,13 +78,16 @@
                     "type": "number",
                     "default": 0.85,
                     "description": "Minimum % identity of nucleotide BLAST results to consider for determining H/N subtypes.",
-                    "fa_icon": "fas fa-balance-scale-left"
+                    "fa_icon": "fas fa-balance-scale-left",
+                    "minimum": 0,
+                    "maximum": 1
                 },
                 "min_aln_length": {
                     "type": "integer",
                     "default": 50,
                     "description": "Minimum alignment length of nucleotide BLAST results to consider for determining H/N subtypes.",
-                    "fa_icon": "fas fa-balance-scale-right"
+                    "fa_icon": "fas fa-balance-scale-right",
+                    "minimum": 0
                 },
                 "ncbi_influenza_fasta": {
                     "type": "string",
