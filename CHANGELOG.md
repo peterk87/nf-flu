@@ -44,7 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 |               | `--schema_ignore_params`              |
 
 > **NB:** Parameter has been __updated__ if both old and new parameter information is present.
+
 > **NB:** Parameter has been __added__ if just the new parameter information is present.
+
 > **NB:** Parameter has been __removed__ if new parameter information isn't present.
 
 ### Software dependencies
@@ -58,5 +60,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `python`   | 3.7.3       | 3.9.0       |
 
 > **NB:** Dependency has been __updated__ if both old and new version information is present.
+
 > **NB:** Dependency has been __added__ if just the new version information is present.
+
 > **NB:** Dependency has been __removed__ if new version information isn't present.
