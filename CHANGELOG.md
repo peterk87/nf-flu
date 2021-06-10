@@ -12,11 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * All software containers are now exclusively obtained from [Biocontainers](https://biocontainers.pro/#/registry)
 * Updated minimum Nextflow version to `v21.04.0` (see [nextflow#572](https://github.com/nextflow-io/nextflow/issues/1964))
 * Add IRMA params
-    * `irma_module`: IRMA module (default: `FLU-utr`)
-    * `keep_ref_deletions`: set consensus sequence deletion by ambiguation (i.e. replace ref seq with Ns) (default: `true`)
+  * `irma_module`: IRMA module (default: `FLU-utr`)
+  * `keep_ref_deletions`: set consensus sequence deletion by ambiguation (i.e. replace ref seq with Ns) (default: `true`)
 * Add BLAST subtyping params:
-    * `pident_threshold`: % identity threshold (default: `0.85`)
-    * `min_aln_length`: min alignment length (default: `50`)
+  * `pident_threshold`: % identity threshold (default: `0.85`)
+  * `min_aln_length`: min alignment length (default: `50`)
 * Replace Azure Pipelines CI with GitHub Actions CI
 * add `nextflow_schema.json` and nf-core helper Jar file and Groovy scripts for params validation, printing help
 * Use nf-core modules where possible
@@ -47,11 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **NB:** Parameter has been __added__ if just the new parameter information is present.
 > **NB:** Parameter has been __removed__ if new parameter information isn't present.
 
-
 ### Software dependencies
 
 Note, since the pipeline is now using Nextflow DSL2, each process will be run with its own [Biocontainer](https://biocontainers.pro/#/registry). This means that on occasion it is entirely possible for the pipeline to be using different versions of the same tool. However, the overall software dependency changes compared to the last release have been listed below for reference.
-
 
 | Dependency | Old version | New version |
 |:-----------|:------------|:------------|
