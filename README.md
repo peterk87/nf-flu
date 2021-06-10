@@ -13,17 +13,15 @@
 
 The pipeline is implemented in [Nextflow][]
 
-
 for the [IRMA][] assembly and H/N subtyping by nucleotide [BLAST][] against the [NCBI Influenza DB][].
 
 ## Pipeline summary
 
 1. Download latest [NCBI Influenza DB][] sequences and metadata (or use user-specified files)
 2. Merge reads of re-sequenced samples ([`cat`](http://www.linfo.org/cat.html)) (if needed)
-3. Assembly of Influenza gene segments with [IRMA][] using the [FLU module]()
+3. Assembly of Influenza gene segments with [IRMA][] using the built-in FLU module
 4. Nucleotide [BLAST][] search against [NCBI Influenza DB][]
 5. H/N subtype prediction and Excel XLSX report generation based on BLAST results
-
 
 ## Quick Start
 
@@ -40,7 +38,7 @@ for the [IRMA][] assembly and H/N subtyping by nucleotide [BLAST][] against the 
 
 4. Run your own analysis
 
-    - [Optional] Generate an input samplesheet from a directory containing Illumina FASTQ files (e.g. `/path/to/illumina_run/Data/Intensities/Basecalls/`) with the included Python script [`fastq_dir_to_samplesheet.py`](https://github.com/peterk87/nf-iav-illumina/blob/master/bin/fastq_dir_to_samplesheet.py) **before** you run the pipeline (requires Python 3 installed locally) e.g.
+    * [Optional] Generate an input samplesheet from a directory containing Illumina FASTQ files (e.g. `/path/to/illumina_run/Data/Intensities/Basecalls/`) with the included Python script [`fastq_dir_to_samplesheet.py`](https://github.com/peterk87/nf-iav-illumina/blob/master/bin/fastq_dir_to_samplesheet.py) **before** you run the pipeline (requires Python 3 installed locally) e.g.
 
         ```bash
         python ~/.nextflow/assets/peterk87/nf-iav-illumina/bin/fastq_dir_to_samplesheet.py \
@@ -48,7 +46,7 @@ for the [IRMA][] assembly and H/N subtyping by nucleotide [BLAST][] against the 
           -o samplesheet.csv
         ```
 
-    - Typical command
+    * Typical command
 
         ```bash
         nextflow run peterk87/nf-iav-illumina \
@@ -60,22 +58,21 @@ for the [IRMA][] assembly and H/N subtyping by nucleotide [BLAST][] against the 
 
 The nf-iav-illumina pipeline comes with:
 
-- [usage](docs/usage.md) and
-- [output](docs/output.md) documentation.
+* [usage](docs/usage.md) and
+* [output](docs/output.md) documentation.
 
 ## Resources
 
-- NCBI Influenza FTP site: ftp://ftp.ncbi.nih.gov/genomes/INFLUENZA/
-- [IRMA][] Iterative Refinement Meta-Assembler
-  - [IRMA Publication](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3030-6)
+* NCBI Influenza FTP site: <ftp://ftp.ncbi.nih.gov/genomes/INFLUENZA/>
+* [IRMA][] Iterative Refinement Meta-Assembler
+  * [IRMA Publication](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3030-6)
 
 ## Credits
 
-- [nf-core](https://nf-co.re) project for establishing Nextflow workflow development best-practices, [nf-core tools](https://nf-co.re/tools-docs/) and [nf-core modules](https://github.com/nf-core/modules)
-- [nf-core/viralrecon](https://github.com/nf-core/viralrecon) for inspiration and setting a high standard for viral sequence data analysis pipelines
-- [Conda](https://docs.conda.io/projects/conda/en/latest/) and [Bioconda](https://bioconda.github.io/) project for making it easy to install, distribute and use bioinformatics software.
-- [Biocontainers](https://biocontainers.pro/) for automatic creation of [Docker] and [Singularity] containers for bioinformatics software in [Bioconda]
-
+* [nf-core](https://nf-co.re) project for establishing Nextflow workflow development best-practices, [nf-core tools](https://nf-co.re/tools-docs/) and [nf-core modules](https://github.com/nf-core/modules)
+* [nf-core/viralrecon](https://github.com/nf-core/viralrecon) for inspiration and setting a high standard for viral sequence data analysis pipelines
+* [Conda](https://docs.conda.io/projects/conda/en/latest/) and [Bioconda](https://bioconda.github.io/) project for making it easy to install, distribute and use bioinformatics software.
+* [Biocontainers](https://biocontainers.pro/) for automatic creation of [Docker] and [Singularity] containers for bioinformatics software in [Bioconda]
 
 [NCBI Influenza DB]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
 [BLAST]: https://blast.ncbi.nlm.nih.gov/Blast.cgi
