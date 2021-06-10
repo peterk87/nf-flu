@@ -1,22 +1,8 @@
-*
-.nextflow
+.nextflow/
+.nextflow.log*
 results
 results/*
 work
 work/*
 .nextflow.log*
-# explicitly including files in git
-!.gitignore
-!main.nf
-!nextflow.config
-!README.md
-!Singularity
-!environment.yml
-!azure-pipelines.yml
-!dag.svg
-!LICENSE
-!conf
-!conf/base.config
-!conf/slurm.config
-!bin/
-!bin/parse_influenza_blast_results.py
+test/
