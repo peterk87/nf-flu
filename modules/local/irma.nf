@@ -42,7 +42,9 @@ process IRMA {
 
   IRMA $params.irma_module $reads $meta.id
   
-  cat ${meta.id}/amended_consensus/*.fa > ${meta.id}.consensus.fasta
+  if [ -d "${meta.id}/amended_consensus/" ]; then
+    cat ${meta.id}/amended_consensus/*.fa > ${meta.id}.consensus.fasta
+  fi
 
   set +e
   IRMA | head -n1 | sed -E 's/^Iter.*IRMA\\), v(\\S+) .*/\\1/' > ${software}.version.txt
