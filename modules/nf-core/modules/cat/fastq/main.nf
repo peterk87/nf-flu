@@ -33,7 +33,7 @@ process CAT_FASTQ {
             cat ${readList.sort().join(' ')} > ${prefix}.merged.fastq.gz
             """
         }
-    } else {
+    }else {
         if (readList.size > 2) {
             def read1 = []
             def read2 = []

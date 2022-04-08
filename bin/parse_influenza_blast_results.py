@@ -2,9 +2,7 @@
 
 """
 Generate an Influenza H/N subtyping report from nucleotide BLAST results for one or more genomes.
-
-Metadata from the NCBI Influenza DB is merged in with the BLAST results to improve subtyping results and provide context for the results obtained. 
-
+Metadata from the NCBI Influenza DB is merged in with the BLAST results to improve subtyping results and provide context for the results obtained.
 For reference:
 Segment 4 - hemagglutinin (HA) gene
 Segment 6 - neuraminidase (NA) gene
@@ -171,12 +169,12 @@ REGEX_UNALLOWED_EXCEL_WS_CHARS = re.compile(r"[\\:/?*\[\]]+")
 
 
 def parse_blast_result(
-    blast_result: str,
-    df_metadata: pd.DataFrame,
-    regex_subtype_pattern: str,
-    top: int = 3,
-    pident_threshold: float = 0.85,
-    min_aln_length: int = 50,
+        blast_result: str,
+        df_metadata: pd.DataFrame,
+        regex_subtype_pattern: str,
+        top: int = 3,
+        pident_threshold: float = 0.85,
+        min_aln_length: int = 50,
 ) -> Optional[
     Tuple[pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame], Dict]
 ]:
@@ -200,7 +198,7 @@ def parse_blast_result(
     )
     df_filtered = df[
         (df["pident"] >= (pident_threshold * 100)) & (df["length"] >= min_aln_length)
-    ]
+        ]
     logging.info(
         f"{sample_name} | n={df_filtered.shape[0]} | Filtered for hits above {pident_threshold}% identity."
     )
@@ -339,8 +337,11 @@ def find_h_or_n_type(df_merge, seg):
 )
 @click.option('--min-aln-length', default=50, help="Min BLAST alignment length threshold")
 @click.option("--threads", default=4, help="Number of BLAST result parsing threads.")
+@click.option("--get-top-ref", default=False, help="Get top ref accession id from ncbi database.")
+@click.option("--sample-name", default="", help="Sample Name.")
 @click.argument("blast_results", nargs=-1)
-def report(flu_metadata, blast_results, excel_report, top, pident_threshold, min_aln_length, threads):
+def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
+           min_aln_length, threads, get_top_ref, sample_name):
     from rich.traceback import install
 
     install(show_locals=True, width=120, word_wrap=True)
@@ -378,7 +379,7 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold, min
     )
     regex_subtype_pattern = r"\((H\d+N\d+|" + "|".join(list(unique_subtypes)) + r")\)"
 
-    if threads > 1 :
+    if threads > 1:
         pool = Pool(processes=threads)
         logging.info(
             f"Initialized multiprocessing pool with {threads} processes. Submitting async parsing jobs."
@@ -397,7 +398,9 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold, min
             f'Got {len(results)} async parsing results. Merging into report "{excel_report}".'
         )
     else:
-        results = [parse_blast_result(blast_result, df_md, regex_subtype_pattern, top=top, pident_threshold=pident_threshold, min_aln_length=min_aln_length) for blast_result in blast_results]
+        results = [
+            parse_blast_result(blast_result, df_md, regex_subtype_pattern, top=top, pident_threshold=pident_threshold,
+                               min_aln_length=min_aln_length) for blast_result in blast_results]
     dfs_blast = []
     all_subtype_results = {}
     for parsed_result in results:
@@ -423,15 +426,19 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold, min
     cols = pd.Series(columns_N_summary_results)
     cols = cols[cols.isin(df_subtype_results.columns)]
     df_N = df_subtype_results[cols].rename(columns=subtype_results_summary_final_names)
-    write_excel(
-        [
-            ("Subtype Predictions", df_subtype_predictions),
-            ("Top Segment Matches", df_all_blast),
-            ("H Segment Results", df_H),
-            ("N Segment Results", df_N),
-        ],
-        output_dest=excel_report,
-    )
+    if not get_top_ref:
+        write_excel(
+            [
+                ("Subtype Predictions", df_subtype_predictions),
+                ("Top Segment Matches", df_all_blast),
+                ("H Segment Results", df_H),
+                ("N Segment Results", df_N),
+            ],
+            output_dest=excel_report,
+        )
+    else:
+        df_all_blast[['Sample', 'Sample Genome Segment Number', 'Reference NCBI Accession']].to_csv(
+            sample_name + ".csv", header=False, index=False)
 
 
 def get_col_widths(df, index=False):
@@ -447,9 +454,9 @@ def get_col_widths(df, index=False):
 
 
 def write_excel(
-    name_dfs: List[Tuple[str, pd.DataFrame]],
-    output_dest: str,
-    sheet_name_index: bool = True,
+        name_dfs: List[Tuple[str, pd.DataFrame]],
+        output_dest: str,
+        sheet_name_index: bool = True,
 ) -> None:
     logging.info("Starting to write tabular data to worksheets in Excel workbook")
     with pd.ExcelWriter(output_dest, engine="xlsxwriter") as writer:

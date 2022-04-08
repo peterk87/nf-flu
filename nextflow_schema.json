@@ -16,6 +16,24 @@
                     "fa_icon": "fas fa-file-csv",
                     "description": "Sample sheet with sample names and paths to reads."
                 },
+                "platform": {
+                    "type": "string",
+                    "fa_icon": "fas fa-hdd",
+                    "description": "NGS platform used to sequence the samples.",
+                    "enum": [
+                        "illumina",
+                        "nanopore"
+                    ]
+                },
+                "protocol": {
+                    "type": "string",
+                    "description": "Specifies the type of protocol used for sequencing.",
+                    "fa_icon": "fas fa-vials",
+                    "enum": [
+                        "metagenomic",
+                        "amplicon"
+                    ]
+                },
                 "outdir": {
                     "type": "string",
                     "description": "The output directory where the results will be saved.",
@@ -26,6 +44,34 @@
             "required": [
                 "input"
             ]
+        },
+        "nanopore_options": {
+            "title": "Nanopore options",
+            "type": "object",
+            "description": "Options exclusive to running the pipeline on Nanopore data using the ARTIC fieldbioinformatics pipeline.",
+            "default": "",
+            "fa_icon": "fas fa-truck-loading",
+            "properties": {
+                "fastq_dir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Path to a folder containing fastq files from the Nanopore run.",
+                    "help_text": "e.g. '--fastq_dir ./20191023_1522_MC-110615_0_FAO93606_12bf9b4f/fastq_pass/'.",
+                    "fa_icon": "fas fa-folder-open"
+                },
+                "min_barcode_reads": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Minimum number of raw reads required per sample/barcode in order to be considered for the downstream processing steps.",
+                    "fa_icon": "fas fa-hand-paper"
+                },
+                "min_guppyplex_reads": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Minimum number of reads required after the artic guppyplex process per sample/barcode in order to be considered for the downstream processing steps.",
+                    "fa_icon": "fas fa-hand-paper"
+                }
+            }
         },
         "irma_assembly_options": {
             "title": "IRMA assembly options",
