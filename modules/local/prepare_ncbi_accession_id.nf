@@ -7,7 +7,7 @@ options        = initOptions(params.options)
 process PREPARE_NCBI_ACCESSION_ID {
     tag "$meta.id"
     label 'process_medium'
-    publishDir "${params.outdir}/reference_sequences/",
+    publishDir "${params.outdir}/reference_sequences/$meta.id",
         pattern: "*.csv",
         mode: params.publish_dir_mode
 

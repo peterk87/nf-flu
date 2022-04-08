@@ -7,7 +7,7 @@ options        = initOptions(params.options)
 process BLAST_BLASTDBCMD{
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
     label 'process_medium'
-    publishDir "${params.outdir}/reference_sequences/",
+    publishDir "${params.outdir}/reference_sequences/$sample_name",
         pattern: "*.fasta",
         mode: params.publish_dir_mode
 

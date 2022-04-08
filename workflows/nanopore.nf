@@ -12,6 +12,7 @@ include { PREPARE_NCBI_ACCESSION_ID                               } from '../mod
 include { IRMA                                                    } from '../modules/local/irma'
 include { MAP_STATS                                               } from '../modules/local/map_stats'
 include { SUBTYPING_REPORT                                        } from '../modules/local/subtyping_report'
+include { COVERAGE_PLOT                                           } from '../modules/local/coverage_plot'
 include { INPUT_CHECK                                             } from '../subworkflows/local/input_check'
 
 include { GUNZIP as GUNZIP_FLU_FASTA                              } from '../modules/nf-core/modules/gunzip/main'
@@ -22,6 +23,7 @@ include { BLAST_BLASTDBCMD                                        } from '../mod
 include { MINIMAP2                                                } from '../modules/nf-core/modules/minimap2/main'
 include { MEDAKA                                                  } from '../modules/nf-core/modules/medaka/main'
 include { LONGSHOT                                                } from '../modules/nf-core/modules/longshot/main'
+include { BCF_FILTER                                              } from '../modules/nf-core/modules/bcftools/filter/main'
 
 def pass_barcode_reads = [:]
 def fail_barcode_reads = [:]
@@ -191,7 +193,10 @@ workflow NANOPORE {
       }
       depth_linecount > 2
     } \
-    | MEDAKA
+    | MEDAKA \
+    | LONGSHOT \
+    | BCF_FILTER \
+    | COVERAGE_PLOT
 
     //Generate suptype prediction report
     ch_blast = BLAST_BLASTN.out.txt.collect({ it[1] })

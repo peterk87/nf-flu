@@ -7,7 +7,7 @@ options        = initOptions(params.options)
 process MEDAKA{
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
     label 'process_medium'
-    publishDir "${params.outdir}/vcf/",
+    publishDir "${params.outdir}/vcf/$sample_name",
         pattern: "*.vcf",
         mode: params.publish_dir_mode
 
