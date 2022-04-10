@@ -77,7 +77,7 @@ def main(depths_file,
 	fig, ax = plt.subplots(1, figsize=(width, height))
 	if log_scale_y:
 		from matplotlib.ticker import ScalarFormatter
-		ax.set_yscale('log', nonposy='clip')
+		ax.set_yscale('log', nonpositive='clip')
 		formatter = ScalarFormatter()
 		formatter.set_scientific(False)
 		ax.yaxis.set_major_formatter(formatter)
