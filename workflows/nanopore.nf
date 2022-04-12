@@ -13,6 +13,7 @@ include { IRMA                                                    } from '../mod
 include { MAP_STATS                                               } from '../modules/local/map_stats'
 include { SUBTYPING_REPORT                                        } from '../modules/local/subtyping_report'
 include { COVERAGE_PLOT                                           } from '../modules/local/coverage_plot'
+include { VCF_FILTER_FRAMESHIFT                                   } from '../modules/local/vcf_filter_frameshift'
 include { INPUT_CHECK                                             } from '../subworkflows/local/input_check'
 
 include { GUNZIP as GUNZIP_FLU_FASTA                              } from '../modules/nf-core/modules/gunzip/main'
@@ -24,6 +25,9 @@ include { MINIMAP2                                                } from '../mod
 include { MEDAKA                                                  } from '../modules/nf-core/modules/medaka/main'
 include { LONGSHOT                                                } from '../modules/nf-core/modules/longshot/main'
 include { BCF_FILTER                                              } from '../modules/nf-core/modules/bcftools/filter/main'
+include { MOSDEPTH_GENOME                                         } from '../modules/nf-core/modules/mosdepth/main'
+include { BCF_CONSENSUS                                           } from '../modules/nf-core/modules/bcftools/consensus/main'
+include { CAT_FASTQ                                               } from '../modules/nf-core/modules/cat/fastq/main'
 
 def pass_barcode_reads = [:]
 def fail_barcode_reads = [:]
@@ -49,7 +53,7 @@ workflow NANOPORE {
                         count += x.countFastq()
                     }
                 }
-                return [ dir.baseName , dir, count ]
+                return [dir.baseName , dir, count]
             }
             .set { ch_fastq_dirs }
 
@@ -136,6 +140,7 @@ workflow NANOPORE {
         ['Sample', 'Barcode count'],
         'fail_barcode_count_samples'
     )
+
     // Re-arrange channels to have meta map of information for sample
     ch_fastq_dirs
         .filter { it[-1] > params.min_barcode_reads }
@@ -148,11 +153,10 @@ workflow NANOPORE {
     BLAST_MAKEBLASTDB_NO_PARSEID(GUNZIP_FLU_FASTA.out.gunzip)
 
     // Make another blast db with parse_id option for pulling reference based on Accession ID
+
     BLAST_MAKEBLASTDB_PARSEID(GUNZIP_FLU_FASTA.out.gunzip)
 
-    // Use artic gupplex to aggregate reads instead of using cat
-    ARTIC_GUPPYPLEX (ch_fastq_dirs).
-    set {ch_aggregate_reads}
+    CAT_FASTQ(ch_fastq_dirs).set {ch_aggregate_reads}
 
     ch_aggregate_reads.map { it ->
         return [it[0].id, it[1]]
@@ -160,7 +164,7 @@ workflow NANOPORE {
     .set {ch_aggregate_reads}
 
     // IRMA to generate amended consensus sequences
-    IRMA(ARTIC_GUPPYPLEX.out.fastq)
+    IRMA(CAT_FASTQ.out.reads)
 
     // Find the top map sequences against ncbi database
     BLAST_BLASTN(IRMA.out.consensus, BLAST_MAKEBLASTDB_NO_PARSEID.out.db)
@@ -182,21 +186,30 @@ workflow NANOPORE {
     // Map reads againts segment reference sequences
     MINIMAP2(BLAST_BLASTDBCMD.out.fasta)
 
-    // Variant calling steps
-    MAP_STATS(MINIMAP2.out.alignment)
-    MAP_STATS.out.stat
-    | filter {
-      // Filter for alignments that did have some reads mapping to the ref genome
-      depth_linecount = file(it[3]).readLines().size()
-      if (depth_linecount == 1) {
-        println "No reads from \"${it[0]}\" mapped to reference ${it[1]}"
-      }
-      depth_linecount > 2
-    } \
-    | MEDAKA \
-    | LONGSHOT \
-    | BCF_FILTER \
-    | COVERAGE_PLOT
+    MOSDEPTH_GENOME(MINIMAP2.out.alignment)
+
+    // Variants calling
+    MINIMAP2.out.alignment
+    .map { it->
+        return [it[0], it[1], it[2], it[3], it[4], it[5]]
+    }. set {ch_medaka}
+    MEDAKA(ch_medaka)
+
+    BCF_FILTER(MEDAKA.out.vcf, params.major_allele_fraction)
+
+    VCF_FILTER_FRAMESHIFT(BCF_FILTER.out.vcf)
+
+    COVERAGE_PLOT (VCF_FILTER_FRAMESHIFT.out.vcf)
+
+    VCF_FILTER_FRAMESHIFT.out.vcf
+    .map { it ->
+        return [it[0], it[1], it[2], it[3], it[5]]
+    }
+    .combine(MOSDEPTH_GENOME.out.bedgz, by: [0, 1, 2])
+    .set { ch_bcf_consensus }
+
+    // Generate consensus sequences
+    BCF_CONSENSUS(ch_bcf_consensus, params.low_coverage)
 
     //Generate suptype prediction report
     ch_blast = BLAST_BLASTN.out.txt.collect({ it[1] })

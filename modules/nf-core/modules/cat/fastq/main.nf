@@ -7,9 +7,6 @@ options        = initOptions(params.options)
 process CAT_FASTQ {
     tag "$meta.id"
     label 'process_low'
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'merged_fastq', meta:meta, publish_by_meta:['id']) }
 
     conda (params.enable_conda ? "conda-forge::sed=4.7" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -22,7 +19,7 @@ process CAT_FASTQ {
     tuple val(meta), path(reads)
 
     output:
-    tuple val(meta), path("*.merged.fastq.gz"), emit: reads
+    tuple val(meta), path("*.fastq.gz"), emit: reads
 
     script:
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
@@ -33,7 +30,12 @@ process CAT_FASTQ {
             cat ${readList.sort().join(' ')} > ${prefix}.merged.fastq.gz
             """
         }
-    }else {
+    } else if (meta.barcode){
+        """
+        cat $reads/*.fastq.gz > ${meta.id}.fastq.gz
+        """
+    }
+    else {
         if (readList.size > 2) {
             def read1 = []
             def read2 = []

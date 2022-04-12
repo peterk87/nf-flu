@@ -27,7 +27,7 @@ process COVERAGE_PLOT{
     plot_filename = "coverage_plot-${sample_name}-Segment_${segment}-${id}.pdf"
     log_scale_plot_filename = "coverage_plot-${sample_name}-Segment_${segment}-${id}-log_scale.pdf"
     """
-    plot_coverage.py -d $depths -v $filt_vcf -o $plot_filename
-    plot_coverage.py -d $depths -v $filt_vcf -o $log_scale_plot_filename --log-scale-y
+    plot_coverage.py -d $depths -v $filt_vcf -o $plot_filename --sample-name $sample_name --segment $segment
+    plot_coverage.py -d $depths -v $filt_vcf -o $log_scale_plot_filename --sample-name $sample_name --segment $segment --log-scale-y
     """
 }

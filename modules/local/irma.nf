@@ -9,7 +9,7 @@ process IRMA {
   label 'process_medium'
   publishDir "${params.outdir}/irma/", 
              mode: params.publish_dir_mode
-  publishDir "${params.outdir}/consensus/",
+  publishDir "${params.outdir}/consensus/irma/",
              pattern: "${meta.id}.consensus.fasta",
              mode: params.publish_dir_mode
 
