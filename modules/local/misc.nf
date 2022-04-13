@@ -2,11 +2,11 @@ process CAT_FASTQ {
     tag "$meta.id"
     label 'process_low'
 
-    conda (params.enable_conda ? "conda-forge::sed=4.7" : null)
+    conda (params.enable_conda ? "conda-forge::pigz=2.6" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://containers.biocontainers.pro/s3/SingImgsRepo/biocontainers/v1.2.0_cv1/biocontainers_v1.2.0_cv1.img"
+        container "https://depot.galaxyproject.org/singularity/mulled-v2-2b04072095278721dc9a5772e61e406f399b6030:7c7abf911e92d7fb831611ffb965f3cf7fe2c01d-0"
     } else {
-        container "biocontainers/biocontainers:v1.2.0_cv1"
+        container "quay.io/biocontainers/mulled-v2-2b04072095278721dc9a5772e61e406f399b6030:7c7abf911e92d7fb831611ffb965f3cf7fe2c01d-0"
     }
 
     input:
@@ -17,6 +17,11 @@ process CAT_FASTQ {
 
     script:
     """
-    cat $reads/*.fastq.gz > ${meta.id}.fastq.gz
+    fastqFile=\$(ls $reads | head -1)
+    if grep -q "gz" <<< "\$fastqFile"; then
+        cat $reads/*.fastq.gz > ${meta.id}.fastq.gz
+    else
+        cat $reads/*.fastq | pigz -ck > ${meta.id}.fastq.gz
+    fi
     """
 }
