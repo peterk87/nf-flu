@@ -1,9 +1,3 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process PREPARE_NCBI_ACCESSION_ID {
     tag "$meta.id"
     label 'process_medium'
@@ -26,7 +20,6 @@ process PREPARE_NCBI_ACCESSION_ID {
     tuple val(meta), path("${meta.id}.csv"), optional: true, emit: accession_id
 
     script:
-    def software = getSoftwareName(task.process)
     """
     parse_influenza_blast_results.py \\
     --threads ${task.cpus} \\

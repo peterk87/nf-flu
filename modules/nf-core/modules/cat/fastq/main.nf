@@ -30,10 +30,6 @@ process CAT_FASTQ {
             cat ${readList.sort().join(' ')} > ${prefix}.merged.fastq.gz
             """
         }
-    } else if (meta.barcode){
-        """
-        cat $reads/*.fastq.gz > ${meta.id}.fastq.gz
-        """
     }
     else {
         if (readList.size > 2) {

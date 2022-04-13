@@ -1,8 +1,5 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
+include { getSoftwareName } from './functions'
 
 process MEDAKA{
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"

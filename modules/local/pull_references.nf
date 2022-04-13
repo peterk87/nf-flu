@@ -1,8 +1,6 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { getSoftwareName } from './functions'
 
-params.options = [:]
-options        = initOptions(params.options)
 
 process BLAST_BLASTDBCMD{
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
@@ -28,7 +26,7 @@ process BLAST_BLASTDBCMD{
 
     script:
     def software = getSoftwareName(task.process)
-    def prefix   = options.suffix ? "${sample_name}${options.suffix}" : "${sample_name}"
+    def prefix   = "${sample_name}"
     """
     DB=`find -L ./ -name "*.ndb" | sed 's/.ndb//'`
     blastdbcmd \\

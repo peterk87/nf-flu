@@ -1,9 +1,3 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process CHECK_SAMPLE_SHEET {
   publishDir "${params.tracedir}/",
              mode: params.publish_dir_mode

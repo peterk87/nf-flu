@@ -1,11 +1,5 @@
-// Import generic module functions
-include { initOptions; saveFiles } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
-process REC2FASTA {
-    tag "${record.id} - ${record.desc} - ${record.sequence.size()}"
+process CAT_FASTQ {
+    tag "$meta.id"
     label 'process_low'
 
     conda (params.enable_conda ? "conda-forge::sed=4.7" : null)
@@ -16,17 +10,13 @@ process REC2FASTA {
     }
 
     input:
-    val (record)
+    tuple val(meta), path(reads)
 
     output:
-    path("*.fasta"), emit: record
+    tuple val(meta), path("*.fastq.gz"), emit: reads
 
     script:
-    fasta = "${record.id}.fasta"
-  """
-  cat > $fasta << EOF
->${record.id} ${record.desc}
-${record.sequence}
-EOF
-  """
+    """
+    cat $reads/*.fastq.gz > ${meta.id}.fastq.gz
+    """
 }

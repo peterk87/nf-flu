@@ -12,20 +12,19 @@ include { IRMA                                                    } from '../mod
 include { SUBTYPING_REPORT                                        } from '../modules/local/subtyping_report'
 include { COVERAGE_PLOT                                           } from '../modules/local/coverage_plot'
 include { VCF_FILTER_FRAMESHIFT                                   } from '../modules/local/vcf_filter_frameshift'
-
+include { MEDAKA                                                  } from '../modules/local/medaka'
+include { MAP                                                     } from '../modules/local/map'
+include { BCF_FILTER; BCF_CONSENSUS                               } from '../modules/local/bcftools'
+include { MOSDEPTH_GENOME                                         } from '../modules/local/mosdepth'
+include { CAT_FASTQ                                               } from '../modules/local/misc'
+include { BLAST_BLASTDBCMD                                        } from '../modules/local/pull_references'
 include { INPUT_CHECK                                             } from '../subworkflows/local/input_check'
 
 include { GUNZIP as GUNZIP_FLU_FASTA                              } from '../modules/nf-core/modules/gunzip/main'
 include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NO_PARSEID       } from '../modules/nf-core/modules/blast/makeblastdb/main' addParams( options: modules['blastn_makeblastdb'] )
 include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_PARSEID          } from '../modules/nf-core/modules/blast/makeblastdb/main' addParams( options: modules['blastn_makeblastdb_parseid'] )
 include { BLAST_BLASTN                                            } from '../modules/nf-core/modules/blast/blastn/main'      addParams( options: modules['blast_blastn'] )
-include { BLAST_BLASTDBCMD                                        } from '../modules/nf-core/modules/blast/blastdbcmd/main'
-include { MINIMAP2                                                } from '../modules/nf-core/modules/minimap2/main'
-include { MEDAKA                                                  } from '../modules/nf-core/modules/medaka/main'
-include { BCF_FILTER                                              } from '../modules/nf-core/modules/bcftools/filter/main'
-include { MOSDEPTH_GENOME                                         } from '../modules/nf-core/modules/mosdepth/main'
-include { BCF_CONSENSUS                                           } from '../modules/nf-core/modules/bcftools/consensus/main'
-include { CAT_FASTQ                                               } from '../modules/nf-core/modules/cat/fastq/main'
+
 
 def pass_barcode_reads = [:]
 def fail_barcode_reads = [:]
@@ -185,12 +184,12 @@ workflow NANOPORE {
     BLAST_BLASTDBCMD(ch_sample_segment, BLAST_MAKEBLASTDB_PARSEID.out.db)
 
     // Map reads againts segment reference sequences
-    MINIMAP2(BLAST_BLASTDBCMD.out.fasta)
+    MAP(BLAST_BLASTDBCMD.out.fasta)
 
-    MOSDEPTH_GENOME(MINIMAP2.out.alignment)
+    MOSDEPTH_GENOME(MAP.out.alignment)
 
     // Variants calling
-    MINIMAP2.out.alignment
+    MAP.out.alignment
     .map { it->
         return [it[0], it[1], it[2], it[3], it[4], it[5]]
     }. set {ch_medaka}

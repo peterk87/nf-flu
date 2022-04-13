@@ -1,10 +1,7 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { getSoftwareName } from './functions'
 
-params.options = [:]
-options        = initOptions(params.options)
-
-process MINIMAP2{
+process MAP{
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
     label 'process_high'
     publishDir "${params.outdir}/mapping/$sample_name",
