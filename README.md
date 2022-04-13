@@ -46,13 +46,25 @@ for the [IRMA][] assembly and H/N subtyping by nucleotide [BLAST][] against the 
           -o samplesheet.csv
         ```
 
-    * Typical command
+    * Typical command for Illumina Platform
 
         ```bash
         nextflow run peterk87/nf-iav-illumina \
           --input samplesheet.csv \
+          --platform illumina \
           --profile <docker/singularity/podman/shifter/charliecloud/conda>
         ```
+      
+    * Typical command for Nanopore Platform
+
+      ```bash
+      nextflow run peterk87/nf-iav-illumina \
+        --input samplesheet.csv \
+        --platform nanopore \
+        --irma_module FLU-minion \
+        --fastq_dir /path/to/fastq_pass \
+        --profile <docker/singularity/podman/shifter/charliecloud/conda>
+      ```
 
 ## Documentation
 
