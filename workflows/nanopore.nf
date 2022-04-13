@@ -7,13 +7,12 @@ include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NO_SAMPLE_NAME     } from '../mod
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NO_BARCODES        } from '../modules/local/multiqc_tsv_from_list'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_BARCODE_COUNT      } from '../modules/local/multiqc_tsv_from_list'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_GUPPYPLEX_COUNT    } from '../modules/local/multiqc_tsv_from_list'
-include { ARTIC_GUPPYPLEX                                         } from '../modules/nf-core/modules/artic/guppyplex/main'
 include { PREPARE_NCBI_ACCESSION_ID                               } from '../modules/local/prepare_ncbi_accession_id'
 include { IRMA                                                    } from '../modules/local/irma'
-include { MAP_STATS                                               } from '../modules/local/map_stats'
 include { SUBTYPING_REPORT                                        } from '../modules/local/subtyping_report'
 include { COVERAGE_PLOT                                           } from '../modules/local/coverage_plot'
 include { VCF_FILTER_FRAMESHIFT                                   } from '../modules/local/vcf_filter_frameshift'
+
 include { INPUT_CHECK                                             } from '../subworkflows/local/input_check'
 
 include { GUNZIP as GUNZIP_FLU_FASTA                              } from '../modules/nf-core/modules/gunzip/main'
@@ -23,7 +22,6 @@ include { BLAST_BLASTN                                            } from '../mod
 include { BLAST_BLASTDBCMD                                        } from '../modules/nf-core/modules/blast/blastdbcmd/main'
 include { MINIMAP2                                                } from '../modules/nf-core/modules/minimap2/main'
 include { MEDAKA                                                  } from '../modules/nf-core/modules/medaka/main'
-include { LONGSHOT                                                } from '../modules/nf-core/modules/longshot/main'
 include { BCF_FILTER                                              } from '../modules/nf-core/modules/bcftools/filter/main'
 include { MOSDEPTH_GENOME                                         } from '../modules/nf-core/modules/mosdepth/main'
 include { BCF_CONSENSUS                                           } from '../modules/nf-core/modules/bcftools/consensus/main'
@@ -153,7 +151,6 @@ workflow NANOPORE {
     BLAST_MAKEBLASTDB_NO_PARSEID(GUNZIP_FLU_FASTA.out.gunzip)
 
     // Make another blast db with parse_id option for pulling reference based on Accession ID
-
     BLAST_MAKEBLASTDB_PARSEID(GUNZIP_FLU_FASTA.out.gunzip)
 
     CAT_FASTQ(ch_fastq_dirs).set {ch_aggregate_reads}
@@ -168,6 +165,10 @@ workflow NANOPORE {
 
     // Find the top map sequences against ncbi database
     BLAST_BLASTN(IRMA.out.consensus, BLAST_MAKEBLASTDB_NO_PARSEID.out.db)
+
+    //Generate suptype prediction report
+    ch_blast = BLAST_BLASTN.out.txt.collect({ it[1] })
+    SUBTYPING_REPORT(ch_influenza_metadata, ch_blast)
 
     // Prepare top ncbi accession id for each segment of each sample sample (id which has top bitscore)
     PREPARE_NCBI_ACCESSION_ID(BLAST_BLASTN.out.txt, ch_influenza_metadata)
@@ -210,9 +211,5 @@ workflow NANOPORE {
 
     // Generate consensus sequences
     BCF_CONSENSUS(ch_bcf_consensus, params.low_coverage)
-
-    //Generate suptype prediction report
-    ch_blast = BLAST_BLASTN.out.txt.collect({ it[1] })
-    SUBTYPING_REPORT(ch_influenza_metadata, ch_blast)
 
 }
