@@ -5,7 +5,7 @@ nextflow.enable.dsl = 2
 def json_schema = "$projectDir/nextflow_schema.json"
 
 if (params.help){
-  def command = "nextflow run peterk87/nf-iav-illumina --input samplesheet.csv -profile singularity/docker/conda"
+  def command = "nextflow run peterk87/nf-iav-illumina --input --platfrom illumina samplesheet.csv -profile singularity/docker/conda"
   log.info NfcoreSchema.params_help(workflow, params, json_schema, command)
   exit 0
 }
@@ -20,7 +20,7 @@ if (workflow.profile == 'slurm' && params.slurm_queue == "") {
 
 // Has the run name been specified by the user?
 //  this has the bonus effect of catching both -name and --name
-custom_runName = params.name
+//custom_runName = params.name
 if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
   custom_runName = workflow.runName
 }
