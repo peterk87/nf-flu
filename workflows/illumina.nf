@@ -1,4 +1,3 @@
-def modules = params.modules.clone()
 
 //=============================================================================
 // NCBI Influenza DB reference data
@@ -15,10 +14,10 @@ include { IRMA } from '../modules/local/irma'
 include { CHECK_SAMPLE_SHEET } from '../modules/local/check_sample_sheet'
 include { SUBTYPING_REPORT } from '../modules/local/subtyping_report'
 
-include { GUNZIP as GUNZIP_FLU_FASTA } from '../modules/nf-core/modules/gunzip/main'
-include { BLAST_MAKEBLASTDB } from '../modules/nf-core/modules/blast/makeblastdb/main' addParams( options: modules['blastn_makeblastdb'] )
-include { BLAST_BLASTN } from '../modules/nf-core/modules/blast/blastn/main' addParams( options: modules['blast_blastn'] )
-include { CAT_FASTQ } from '../modules/nf-core/modules/cat/fastq/main' addParams( options: modules['cat_fastq'] )
+include { GUNZIP as GUNZIP_FLU_FASTA                   } from '../modules/local/misc'
+include { BLAST_MAKEBLASTDB } from '../modules/nf-core/modules/blast/makeblastdb/main' //addParams( options: modules['blastn_makeblastdb'] )
+include { BLAST_BLASTN } from '../modules/nf-core/modules/blast/blastn/main' //addParams( options: modules['blast_blastn'] )
+include { CAT_FASTQ } from '../modules/nf-core/modules/cat/fastq/main' //addParams( options: modules['cat_fastq'] )
 
 
 workflow ILLUMINA {
@@ -61,6 +60,7 @@ workflow ILLUMINA {
 
   // Credit to nf-core/viralrecon. Source: https://github.com/nf-core/viralrecon/blob/a85d5969f9025409e3618d6c280ef15ce417df65/workflows/illumina.nf#L221
   // Concatenate FastQ files from same sample if required
+  //Temporarily disable
   CAT_FASTQ(ch_input.multiple)
     .mix(ch_input.single)
     .set { ch_cat_reads }

@@ -25,7 +25,6 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
   custom_runName = workflow.runName
 }
 
-def modules = params.modules.clone()
 
 //=============================================================================
 // LOG PARAMS SUMMARY

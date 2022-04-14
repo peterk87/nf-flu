@@ -1,8 +1,3 @@
-def modules = params.modules.clone()
-
-if (params.input) { ch_input= file(params.input) }
-
-
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NO_SAMPLE_NAME     } from '../modules/local/multiqc_tsv_from_list'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NO_BARCODES        } from '../modules/local/multiqc_tsv_from_list'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_BARCODE_COUNT      } from '../modules/local/multiqc_tsv_from_list'
@@ -16,15 +11,15 @@ include { MEDAKA                                                  } from '../mod
 include { MINIMAP2                                                } from '../modules/local/minimap2'
 include { BCF_FILTER; BCF_CONSENSUS                               } from '../modules/local/bcftools'
 include { MOSDEPTH_GENOME                                         } from '../modules/local/mosdepth'
-include { CAT_FASTQ                                               } from '../modules/local/misc'
+include { CAT_FASTQ; GUNZIP as GUNZIP_FLU_FASTA                   } from '../modules/local/misc'
 include { BLAST_BLASTDBCMD                                        } from '../modules/local/pull_references'
 include { INPUT_CHECK                                             } from '../subworkflows/local/input_check'
 
-include { GUNZIP as GUNZIP_FLU_FASTA                              } from '../modules/nf-core/modules/gunzip/main'
-include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NO_PARSEID       } from '../modules/nf-core/modules/blast/makeblastdb/main' addParams( options: modules['blastn_makeblastdb'] )
-include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_PARSEID          } from '../modules/nf-core/modules/blast/makeblastdb/main' addParams( options: modules['blastn_makeblastdb_parseid'] )
-include { BLAST_BLASTN                                            } from '../modules/nf-core/modules/blast/blastn/main'      addParams( options: modules['blast_blastn'] )
+include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NO_PARSEID       } from '../modules/nf-core/modules/blast/makeblastdb/main' //addParams( options: modules['blastn_makeblastdb'] )
+include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_PARSEID          } from '../modules/nf-core/modules/blast/makeblastdb/main' //addParams( options: modules['blastn_makeblastdb_parseid'] )
+include { BLAST_BLASTN                                            } from '../modules/nf-core/modules/blast/blastn/main'      //addParams( options: modules['blast_blastn'] )
 
+if (params.input) { ch_input= file(params.input) }
 
 def pass_barcode_reads = [:]
 def fail_barcode_reads = [:]
@@ -164,7 +159,7 @@ workflow NANOPORE {
 
     // Find the top map sequences against ncbi database
     BLAST_BLASTN(IRMA.out.consensus, BLAST_MAKEBLASTDB_NO_PARSEID.out.db)
-    ch_versions.mix(BLAST_BLASTN.out.version)
+    ch_versions.mix(BLAST_BLASTN.out.versions)
 
     //Generate suptype prediction report
     ch_blast = BLAST_BLASTN.out.txt.collect({ it[1] })

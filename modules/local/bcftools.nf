@@ -2,8 +2,6 @@
 process BCF_CONSENSUS {
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
     label 'process_medium'
-    publishDir "${params.outdir}/consensus/bcf_consensus/$sample_name",
-        mode: params.publish_dir_mode
 
     conda (params.enable_conda ? 'bioconda::bcftools=1.15.1' : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

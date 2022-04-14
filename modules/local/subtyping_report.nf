@@ -5,7 +5,6 @@ params.options = [:]
 options        = initOptions(params.options)
 
 process SUBTYPING_REPORT {
-  publishDir "${params.outdir}/", mode: params.publish_dir_mode
   memory { 
     // Dynamically determine how much memory is required for this task based on 
     // overall size of tabular blastn inputs. For a single input, allocate 2GB

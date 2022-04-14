@@ -4,10 +4,7 @@ include { getSoftwareName } from './functions'
 
 process BLAST_BLASTDBCMD{
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
-    label 'process_medium'
-    publishDir "${params.outdir}/reference_sequences/$sample_name",
-        pattern: "*.fasta",
-        mode: params.publish_dir_mode
+    label 'process_low'
 
     conda (params.enable_conda ? 'bioconda::blast=2.10.1' : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

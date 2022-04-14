@@ -1,17 +1,10 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { getSoftwareName } from './functions'
 
-params.options = [:]
-options        = initOptions(params.options)
 
 process IRMA {
   tag "$meta.id"
   label 'process_high'
-  publishDir "${params.outdir}/irma/", 
-             mode: params.publish_dir_mode
-  publishDir "${params.outdir}/consensus/irma/",
-             pattern: "${meta.id}.consensus.fasta",
-             mode: params.publish_dir_mode
 
   conda (params.enable_conda ? "bioconda::irma=1.0.2" : null)
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

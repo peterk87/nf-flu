@@ -4,9 +4,6 @@ include { getSoftwareName } from './functions'
 process MEDAKA{
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
     label 'process_low'
-    publishDir "${params.outdir}/variants/$sample_name",
-        pattern: "*.{vcf,log}",
-        mode: params.publish_dir_mode
 
     conda (params.enable_conda ? 'bioconda::medaka=1.4.4' : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

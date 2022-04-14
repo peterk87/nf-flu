@@ -1,0 +1,23 @@
+{
+    "name": "peterk87/nf-iav-illumina",
+    "homePage": "https://github.com/peterk87/nf-iav-illumina",
+    "repos": {
+        "nf-core/modules": {
+            "blast/blastn": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            },
+            "blast/makeblastdb": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            },
+            "cat/fastq": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            },
+            "multiqc": {
+                "git_sha": "49b18b1639f4f7104187058866a8fab33332bdfe"
+            },
+            "prokka": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            }
+        }
+    }
+}

@@ -3,8 +3,6 @@ include { getSoftwareName } from './functions'
 process MOSDEPTH_GENOME {
   tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
   label 'process_low'
-  publishDir "${params.outdir}/mosdepth/$sample_name",
-         mode: params.publish_dir_mode
 
   conda (params.enable_conda ? 'bioconda::mosdepth=0.3.1' : null)
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

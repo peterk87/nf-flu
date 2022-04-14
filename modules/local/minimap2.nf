@@ -1,8 +1,6 @@
 process MINIMAP2{
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
     label 'process_high'
-    publishDir "${params.outdir}/mapping/$sample_name",
-         mode: params.publish_dir_mode
 
     conda (params.enable_conda ? 'bioconda::minimap2=2.24 bioconda::samtools=1.15' : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
