@@ -3,7 +3,7 @@ include { getSoftwareName } from './functions'
 
 process MEDAKA{
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
-    label 'process_medium'
+    label 'process_low'
     publishDir "${params.outdir}/variants/$sample_name",
         pattern: "*.{vcf,log}",
         mode: params.publish_dir_mode
@@ -21,13 +21,13 @@ process MEDAKA{
 
     output:
     tuple val(sample_name), val(segment), val(id), path(fasta), path(depths), path(vcf), emit: vcf
-    path('*.medaka.log'), emit: log
+    path('*.medaka_variant.log'), emit: log
     path '*.version.txt'                 , emit: version
 
     script:
     def software  = getSoftwareName(task.process)
-    vcf           = "${sample_name}.Segment_${segment}.${id}.medaka.vcf"
-    medaka_log    = "${sample_name}.Segment_${segment}.${id}.medaka.log"
+    vcf           = "${sample_name}.Segment_${segment}.${id}.medaka_variant.vcf"
+    medaka_log    = "${sample_name}.Segment_${segment}.${id}.medaka_variant.log"
     """
     medaka_variant \\
         -d \\
