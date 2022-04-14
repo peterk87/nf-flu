@@ -25,15 +25,6 @@
                         "nanopore"
                     ]
                 },
-                "protocol": {
-                    "type": "string",
-                    "description": "Specifies the type of protocol used for sequencing.",
-                    "fa_icon": "fas fa-vials",
-                    "enum": [
-                        "metagenomic",
-                        "amplicon"
-                    ]
-                },
                 "outdir": {
                     "type": "string",
                     "description": "The output directory where the results will be saved.",
