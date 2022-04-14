@@ -53,18 +53,6 @@
                     "default": "r941_prom_hac_snp_g507",
                     "fa_icon": "fas fa-dna"
                 },
-                "medaka_chunk_len": {
-                    "type": "integer",
-                    "description": "[Medaka](https://github.com/nanoporetech/medaka) consensus chunk length of samples.",
-                    "default": 800,
-                    "fa_icon": "fas fa-puzzle-piece"
-                },
-                "medaka_chunk_overlap": {
-                    "type": "integer",
-                    "description": "[Medaka](https://github.com/nanoporetech/medaka) consensus overlap of chunks",
-                    "default": 400,
-                    "fa_icon": "fas fa-layer-group"
-                },
                 "minor_allele_fraction": {
                     "type": "number",
                     "minimum": 0,
@@ -152,6 +140,19 @@
                 "irma_module"
             ],
             "fa_icon": "fas fa-cogs"
+        },"nanopore_illumina_options": {
+            "title": "Nanopore/Illumina options",
+            "type": "object",
+            "description": "Options common to both the Nanopore and Illumina workflows in the pipeline.",
+            "default": "",
+            "properties": {
+                "skip_mosdepth": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip genome-wide and amplicon coverage plot generation from mosdepth output."
+                }
+            },
+            "fa_icon": "fas fa-retweet"
         },
         "h_n_subtyping_options": {
             "title": "H/N subtyping options",

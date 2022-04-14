@@ -174,12 +174,13 @@ workflow NANOPORE {
     PREPARE_NCBI_ACCESSION_ID(BLAST_BLASTN.out.txt, ch_influenza_metadata)
     .set {ch_ref_accession_id}
 
+
     ch_ref_accession_id.map {it[1]}.splitCsv(sep:",")
     .map{ it ->
         return [it[0],it[1],it[2]]
     }
     .combine(ch_aggregate_reads, by: 0)
-    .set {ch_sample_segment}
+    .set {ch_sample_segment} // ch_sample_segment: [sample_name, segment, id, reads]
 
     //Pull segment reference sequence for each sample
     BLAST_BLASTDBCMD(ch_sample_segment, BLAST_MAKEBLASTDB_PARSEID.out.db)
@@ -194,6 +195,7 @@ workflow NANOPORE {
     // Variants calling
     MINIMAP2.out.alignment
     .map { it->
+        // [0: sample_name, segment, 2: id, 3: fasta, 4: path('*.{bam,bam.bai}'), 5:depths]
         return [it[0], it[1], it[2], it[3], it[4], it[5]]
     }. set {ch_medaka}
     MEDAKA(ch_medaka)
@@ -204,14 +206,15 @@ workflow NANOPORE {
 
     VCF_FILTER_FRAMESHIFT(BCF_FILTER.out.vcf)
 
-    COVERAGE_PLOT (VCF_FILTER_FRAMESHIFT.out.vcf)
+    COVERAGE_PLOT (VCF_FILTER_FRAMESHIFT.out.vcf, params.low_coverage)
 
     VCF_FILTER_FRAMESHIFT.out.vcf
     .map { it ->
-        return [it[0], it[1], it[2], it[3], it[5]]
+        //[0: sample_name, 1: segment, 2: id, 3: fasta, 4: depths, 5: filt_vcf]
+        return [it[0], it[1], it[2], it[3], it[5]] // no need 4: depths
     }
-    .combine(MOSDEPTH_GENOME.out.bedgz, by: [0, 1, 2])
-    .set { ch_bcf_consensus }
+    .combine(MOSDEPTH_GENOME.out.bedgz, by: [0, 1, 2]) // combine channels based on sample_name, segment and acession_id
+    .set { ch_bcf_consensus } //[sample_name, segment, id, fasta, filt_vcf, mosdepth_per_base]
 
     // Generate consensus sequences
     BCF_CONSENSUS(ch_bcf_consensus, params.low_coverage)
