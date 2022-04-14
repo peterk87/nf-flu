@@ -13,7 +13,7 @@ include { SUBTYPING_REPORT                                        } from '../mod
 include { COVERAGE_PLOT                                           } from '../modules/local/coverage_plot'
 include { VCF_FILTER_FRAMESHIFT                                   } from '../modules/local/vcf_filter_frameshift'
 include { MEDAKA                                                  } from '../modules/local/medaka'
-include { MAP                                                     } from '../modules/local/map'
+include { MINIMAP2                                                } from '../modules/local/minimap2'
 include { BCF_FILTER; BCF_CONSENSUS                               } from '../modules/local/bcftools'
 include { MOSDEPTH_GENOME                                         } from '../modules/local/mosdepth'
 include { CAT_FASTQ                                               } from '../modules/local/misc'
@@ -185,14 +185,14 @@ workflow NANOPORE {
     BLAST_BLASTDBCMD(ch_sample_segment, BLAST_MAKEBLASTDB_PARSEID.out.db)
 
     // Map reads againts segment reference sequences
-    MAP(BLAST_BLASTDBCMD.out.fasta)
-    ch_versions.mix(MAP.out.version)
+    MINIMAP2(BLAST_BLASTDBCMD.out.fasta)
+    ch_versions.mix(MINIMAP2.out.version)
 
-    MOSDEPTH_GENOME(MAP.out.alignment)
+    MOSDEPTH_GENOME(MINIMAP2.out.alignment)
     ch_versions.mix(MOSDEPTH_GENOME.out.version)
 
     // Variants calling
-    MAP.out.alignment
+    MINIMAP2.out.alignment
     .map { it->
         return [it[0], it[1], it[2], it[3], it[4], it[5]]
     }. set {ch_medaka}

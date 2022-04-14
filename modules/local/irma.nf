@@ -6,7 +6,7 @@ options        = initOptions(params.options)
 
 process IRMA {
   tag "$meta.id"
-  label 'process_medium'
+  label 'process_high'
   publishDir "${params.outdir}/irma/", 
              mode: params.publish_dir_mode
   publishDir "${params.outdir}/consensus/irma/",
@@ -26,11 +26,13 @@ process IRMA {
   output:
   tuple val(meta), path("${meta.id}/"), emit: irma
   tuple val(meta), path("${meta.id}.consensus.fasta"), optional: true, emit: consensus
+  path "*.irma.log", emit: log
   path "*.version.txt", emit: version
 
   script:
   def software = getSoftwareName(task.process)
   irma_config = "DEL_TYPE=\"NNN\"\nALIGN_PROG=\"BLAT\""
+  irma_log    = "${meta.id}.irma.log"
   """
   touch irma_config.sh
   echo 'SINGLE_LOCAL_PROC=${task.cpus}' >> irma_config.sh
@@ -45,7 +47,7 @@ process IRMA {
   if [ -d "${meta.id}/amended_consensus/" ]; then
     cat ${meta.id}/amended_consensus/*.fa > ${meta.id}.consensus.fasta
   fi
-
+  ln -s .command.log $irma_log
   set +e
   IRMA | head -n1 | sed -E 's/^Iter.*IRMA\\), v(\\S+) .*/\\1/' > ${software}.version.txt
   set -e

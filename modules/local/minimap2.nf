@@ -1,4 +1,4 @@
-process MAP{
+process MINIMAP2{
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
     label 'process_high'
     publishDir "${params.outdir}/mapping/$sample_name",
@@ -17,14 +17,16 @@ process MAP{
     output:
     tuple val(sample_name), val(segment), val(id), path(fasta), path('*.{bam,bam.bai}'),
     path(depths), path(flagstat), path(idxstats), path(stats), emit: alignment
+    path('*.minimap2.log'), emit: log
     path '*.version.txt'                 , emit: version
 
     script:
-    bam = "${sample_name}.Segment_${segment}.${id}.bam"
-    depths = "${sample_name}.Segment_${segment}.${id}.depths.tsv"
-    flagstat = "${sample_name}.Segment_${segment}.${id}.flagstat"
-    idxstats = "${sample_name}.Segment_${segment}.${id}.idxstats"
-    stats = "${sample_name}.Segment_${segment}.${id}.stats"
+    bam           = "${sample_name}.Segment_${segment}.${id}.bam"
+    depths        = "${sample_name}.Segment_${segment}.${id}.depths.tsv"
+    flagstat      = "${sample_name}.Segment_${segment}.${id}.flagstat"
+    idxstats      = "${sample_name}.Segment_${segment}.${id}.idxstats"
+    stats         = "${sample_name}.Segment_${segment}.${id}.stats"
+    mapping_log   = "${sample_name}.Segment_${segment}.${id}.minimap2.log"
     """
     minimap2 \\
         -ax map-ont \\
@@ -38,6 +40,7 @@ process MAP{
     samtools flagstat $bam > $flagstat
     samtools idxstats $bam > $idxstats
     samtools depth -a -d 0 $bam > $depths
+    ln -s .command.log $mapping_log
     echo \$(minimap2 --version 2>&1) > minimap2.version.txt
     """
 }

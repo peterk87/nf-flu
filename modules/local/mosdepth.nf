@@ -2,7 +2,7 @@ include { getSoftwareName } from './functions'
 
 process MOSDEPTH_GENOME {
   tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
-  label 'process_medium'
+  label 'process_low'
   publishDir "${params.outdir}/mosdepth/$sample_name",
          mode: params.publish_dir_mode
 

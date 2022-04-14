@@ -1,6 +1,6 @@
 process VCF_FILTER_FRAMESHIFT{
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
-    label 'process_medium'
+    label 'process_low'
     publishDir "${params.outdir}/variants/$sample_name",
         pattern: "*.vcf",
            mode: params.publish_dir_mode
