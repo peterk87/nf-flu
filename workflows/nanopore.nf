@@ -65,7 +65,6 @@ workflow NANOPORE {
             .sample_info
             .join(ch_fastq_dirs, remainder: true)
             .set { ch_fastq_dirs }
-            ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
             //
             // MODULE: Create custom content file for MultiQC to report barcodes were allocated reads >= params.min_barcode_reads but no sample name in samplesheet
@@ -161,9 +160,11 @@ workflow NANOPORE {
 
     // IRMA to generate amended consensus sequences
     IRMA(CAT_FASTQ.out.reads)
+    ch_versions.mix(IRMA.out.version)
 
     // Find the top map sequences against ncbi database
     BLAST_BLASTN(IRMA.out.consensus, BLAST_MAKEBLASTDB_NO_PARSEID.out.db)
+    ch_versions.mix(BLAST_BLASTN.out.version)
 
     //Generate suptype prediction report
     ch_blast = BLAST_BLASTN.out.txt.collect({ it[1] })
@@ -185,8 +186,10 @@ workflow NANOPORE {
 
     // Map reads againts segment reference sequences
     MAP(BLAST_BLASTDBCMD.out.fasta)
+    ch_versions.mix(MAP.out.version)
 
     MOSDEPTH_GENOME(MAP.out.alignment)
+    ch_versions.mix(MOSDEPTH_GENOME.out.version)
 
     // Variants calling
     MAP.out.alignment
@@ -194,8 +197,10 @@ workflow NANOPORE {
         return [it[0], it[1], it[2], it[3], it[4], it[5]]
     }. set {ch_medaka}
     MEDAKA(ch_medaka)
+    ch_versions.mix(MEDAKA.out.version)
 
     BCF_FILTER(MEDAKA.out.vcf, params.major_allele_fraction)
+    ch_versions = ch_versions.mix(BCF_FILTER.out.version)
 
     VCF_FILTER_FRAMESHIFT(BCF_FILTER.out.vcf)
 

@@ -1,3 +1,4 @@
+
 process BCF_CONSENSUS {
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
     label 'process_medium'
@@ -17,6 +18,7 @@ process BCF_CONSENSUS {
 
     output:
     tuple val(sample_name), val(segment), val(id), path(consensus), emit: vcf
+    path "*.version.txt", emit: version
 
     script:
     consensus = "${sample_name}.Segment_${segment}.${id}.consensus.fasta"
@@ -30,7 +32,8 @@ process BCF_CONSENSUS {
         -m low_cov.bed \\
         ${vcf}.gz > $consensus
     sed -i -E "s/^>(.*)/>$sequenceID/g" $consensus
-  """
+    echo \$(bcftools --version 2>&1) | sed 's/^.*bcftools //; s/ .*\$//' > bcftools.version.txt
+    """
 }
 
 process BCF_FILTER {
@@ -51,6 +54,7 @@ process BCF_FILTER {
     output:
     tuple val(sample_name), val(segment), val(id), path(fasta),
     path(depths), path(filt_vcf), emit: vcf
+    path "*.version.txt", emit: version
 
     script:
     filt_vcf = "${sample_name}.Segment_${segment}.${id}.filt.vcf"
@@ -67,5 +71,6 @@ process BCF_FILTER {
         norm.vcf \\
         -Ov \\
         -o $filt_vcf
+    echo \$(bcftools --version 2>&1) | sed 's/^.*bcftools //; s/ .*\$//' > bcftools.version.txt
     """
 }

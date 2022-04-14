@@ -18,7 +18,7 @@ process CAT_FASTQ {
     script:
     """
     fastqFile=\$(ls $reads | head -1)
-    if grep -q "gz" <<< "\$fastqFile"; then
+    if grep -q "fastq.gz" <<< "\$fastqFile"; then
         cat $reads/*.fastq.gz > ${meta.id}.fastq.gz
     else
         cat $reads/*.fastq | pigz -ck > ${meta.id}.fastq.gz

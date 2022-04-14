@@ -1,3 +1,5 @@
+include { getSoftwareName } from './functions'
+
 process MOSDEPTH_GENOME {
   tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
   label 'process_medium'
@@ -18,13 +20,16 @@ process MOSDEPTH_GENOME {
   tuple val(sample_name), val(segment), val(id), path("*.per-base.bed.gz"), emit: bedgz
   path "*.global.dist.txt", emit: mqc
   path "*.{txt,gz,csi,tsv}"
+  path '*.version.txt'                 , emit: version
 
   script:
+  def software = getSoftwareName(task.process)
   def prefix = "${sample_name}.Segment_${segment}.${id}"
   """
   mosdepth \\
       --fast-mode \\
       $prefix \\
       ${bam[0]}
+  echo \$(mosdepth --version 2>&1) | sed 's/^.*mosdepth //' > ${software}.version.txt
   """
 }
