@@ -18,7 +18,7 @@ process IRMA {
   
   output:
   tuple val(meta), path("${meta.id}/"), emit: irma
-  tuple val(meta), path("${meta.id}.consensus.fasta"), optional: true, emit: consensus
+  tuple val(meta), path("${meta.id}.irma.consensus.fasta"), optional: true, emit: consensus
   path "*.irma.log", emit: log
   path "*.version.txt", emit: version
 
@@ -38,7 +38,7 @@ process IRMA {
   IRMA $params.irma_module $reads $meta.id
   
   if [ -d "${meta.id}/amended_consensus/" ]; then
-    cat ${meta.id}/amended_consensus/*.fa > ${meta.id}.consensus.fasta
+    cat ${meta.id}/amended_consensus/*.fa > ${meta.id}.irma.consensus.fasta
   fi
   ln -s .command.log $irma_log
   set +e

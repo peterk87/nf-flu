@@ -19,7 +19,7 @@ process BCF_CONSENSUS {
     path "*.version.txt", emit: version
 
     script:
-    consensus    = "${sample_name}.Segment_${segment}.${id}.consensus.fasta"
+    consensus    = "${sample_name}.Segment_${segment}.${id}.bcftools.consensus.fasta"
     sequenceID   = "${sample_name}.Segment${segment}.${id}"
     """
     bgzip -c $vcf > ${vcf}.gz
