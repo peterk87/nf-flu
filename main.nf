@@ -39,7 +39,7 @@ if (params.platform == 'illumina'){
     include { NANOPORE } from './workflows/nanopore'
 }
 
-workflow AVIAN_INFLUENZA {
+workflow NF_FLU {
     if (params.platform == 'illumina'){
         ILLUMINA ()
     } else if (params.platform == 'nanopore') {
@@ -48,7 +48,7 @@ workflow AVIAN_INFLUENZA {
 }
 
 workflow {
-    AVIAN_INFLUENZA ()
+    NF_FLU ()
 }
 /* Introspection
  *

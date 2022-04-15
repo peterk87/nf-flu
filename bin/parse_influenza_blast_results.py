@@ -437,8 +437,8 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
             output_dest=excel_report,
         )
     else:
-        df_all_blast[['Sample', 'Sample Genome Segment Number', 'Reference NCBI Accession']].to_csv(
-            sample_name + ".csv", header=False, index=False)
+        df_all_blast[['Sample', 'Sample Genome Segment Number', 'Reference NCBI Accession', 'BLASTN Bitscore']].to_csv(
+            sample_name + ".csv", header=True, index=False)
 
 
 def get_col_widths(df, index=False):

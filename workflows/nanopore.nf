@@ -170,8 +170,9 @@ workflow NANOPORE {
     .set {ch_ref_accession_id}
 
 
-    ch_ref_accession_id.map {it[1]}.splitCsv(sep:",")
+    ch_ref_accession_id.map {it[1]}.splitCsv(header: false, sep:",")
     .map{ it ->
+        // 0: sample_name, 1: segment, 2: ref_ncbi_accession_id
         return [it[0],it[1],it[2]]
     }
     .combine(ch_aggregate_reads, by: 0)
