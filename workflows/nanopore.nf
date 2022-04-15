@@ -1,6 +1,7 @@
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NO_SAMPLE_NAME     } from '../modules/local/multiqc_tsv_from_list'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NO_BARCODES        } from '../modules/local/multiqc_tsv_from_list'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_BARCODE_COUNT      } from '../modules/local/multiqc_tsv_from_list'
+include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_BARCODE_COUNT_FAIL } from '../modules/local/multiqc_tsv_from_list'
+include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_BARCODE_COUNT_PASS } from '../modules/local/multiqc_tsv_from_list'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_GUPPYPLEX_COUNT    } from '../modules/local/multiqc_tsv_from_list'
 include { PREPARE_NCBI_ACCESSION_ID                               } from '../modules/local/prepare_ncbi_accession_id'
 include { IRMA                                                    } from '../modules/local/irma'
@@ -126,10 +127,16 @@ workflow NANOPORE {
         }
         .set { ch_pass_fail_barcode_count }
 
-    MULTIQC_TSV_BARCODE_COUNT (
+    MULTIQC_TSV_BARCODE_COUNT_FAIL (
         ch_pass_fail_barcode_count.fail.collect(),
         ['Sample', 'Barcode count'],
         'fail_barcode_count_samples'
+    )
+
+    MULTIQC_TSV_BARCODE_COUNT_PASS (
+        ch_pass_fail_barcode_count.pass.collect(),
+        ['Sample', 'Barcode count'],
+        'pass_barcode_count_samples'
     )
 
     // Re-arrange channels to have meta map of information for sample

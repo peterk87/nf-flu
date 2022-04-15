@@ -58,7 +58,7 @@ def depth_plot(ax,
     df0 = df.copy()
     zero_depth = (df0.depth == 0)
     df0.loc[zero_depth, 'depth'] = df.depth.max()
-    ax.set_title(f'Sample "{genome}", segment {segment} mapped to reference "{reference}"\n')
+    ax.set_title(f'Sample "{genome}" mapped to segment {segment} with reference ID "{reference}"\n')
     ax.set_ylabel('Depth')
     ax.set_xlabel('Position')
     ax.set_ylim(top=df.depth.max())
