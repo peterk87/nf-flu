@@ -35,15 +35,21 @@ process SUBTYPING_REPORT {
   output:
   path('iav-subtyping-report.xlsx'), emit: report
   path('parse_influenza_blast_results.log'), emit: log
+  path "versions.yml", emit: versions
 
   script:
   """
   parse_influenza_blast_results.py \\
    --threads ${task.cpus} \\
    --flu-metadata $genomeset \\
+   --top 3 \\
    --excel-report iav-subtyping-report.xlsx \\
    --pident-threshold $params.pident_threshold \\
    $blastn_results
   ln -s .command.log parse_influenza_blast_results.log
+  cat <<-END_VERSIONS > versions.yml
+  "${task.process}":
+     python: \$(python --version | sed 's/Python //g')
+  END_VERSIONS
   """
 }

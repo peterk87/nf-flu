@@ -19,7 +19,7 @@ process MEDAKA{
     output:
     tuple val(sample_name), val(segment), val(id), path(fasta), path(depths), path(vcf), emit: vcf
     path('*.medaka_variant.log'), emit: log
-    path '*.version.txt'                 , emit: version
+    path "versions.yml" , emit: versions
 
     script:
     def software  = getSoftwareName(task.process)
@@ -41,6 +41,9 @@ process MEDAKA{
         ${vcf} \\
         --dpsp
     ln -s .command.log $medaka_log
-    echo \$(medaka --version 2>&1) | sed 's/^.*medaka //' > ${software}.version.txt
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        medaka: \$(medaka --version 2>&1 | sed 's/^.*medaka //')
+    END_VERSIONS
     """
 }

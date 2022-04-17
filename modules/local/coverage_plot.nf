@@ -15,6 +15,7 @@ process COVERAGE_PLOT{
 
     output:
     path('*.pdf'), emit: coverage_plot
+    path "versions.yml", emit: versions
 
     script:
     plot_filename = "coverage_plot-${sample_name}-Segment_${segment}-${id}.pdf"
@@ -22,5 +23,9 @@ process COVERAGE_PLOT{
     """
     plot_coverage.py -d $depths -v $filt_vcf -o $plot_filename --low-coverage $low_coverage --sample-name $sample_name --segment $segment
     plot_coverage.py -d $depths -v $filt_vcf -o $log_scale_plot_filename --low-coverage $low_coverage --sample-name $sample_name --segment $segment --log-scale-y
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
     """
 }

@@ -16,6 +16,7 @@ process CAT_FASTQ {
 
     output:
     tuple val(meta), path("*.fastq.gz"), emit: reads
+    path "versions.yml" , emit: versions
 
     script:
     """
@@ -25,6 +26,10 @@ process CAT_FASTQ {
     else
         cat $reads/*.fastq | pigz -ck > ${meta.id}.fastq.gz
     fi
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        pigz: \$(pigz --version 2>&1 | sed 's/pigz //g' )
+    END_VERSIONS
     """
 }
 
@@ -44,14 +49,17 @@ process GUNZIP {
 
     output:
     path "$gunzip",       emit: gunzip
-    path "*.version.txt", emit: version
+    path "versions.yml" , emit: versions
 
     script:
     def software = getSoftwareName(task.process)
     gunzip       = archive.toString() - '.gz'
     """
     gunzip -f $archive
-    echo \$(gunzip --version 2>&1) | sed 's/^.*(gzip) //; s/ Copyright.*\$//' > ${software}.version.txt
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        gunzip: \$(echo \$(gunzip --version 2>&1) | sed 's/^.*(gzip) //; s/ Copyright.*\$//')
+    END_VERSIONS
     """
 }
 

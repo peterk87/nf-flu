@@ -10,15 +10,20 @@ process VCF_FILTER_FRAMESHIFT{
     }
 
     input:
-    tuple val(sample_name), val(segment), val(id), path(fasta), path(depths), path(bcf_filt_vcf)
+    tuple val(sample_name), val(segment), val(id), path(fasta), path(depths), path(vcf)
 
     output:
     tuple val(sample_name), val(segment), val(id), path(fasta),
-    path(depths), path(filt_vcf), emit: vcf
+    path(depths), path(filt_frameshift_vcf), emit: vcf
+    path "versions.yml", emit: versions
 
     script:
-    filt_vcf = "${sample_name}.Segment_${segment}.${id}.filt.vcf"
+    filt_frameshift_vcf = "${sample_name}.Segment_${segment}.${id}.filt_frameshift.vcf"
     """
-    vcf_filter_frameshift.py $bcf_filt_vcf $filt_vcf
+    vcf_filter_frameshift.py $vcf $filt_frameshift_vcf
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+       python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
     """
 }

@@ -16,7 +16,7 @@ process MINIMAP2{
     tuple val(sample_name), val(segment), val(id), path(fasta), path('*.{bam,bam.bai}'),
     path(depths), path(flagstat), path(idxstats), path(stats), emit: alignment
     path('*.minimap2.log'), emit: log
-    path '*.version.txt'                 , emit: version
+    path "versions.yml" , emit: versions
 
     script:
     bam           = "${sample_name}.Segment_${segment}.${id}.bam"
@@ -39,6 +39,10 @@ process MINIMAP2{
     samtools idxstats $bam > $idxstats
     samtools depth -a -d 0 $bam > $depths
     ln -s .command.log $mapping_log
-    echo \$(minimap2 --version 2>&1) > minimap2.version.txt
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        minimap2: \$(minimap2 --version 2>&1)
+        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+    END_VERSIONS
     """
 }

@@ -6,11 +6,11 @@ process BLAST_BLASTDBCMD{
     tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
     label 'process_low'
 
-    conda (params.enable_conda ? 'bioconda::blast=2.10.1' : null)
+    conda (params.enable_conda ? 'bioconda::blast=2.12.0' : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container 'https://depot.galaxyproject.org/singularity/blast:2.10.1--pl526he19e7b1_3'
+        container 'https://depot.galaxyproject.org/singularity/blast:2.12.0--pl5262h3289130_0'
     } else {
-        container 'quay.io/biocontainers/blast:2.10.1--pl526he19e7b1_3'
+        container 'quay.io/biocontainers/blast:2.12.0--pl5262h3289130_0'
     }
 
     input:
@@ -19,7 +19,7 @@ process BLAST_BLASTDBCMD{
 
     output:
     tuple val(sample_name), val(segment), val(id), path('*.fasta'), path(reads), emit: fasta
-    path '*.version.txt'            , emit: version
+    path "versions.yml"                  , emit: versions
 
     script:
     def software = getSoftwareName(task.process)
@@ -30,7 +30,10 @@ process BLAST_BLASTDBCMD{
         -db \$DB \\
         -entry $id\\
         -out ${prefix}.Segment_${segment}.${id}.reference.fasta
-    echo \$(blastn -version 2>&1) | sed 's/^.*blastn: //; s/ .*\$//' > ${software}.version.txt
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        blast: \$(blastn -version 2>&1 | sed 's/^.*blastn: //; s/ .*\$//')
+    END_VERSIONS
     """
 }
 /* Will use it in next release

@@ -15,8 +15,8 @@ process BCF_CONSENSUS {
     val(low_coverage)
 
     output:
-    tuple val(sample_name), val(segment), val(id), path(consensus), emit: vcf
-    path "*.version.txt", emit: version
+    tuple val(sample_name), val(segment), val(id), path(consensus), emit: fasta
+    path "versions.yml" , emit: versions
 
     script:
     consensus    = "${sample_name}.Segment_${segment}.${id}.bcftools.consensus.fasta"
@@ -30,7 +30,10 @@ process BCF_CONSENSUS {
         -m low_cov.bed \\
         ${vcf}.gz > $consensus
     sed -i -E "s/^>(.*)/>$sequenceID/g" $consensus
-    echo \$(bcftools --version 2>&1) | sed 's/^.*bcftools //; s/ .*\$//' > bcftools.version.txt
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
+    END_VERSIONS
     """
 }
 
@@ -51,11 +54,11 @@ process BCF_FILTER {
 
     output:
     tuple val(sample_name), val(segment), val(id), path(fasta),
-    path(depths), path(filt_vcf), emit: vcf
-    path "*.version.txt", emit: version
+    path(depths), path(bcftools_filt_vcf), emit: vcf
+    path "versions.yml" , emit: versions
 
     script:
-    filt_vcf = "${sample_name}.Segment_${segment}.${id}.filt.vcf"
+    bcftools_filt_vcf = "${sample_name}.Segment_${segment}.${id}.bcftools_filt.vcf"
     """
     bcftools norm \\
         -Ov \\
@@ -68,7 +71,10 @@ process BCF_FILTER {
         -e 'AF < $allele_fraction' \\
         norm.vcf \\
         -Ov \\
-        -o $filt_vcf
-    echo \$(bcftools --version 2>&1) | sed 's/^.*bcftools //; s/ .*\$//' > bcftools.version.txt
+        -o $bcftools_filt_vcf
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
+    END_VERSIONS
     """
 }

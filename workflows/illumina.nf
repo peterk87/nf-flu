@@ -19,6 +19,10 @@ include { BLAST_MAKEBLASTDB } from '../modules/nf-core/modules/blast/makeblastdb
 include { BLAST_BLASTN } from '../modules/nf-core/modules/blast/blastn/main' //addParams( options: modules['blast_blastn'] )
 include { CAT_FASTQ } from '../modules/nf-core/modules/cat/fastq/main' //addParams( options: modules['cat_fastq'] )
 
+def irma_module = 'FLU-utr'
+if (params.irma_module) {
+    irma_module = params.irma_module
+}
 
 workflow ILLUMINA {
 
@@ -65,7 +69,7 @@ workflow ILLUMINA {
     .mix(ch_input.single)
     .set { ch_cat_reads }
 
-  IRMA(ch_cat_reads)
+  IRMA(ch_cat_reads, irma_module)
 
   BLAST_BLASTN(IRMA.out.consensus, BLAST_MAKEBLASTDB.out.db)
 

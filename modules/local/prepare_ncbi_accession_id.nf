@@ -14,7 +14,8 @@ process PREPARE_NCBI_ACCESSION_ID {
     path(genomeset)
 
     output:
-    tuple val(meta), path("${meta.id}.csv"), optional: true, emit: accession_id
+    tuple val(meta), path("*.csv"), optional: true, emit: accession_id
+    path "versions.yml"                  , emit: versions
 
     script:
     """
@@ -26,5 +27,10 @@ process PREPARE_NCBI_ACCESSION_ID {
     --pident-threshold $params.pident_threshold \\
     --sample-name ${meta.id} \\
     $blastn_results
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+       python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
     """
 }

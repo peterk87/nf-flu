@@ -18,7 +18,7 @@ process MOSDEPTH_GENOME {
   tuple val(sample_name), val(segment), val(id), path("*.per-base.bed.gz"), emit: bedgz
   path "*.global.dist.txt", emit: mqc
   path "*.{txt,gz,csi,tsv}"
-  path '*.version.txt'                 , emit: version
+  path  "versions.yml"                          , emit: versions
 
   script:
   def software = getSoftwareName(task.process)
@@ -28,6 +28,9 @@ process MOSDEPTH_GENOME {
       --fast-mode \\
       $prefix \\
       ${bam[0]}
-  echo \$(mosdepth --version 2>&1) | sed 's/^.*mosdepth //' > ${software}.version.txt
+  cat <<-END_VERSIONS > versions.yml
+  "${task.process}":
+     mosdepth: \$(mosdepth --version 2>&1 | sed 's/^.*mosdepth //; s/ .*\$//')
+  END_VERSIONS
   """
 }

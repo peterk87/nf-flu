@@ -17,6 +17,6 @@ process CHECK_SAMPLE_SHEET {
 
   script:
   """
-  check_sample_sheet.py $samplesheet samplesheet.fixed.csv
+  check_sample_sheet.py $samplesheet ${params.platform} samplesheet.fixed.csv
   """
 }
