@@ -10,7 +10,9 @@ include { MEDAKA                                                  } from '../mod
 include { MINIMAP2                                                } from '../modules/local/minimap2'
 include { BCF_FILTER; BCF_CONSENSUS                               } from '../modules/local/bcftools'
 include { MOSDEPTH_GENOME                                         } from '../modules/local/mosdepth'
-include { CAT_FASTQ; GUNZIP as GUNZIP_FLU_FASTA                   } from '../modules/local/misc'
+include { CAT_FASTQ;
+          GUNZIP as GUNZIP_FLU_FASTA;
+          REC2FASTA        } from '../modules/local/misc'
 include { BLAST_BLASTDBCMD                                        } from '../modules/local/pull_references'
 include { CHECK_SAMPLE_SHEET                                      } from '../modules/local/check_sample_sheet'
 
@@ -31,6 +33,7 @@ if (params.irma_module) {
 
 workflow NANOPORE {
     ch_versions = Channel.empty()
+    ch_input_ref = Channel.empty()
 
     Channel.fromPath(params.input, checkIfExists: true)
     | CHECK_SAMPLE_SHEET
@@ -77,7 +80,6 @@ workflow NANOPORE {
     | map { sample, dir, count -> [ [ id: sample], dir ] }
     | set { ch_fastq_dirs }
 
-
     GUNZIP_FLU_FASTA(ch_influenza_db_fasta)
 
     BLAST_MAKEBLASTDB_NO_PARSEID(GUNZIP_FLU_FASTA.out.gunzip)
@@ -92,6 +94,24 @@ workflow NANOPORE {
         return [it[0].id, it[1]]
     }
     | set {ch_aggregate_reads}
+
+    if (params.ref_sequences){
+        //ref_sequences in format: ref_id, segment_no, ref_fasta
+        Channel.fromPath(params.ref_sequences, checkIfExists: true) \
+        | splitCsv(header: false) \
+        | map { it ->
+            // 0: ref ID, 1: segment, 2: path ref_fasta
+            return [it[0], it[1], it[2]]
+        } \
+        | combine (ch_aggregate_reads) \
+        | set {ch_input_ref_combine }
+
+        ch_input_ref_combine
+        | map { it ->
+            // get [sample, segment, ref_id, ref_fasta, reads]
+            return [it[3], it[1], it[0], it[2], it[4]]
+        } | set { ch_input_ref }
+    }
 
     //ch_aggregate_reads.view()
 
@@ -122,8 +142,9 @@ workflow NANOPORE {
     //Pull segment reference sequence for each sample
     BLAST_BLASTDBCMD(ch_sample_segment, BLAST_MAKEBLASTDB_PARSEID.out.db)
 
-    // Map reads againts segment reference sequences
-    MINIMAP2(BLAST_BLASTDBCMD.out.fasta)
+    // Map reads against segment reference sequences
+    ch_mapping = BLAST_BLASTDBCMD.out.fasta.concat(ch_input_ref)
+    MINIMAP2(ch_mapping)
     //ch_versions.mix(MINIMAP2.out.version)
 
     MOSDEPTH_GENOME(MINIMAP2.out.alignment)

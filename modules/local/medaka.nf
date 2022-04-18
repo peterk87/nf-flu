@@ -27,7 +27,6 @@ process MEDAKA{
     medaka_log    = "${sample_name}.Segment_${segment}.${id}.medaka_variant.log"
     """
     medaka_variant \\
-        -d \\
         -o medaka_variant \\
         -t ${task.cpus} \\
         -f $fasta \\

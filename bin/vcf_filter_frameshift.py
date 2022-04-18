@@ -62,16 +62,19 @@ def main(input_vcf: Path = typer.Argument(None, help='VCF file to filter'),
     header, df = read_vcf(input_vcf if input_vcf else sys.stdin)
     # writer = vcfpy.Writer.from_stream(output_vcf, reader.header) if isinstance(output_vcf, TextIOWrapper) else vcfpy.Writer.from_path(output_vcf, reader.header)
     # for idx, rec in reader.iterrows():
-    potential_frameshift_mask = df.apply(lambda x:  (len(x.ALT) - len(x.REF)) % 3 == 0, axis=1)
-    df_filtered = df[potential_frameshift_mask]
+    if (len(df)): # variant founds
+        potential_frameshift_mask = df.apply(lambda x:  (len(x.ALT) - len(x.REF)) % 3 == 0, axis=1)
+        df_filtered = df[potential_frameshift_mask]
 
-    # log any potential frameshift variants that are going to be filtered out in output VCF
-    if (~potential_frameshift_mask).any():
-        #log.info(f'{(~potential_frameshift_mask).sum()} frameshift variants filtered out')
-        for _, row in df[~potential_frameshift_mask].iterrows():
-            print(row)
+        # log any potential frameshift variants that are going to be filtered out in output VCF
+        if (~potential_frameshift_mask).any():
+            #log.info(f'{(~potential_frameshift_mask).sum()} frameshift variants filtered out')
+            for _, row in df[~potential_frameshift_mask].iterrows():
+                print(row)
 
-    write_vcf(output_vcf if output_vcf else sys.stdout, header, df_filtered)
+        write_vcf(output_vcf if output_vcf else sys.stdout, header, df_filtered)
+    else: # no variants found
+        write_vcf(output_vcf if output_vcf else sys.stdout, header, df)
 
 
 if __name__ == '__main__':

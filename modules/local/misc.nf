@@ -63,3 +63,31 @@ process GUNZIP {
     """
 }
 
+process REC2FASTA {
+
+  tag "${record.id} - ${record.sequence.size()}"
+
+  conda (params.enable_conda ? "conda-forge::pigz=2.6" : null)
+  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+      container "https://depot.galaxyproject.org/singularity/mulled-v2-2b04072095278721dc9a5772e61e406f399b6030:7c7abf911e92d7fb831611ffb965f3cf7fe2c01d-0"
+  } else {
+      container "quay.io/biocontainers/mulled-v2-2b04072095278721dc9a5772e61e406f399b6030:7c7abf911e92d7fb831611ffb965f3cf7fe2c01d-0"
+  }
+
+  input:
+    val(record)
+  output:
+    tuple val(recordID), path(fasta), emit: fasta
+
+  script:
+  recordID = "${record.id}"
+  fasta = "${record.id}.fasta"
+  """
+  cat > $fasta << EOF
+>${record.id}
+${record.sequence}
+EOF
+  """
+}
+
+

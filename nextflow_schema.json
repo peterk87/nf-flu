@@ -25,6 +25,12 @@
                         "nanopore"
                     ]
                 },
+                "ref_sequences": {
+                    "type": "string",
+                    "fa_icon": "fas fa-hdd",
+                    "description": "Provide the list known or interesting reference sequences.",
+                    "default": ""
+                },
                 "outdir": {
                     "type": "string",
                     "description": "The output directory where the results will be saved.",

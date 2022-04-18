@@ -20,7 +20,7 @@ process BCF_CONSENSUS {
 
     script:
     consensus    = "${sample_name}.Segment_${segment}.${id}.bcftools.consensus.fasta"
-    sequenceID   = "${sample_name}.Segment${segment}.${id}"
+    sequenceID   = "${sample_name}.Segment_${segment}.${id}"
     """
     bgzip -c $vcf > ${vcf}.gz
     tabix ${vcf}.gz
