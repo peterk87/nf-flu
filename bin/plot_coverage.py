@@ -105,22 +105,23 @@ def main(depths_file,
         df_vcf = parse_vcf(vcf_file)
         print(df_vcf)
     fig, ax = plt.subplots(1, figsize=(width, height))
-    if log_scale_y:
-        from matplotlib.ticker import ScalarFormatter
-        ax.set_yscale('log', nonpositive='clip')
-        formatter = ScalarFormatter()
-        formatter.set_scientific(False)
-        ax.yaxis.set_major_formatter(formatter)
-    bottom_desc = depth_plot(ax,
-                             df,
-                             low=low_coverage,
-                             sample_name=sample_name,
-                             segment=segment,
-                             highlight_low_cov=highlight_low_no_cov_regions,
-                             highlight_no_cov=highlight_low_no_cov_regions)
-    # add coverage stats description below plot
-    fig.text(0.1, -0.15, bottom_desc, fontsize='small')
-    print(bottom_desc)
+    if len(df):
+        if log_scale_y:
+            from matplotlib.ticker import ScalarFormatter
+            ax.set_yscale('log', nonpositive='clip')
+            formatter = ScalarFormatter()
+            formatter.set_scientific(False)
+            ax.yaxis.set_major_formatter(formatter)
+        bottom_desc = depth_plot(ax,
+                                 df,
+                                 low=low_coverage,
+                                 sample_name=sample_name,
+                                 segment=segment,
+                                 highlight_low_cov=highlight_low_no_cov_regions,
+                                 highlight_no_cov=highlight_low_no_cov_regions)
+        # add coverage stats description below plot
+        fig.text(0.1, -0.15, bottom_desc, fontsize='small')
+        print(bottom_desc)
     if df_vcf is not None:
         df = df.set_index('pos')
         for idx, row in df_vcf.iterrows():
@@ -131,6 +132,8 @@ def main(depths_file,
                     depth,
                     f'{row.REF}{row.POS}{row.ALT}\nDP={depth}',
                     fontsize='xx-small')
+    if len(df) == 0:
+        ax.set_title(f'No mapping (Empty Plot)\n')
     fig.savefig(output_pdf, bbox_inches='tight')
 
 
