@@ -9,6 +9,7 @@ include { VCF_FILTER_FRAMESHIFT                                   } from '../mod
 include { MEDAKA                                                  } from '../modules/local/medaka'
 include { MINIMAP2                                                } from '../modules/local/minimap2'
 include { BCF_FILTER; BCF_CONSENSUS                               } from '../modules/local/bcftools'
+include { CLAIR3                                                  } from '../modules/local/clair3'
 include { MOSDEPTH_GENOME                                         } from '../modules/local/mosdepth'
 include { CAT_FASTQ;
           GUNZIP as GUNZIP_FLU_FASTA;
@@ -155,8 +156,13 @@ workflow NANOPORE {
     | map { it->
         // [0: sample_name, segment, 2: id, 3: fasta, 4: path('*.{bam,bam.bai}'), 5:depths]
         return [it[0], it[1], it[2], it[3], it[4], it[5]]
-    } | set {ch_medaka}
-    MEDAKA(ch_medaka)
+    } | set {ch_variant_calling}
+
+    if (!params.skip_clair3){
+        CLAIR3(ch_variant_calling)
+    }
+
+    MEDAKA(ch_variant_calling)
     //ch_versions.mix(MEDAKA.out.version)
 
     BCF_FILTER(MEDAKA.out.vcf, params.major_allele_fraction)

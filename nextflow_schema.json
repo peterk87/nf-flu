@@ -59,6 +59,12 @@
                     "default": "r941_prom_hac_snp_g507",
                     "fa_icon": "fas fa-dna"
                 },
+                "clair3_variant_model": {
+                    "type": "string",
+                    "description": "[Clair3](https://github.com/HKU-BAL/Clair3) Clair3 variant model",
+                    "default": "r941_prom_hac_g360+g422",
+                    "fa_icon": "fas fa-dna"
+                },
                 "minor_allele_fraction": {
                     "type": "number",
                     "minimum": 0,
@@ -144,8 +150,15 @@
             "properties": {
                 "skip_mosdepth": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip genome-wide and amplicon coverage plot generation from mosdepth output."
+                },
+                "skip_clair3": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "default": true,
+                    "description": "Skip variant calling from Clair3."
                 }
             },
             "fa_icon": "fas fa-retweet"
