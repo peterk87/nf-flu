@@ -1,6 +1,8 @@
+// Import generic module functions
+include { getSoftwareName } from './functions';
 
 process BCF_CONSENSUS {
-    tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
+    tag "$sample_name - Segment:$segment - Ref ID:$id"
     label 'process_medium'
 
     conda (params.enable_conda ? 'bioconda::bcftools=1.15.1' : null)
@@ -38,7 +40,7 @@ process BCF_CONSENSUS {
 }
 
 process BCF_FILTER {
-    tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
+    tag "$sample_name - Segment:$segment - Ref ID:$id"
     label 'process_medium'
 
     conda (params.enable_conda ? 'bioconda::bcftools=1.15.1' : null)
@@ -59,6 +61,12 @@ process BCF_FILTER {
 
     script:
     bcftools_filt_vcf = "${sample_name}.Segment_${segment}.${id}.bcftools_filt.vcf"
+    def exclude
+    if (params.skip_clair3){
+        exclude = "AF < $allele_fraction"
+    }else{
+        exclude = "%FILTER='RefCall' | AF < $allele_fraction"
+    }
     """
     bcftools norm \\
         -Ov \\
@@ -68,7 +76,7 @@ process BCF_FILTER {
         > norm.vcf
     # filter for major alleles
     bcftools filter \\
-        -e 'AF < $allele_fraction' \\
+        -e "$exclude" \\
         norm.vcf \\
         -Ov \\
         -o $bcftools_filt_vcf

@@ -1,5 +1,5 @@
 process MINIMAP2{
-    tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
+    tag "$sample_name - Segment:$segment - Ref ID:$id"
     label 'process_high'
 
     conda (params.enable_conda ? 'bioconda::minimap2=2.24 bioconda::samtools=1.15' : null)

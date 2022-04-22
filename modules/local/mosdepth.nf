@@ -1,7 +1,7 @@
 include { getSoftwareName } from './functions'
 
 process MOSDEPTH_GENOME {
-  tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
+  tag "$sample_name - Segment:$segment - Ref ID:$id"
   label 'process_low'
 
   conda (params.enable_conda ? 'bioconda::mosdepth=0.3.3' : null)

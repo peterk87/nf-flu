@@ -8,7 +8,9 @@ include { COVERAGE_PLOT                                           } from '../mod
 include { VCF_FILTER_FRAMESHIFT                                   } from '../modules/local/vcf_filter_frameshift'
 include { MEDAKA                                                  } from '../modules/local/medaka'
 include { MINIMAP2                                                } from '../modules/local/minimap2'
-include { BCF_FILTER; BCF_CONSENSUS                               } from '../modules/local/bcftools'
+include { BCF_FILTER as BCF_FILTER_CLAIR3;
+          BCF_FILTER as BCF_FILTER_MEDAKA;
+          BCF_CONSENSUS                               } from '../modules/local/bcftools'
 include { CLAIR3                                                  } from '../modules/local/clair3'
 include { MOSDEPTH_GENOME                                         } from '../modules/local/mosdepth'
 include { CAT_FASTQ;
@@ -160,15 +162,15 @@ workflow NANOPORE {
 
     if (!params.skip_clair3){
         CLAIR3(ch_variant_calling)
+        BCF_FILTER_CLAIR3(CLAIR3.out.vcf, params.major_allele_fraction)
+        ch_vcf_filter = BCF_FILTER_CLAIR3.out.vcf
+    } else {
+        MEDAKA(ch_variant_calling)
+        BCF_FILTER_MEDAKA(MEDAKA.out.vcf, params.major_allele_fraction)
+        ch_vcf_filter = BCF_FILTER_MEDAKA.out.vcf
     }
 
-    MEDAKA(ch_variant_calling)
-    //ch_versions.mix(MEDAKA.out.version)
-
-    BCF_FILTER(MEDAKA.out.vcf, params.major_allele_fraction)
-    //ch_versions = ch_versions.mix(BCF_FILTER.out.version)
-
-    VCF_FILTER_FRAMESHIFT(BCF_FILTER.out.vcf)
+    VCF_FILTER_FRAMESHIFT(ch_vcf_filter)
 
     COVERAGE_PLOT (VCF_FILTER_FRAMESHIFT.out.vcf, params.low_coverage)
 
@@ -182,5 +184,4 @@ workflow NANOPORE {
 
     // Generate consensus sequences
     BCF_CONSENSUS(ch_bcf_consensus, params.low_coverage)
-
 }

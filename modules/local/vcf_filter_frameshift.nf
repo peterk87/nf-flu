@@ -1,5 +1,5 @@
 process VCF_FILTER_FRAMESHIFT{
-    tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
+    tag "$sample_name - Segment:$segment - Ref ID:$id"
     label 'process_low'
 
     conda (params.enable_conda ? 'conda-forge::python=3.9 conda-forge::biopython=1.78 conda-forge::openpyxl=3.0.7 conda-forge::matplotlib=3.5.1 conda-forge::pandas=1.2.4 conda-forge::rich=10.2.2 conda-forge::typer=0.3.2 conda-forge::xlsxwriter=1.4.3' : null)

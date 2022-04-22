@@ -3,7 +3,7 @@ include { getSoftwareName } from './functions'
 
 
 process BLAST_BLASTDBCMD{
-    tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
+    tag "$sample_name - Segment:$segment - Ref ID:$id"
     label 'process_low'
 
     conda (params.enable_conda ? 'bioconda::blast=2.12.0' : null)

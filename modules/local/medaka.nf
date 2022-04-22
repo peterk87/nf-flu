@@ -2,7 +2,7 @@
 include { getSoftwareName } from './functions'
 
 process MEDAKA{
-    tag "$sample_name - Segment:$segment - Ref Accession ID:$id"
+    tag "$sample_name - Segment:$segment - Ref ID:$id"
     label 'process_low'
 
     conda (params.enable_conda ? 'bioconda::medaka=1.4.4' : null)
