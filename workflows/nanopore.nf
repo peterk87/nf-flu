@@ -3,25 +3,29 @@ include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_BARCODE_COUNT_FAIL } from '../mod
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_BARCODE_COUNT_PASS } from '../modules/local/multiqc_tsv_from_list'
 include { PREPARE_NCBI_ACCESSION_ID                               } from '../modules/local/prepare_ncbi_accession_id'
 include { IRMA                                                    } from '../modules/local/irma'
-include { SUBTYPING_REPORT                                        } from '../modules/local/subtyping_report'
+include { SUBTYPING_REPORT  as  SUBTYPING_REPORT_IRMA_CONSENSUS;
+          SUBTYPING_REPORT  as  SUBTYPING_REPORT_BCF_CONSENSUS    } from '../modules/local/subtyping_report'
 include { COVERAGE_PLOT                                           } from '../modules/local/coverage_plot'
 include { VCF_FILTER_FRAMESHIFT                                   } from '../modules/local/vcf_filter_frameshift'
 include { MEDAKA                                                  } from '../modules/local/medaka'
 include { MINIMAP2                                                } from '../modules/local/minimap2'
 include { BCF_FILTER as BCF_FILTER_CLAIR3;
           BCF_FILTER as BCF_FILTER_MEDAKA;
-          BCF_CONSENSUS                               } from '../modules/local/bcftools'
+          BCF_CONSENSUS                                           } from '../modules/local/bcftools'
 include { CLAIR3                                                  } from '../modules/local/clair3'
 include { MOSDEPTH_GENOME                                         } from '../modules/local/mosdepth'
 include { CAT_FASTQ;
           GUNZIP as GUNZIP_FLU_FASTA;
-          REC2FASTA        } from '../modules/local/misc'
+          CAT_DB; CAT_CONSENSUS                                   } from '../modules/local/misc'
 include { BLAST_BLASTDBCMD                                        } from '../modules/local/pull_references'
 include { CHECK_SAMPLE_SHEET                                      } from '../modules/local/check_sample_sheet'
+include { REF_FASTA_CHECK                                         } from '../modules/local/ref_fasta_check'
 
-include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NO_PARSEID       } from '../modules/nf-core/modules/blast/makeblastdb/main' //addParams( options: modules['blastn_makeblastdb'] )
-include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_PARSEID          } from '../modules/nf-core/modules/blast/makeblastdb/main' //addParams( options: modules['blastn_makeblastdb_parseid'] )
-include { BLAST_BLASTN                                            } from '../modules/nf-core/modules/blast/blastn/main'      //addParams( options: modules['blast_blastn'] )
+include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI_NO_PARSEID  } from '../modules/nf-core/modules/blast/makeblastdb/main'
+include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_REFDB            } from '../modules/nf-core/modules/blast/makeblastdb/main'
+include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI_PARSEID     } from '../modules/nf-core/modules/blast/makeblastdb/main'
+include { BLAST_BLASTN as BLAST_BLASTN_NCBI                       } from '../modules/nf-core/modules/blast/blastn/main'
+include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS                  } from '../modules/nf-core/modules/blast/blastn/main'
 
 if (params.input) { ch_input= file(params.input) }
 
@@ -85,10 +89,20 @@ workflow NANOPORE {
 
     GUNZIP_FLU_FASTA(ch_influenza_db_fasta)
 
-    BLAST_MAKEBLASTDB_NO_PARSEID(GUNZIP_FLU_FASTA.out.gunzip)
+    ch_input_ref_db = GUNZIP_FLU_FASTA.out.gunzip
+
+    if (params.ref_db){
+        ref_fasta_file = file(params.ref_db, type: 'file')
+        REF_FASTA_CHECK(ref_fasta_file)
+        CAT_DB(GUNZIP_FLU_FASTA.out.gunzip, REF_FASTA_CHECK.out.fasta)
+        ch_input_ref_db = CAT_DB.out.fasta
+        //BLAST_MAKEBLASTDB_REFDB(REF_FASTA_CHECK.out.fasta)
+    }
+
+    BLAST_MAKEBLASTDB_NCBI_NO_PARSEID(ch_input_ref_db)
 
     // Make another blast db with parse_id option for pulling reference based on Accession ID
-    BLAST_MAKEBLASTDB_PARSEID(GUNZIP_FLU_FASTA.out.gunzip)
+    BLAST_MAKEBLASTDB_NCBI_PARSEID(ch_input_ref_db)
 
     CAT_FASTQ(ch_fastq_dirs)
 
@@ -116,22 +130,21 @@ workflow NANOPORE {
         } | set { ch_input_ref }
     }
 
-    //ch_aggregate_reads.view()
-
     // IRMA to generate amended consensus sequences
     IRMA(CAT_FASTQ.out.reads, irma_module)
     //ch_versions.mix(IRMA.out.version)
-
     // Find the top map sequences against ncbi database
-    BLAST_BLASTN(IRMA.out.consensus, BLAST_MAKEBLASTDB_NO_PARSEID.out.db)
+    BLAST_BLASTN_NCBI(IRMA.out.consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
     //ch_versions.mix(BLAST_BLASTN.out.versions)
 
     //Generate suptype prediction report
-    ch_blast = BLAST_BLASTN.out.txt.collect({ it[1] })
-    SUBTYPING_REPORT(ch_influenza_metadata, ch_blast)
+    /* Does not need for now
+    ch_blast = BLAST_BLASTN_NCBI.out.txt.collect({ it[1] })
+    SUBTYPING_REPORT_IRMA_CONSENSUS(ch_influenza_metadata, ch_blast)
+    */
 
     // Prepare top ncbi accession id for each segment of each sample sample (id which has top bitscore)
-    PREPARE_NCBI_ACCESSION_ID(BLAST_BLASTN.out.txt, ch_influenza_metadata)
+    PREPARE_NCBI_ACCESSION_ID(BLAST_BLASTN_NCBI.out.txt, ch_influenza_metadata)
 
     PREPARE_NCBI_ACCESSION_ID.out.accession_id
     | map {it[1]} | splitCsv(header: false, sep:",")
@@ -143,7 +156,7 @@ workflow NANOPORE {
     | set {ch_sample_segment} // ch_sample_segment: [sample_name, segment, id, reads]
 
     //Pull segment reference sequence for each sample
-    BLAST_BLASTDBCMD(ch_sample_segment, BLAST_MAKEBLASTDB_PARSEID.out.db)
+    BLAST_BLASTDBCMD(ch_sample_segment, BLAST_MAKEBLASTDB_NCBI_PARSEID.out.db)
 
     // Map reads against segment reference sequences
     ch_mapping = BLAST_BLASTDBCMD.out.fasta.concat(ch_input_ref)
@@ -184,4 +197,17 @@ workflow NANOPORE {
 
     // Generate consensus sequences
     BCF_CONSENSUS(ch_bcf_consensus, params.low_coverage)
+    BCF_CONSENSUS.out.fasta
+    | groupTuple(by: 0)
+    | set { ch_final_consensus }
+
+    CAT_CONSENSUS(ch_final_consensus)
+    CAT_CONSENSUS.out.fasta
+    | map {it ->
+        return [[id:it[0]], it[1]]
+    }
+    | set { ch_blatn_consensus }
+    BLAST_BLASTN_CONSENSUS(ch_blatn_consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
+    ch_blast_consensus = BLAST_BLASTN_CONSENSUS.out.txt.collect({ it[1] })
+    SUBTYPING_REPORT_BCF_CONSENSUS(ch_influenza_metadata, ch_blast_consensus)
 }

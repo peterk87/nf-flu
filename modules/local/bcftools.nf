@@ -17,12 +17,12 @@ process BCF_CONSENSUS {
     val(low_coverage)
 
     output:
-    tuple val(sample_name), val(segment), val(id), path(consensus), emit: fasta
+    tuple val(sample_name), path(consensus), emit: fasta
     path "versions.yml" , emit: versions
 
     script:
     consensus    = "${sample_name}.Segment_${segment}.${id}.bcftools.consensus.fasta"
-    sequenceID   = "${sample_name}.Segment_${segment}.${id}"
+    sequenceID   = "${sample_name}_${segment}"
     """
     bgzip -c $vcf > ${vcf}.gz
     tabix ${vcf}.gz

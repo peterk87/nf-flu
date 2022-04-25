@@ -23,6 +23,18 @@ from rich.logging import RichHandler
 LOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s [in %(filename)s:%(lineno)d]"
 logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
 
+influenza_segment = {
+    1: "1_PB2",
+    2: "2_PB1",
+    3: "3_PA",
+    4: "4_HA",
+    5: "5_NP",
+    6: "6_NA",
+    7: "7_M",
+    8: "8_NS",
+}
+
+
 # Column names/types/final report names
 blast_cols = [
     ("qaccver", "category"),
@@ -437,8 +449,14 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
             output_dest=excel_report,
         )
     else:
-        df_all_blast[['Sample', 'Sample Genome Segment Number', 'Reference NCBI Accession', 'BLASTN Bitscore']].to_csv(
-            sample_name + ".topsegments.csv", header=True, index=False)
+        df_ref_id = df_all_blast[
+            ['Sample', 'Sample Genome Segment Number', 'Reference NCBI Accession', 'BLASTN Bitscore',
+             'Reference Sequence ID']]
+        df_ref_id.loc[df_ref_id['Reference NCBI Accession'].isna(),'Reference NCBI Accession'] = df_ref_id['Reference Sequence ID']
+        df_ref_id['Reference NCBI Accession'] = df_ref_id['Reference NCBI Accession'].str.strip()
+        df_ref_id['Sample Genome Segment Number'] = df_ref_id['Sample Genome Segment Number'].\
+            apply(lambda x: influenza_segment[int(x)])
+        df_ref_id.to_csv(sample_name + ".topsegments.csv", header=True, index=False)
 
 
 def get_col_widths(df, index=False):

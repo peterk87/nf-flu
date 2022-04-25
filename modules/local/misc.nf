@@ -33,6 +33,30 @@ process CAT_FASTQ {
     """
 }
 
+process CAT_DB {
+    tag "$fasta1 - $fasta2"
+    label 'process_low'
+
+    conda (params.enable_conda ? "conda-forge::pigz=2.6" : null)
+    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+        container "https://depot.galaxyproject.org/singularity/mulled-v2-2b04072095278721dc9a5772e61e406f399b6030:7c7abf911e92d7fb831611ffb965f3cf7fe2c01d-0"
+    } else {
+        container "quay.io/biocontainers/mulled-v2-2b04072095278721dc9a5772e61e406f399b6030:7c7abf911e92d7fb831611ffb965f3cf7fe2c01d-0"
+    }
+
+    input:
+    path(fasta1)
+    path(fasta2)
+
+    output:
+    path("*.fasta"), emit: fasta
+
+    script:
+    """
+        cat $fasta1 $fasta2 > influenza_db.fasta
+    """
+}
+
 process GUNZIP {
     tag "$archive"
     label 'process_low'
@@ -63,31 +87,26 @@ process GUNZIP {
     """
 }
 
-process REC2FASTA {
-
-  tag "${record.id} - ${record.sequence.size()}"
-
-  conda (params.enable_conda ? "conda-forge::pigz=2.6" : null)
+process CAT_CONSENSUS {
+  tag "$sample_name"
+  conda (params.enable_conda ? 'bioconda::shiptv=0.4.0' : null)
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-      container "https://depot.galaxyproject.org/singularity/mulled-v2-2b04072095278721dc9a5772e61e406f399b6030:7c7abf911e92d7fb831611ffb965f3cf7fe2c01d-0"
+    container 'https://depot.galaxyproject.org/singularity/shiptv:0.4.0--pyh5e36f6f_0'
   } else {
-      container "quay.io/biocontainers/mulled-v2-2b04072095278721dc9a5772e61e406f399b6030:7c7abf911e92d7fb831611ffb965f3cf7fe2c01d-0"
+    container 'quay.io/biocontainers/shiptv:0.4.0--pyh5e36f6f_0'
   }
 
   input:
-    val(record)
+  tuple val(sample_name), path(consensus)
+
   output:
-    tuple val(recordID), path(fasta), emit: fasta
+  tuple val(sample_name), path('*.fasta'), emit: fasta
 
   script:
-  recordID = "${record.id}"
-  fasta = "${record.id}.fasta"
   """
-  cat > $fasta << EOF
->${record.id}
-${record.sequence}
-EOF
+  cat_consensus_sequences.py --sample-name $sample_name --output-fasta ${sample_name}.consensus.fasta $consensus
   """
 }
+
 
 

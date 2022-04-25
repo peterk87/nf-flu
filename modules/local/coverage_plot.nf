@@ -18,8 +18,8 @@ process COVERAGE_PLOT{
     path "versions.yml", emit: versions
 
     script:
-    plot_filename = "coverage_plot-${sample_name}-Segment_${segment}-${id}.pdf"
-    log_scale_plot_filename = "coverage_plot-${sample_name}-Segment_${segment}-${id}-log_scale.pdf"
+    plot_filename = "coverage_plot-${sample_name}-Segment_${segment}.${id}.pdf"
+    log_scale_plot_filename = "coverage_plot-${sample_name}-Segment_${segment}.${id}-log_scale.pdf"
     """
     plot_coverage.py -d $depths -v $filt_vcf -o $plot_filename --low-coverage $low_coverage --sample-name $sample_name --segment $segment
     plot_coverage.py -d $depths -v $filt_vcf -o $log_scale_plot_filename --low-coverage $low_coverage --sample-name $sample_name --segment $segment --log-scale-y
