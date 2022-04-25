@@ -190,6 +190,13 @@
                     "fa_icon": "fas fa-balance-scale-right",
                     "minimum": 0
                 },
+                "max_top_blastn": {
+                    "type": "integer",
+                    "default": 3,
+                    "description": "Maximum of top blastn result reported",
+                    "fa_icon": "fas fa-balance-scale-right",
+                    "minimum": 1
+                },
                 "ncbi_influenza_fasta": {
                     "type": "string",
                     "default": "https://ftp.ncbi.nih.gov/genomes/INFLUENZA/influenza.fna.gz",

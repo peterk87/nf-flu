@@ -42,7 +42,7 @@ process SUBTYPING_REPORT {
   parse_influenza_blast_results.py \\
    --threads ${task.cpus} \\
    --flu-metadata $genomeset \\
-   --top 3 \\
+   --top ${params.max_top_blastn} \\
    --excel-report iav-subtyping-report.xlsx \\
    --pident-threshold $params.pident_threshold \\
    $blastn_results
