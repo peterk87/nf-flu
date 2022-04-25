@@ -1,4 +1,4 @@
-process PREPARE_NCBI_ACCESSION_ID {
+process PULL_TOP_REF_ID {
     tag "$meta.id"
     label 'process_medium'
 

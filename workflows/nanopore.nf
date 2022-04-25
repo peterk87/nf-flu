@@ -1,7 +1,7 @@
 
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_BARCODE_COUNT_FAIL } from '../modules/local/multiqc_tsv_from_list'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_BARCODE_COUNT_PASS } from '../modules/local/multiqc_tsv_from_list'
-include { PREPARE_NCBI_ACCESSION_ID                               } from '../modules/local/prepare_ncbi_accession_id'
+include { PULL_TOP_REF_ID                                         } from '../modules/local/pull_top_ref_id'
 include { IRMA                                                    } from '../modules/local/irma'
 include { SUBTYPING_REPORT  as  SUBTYPING_REPORT_IRMA_CONSENSUS;
           SUBTYPING_REPORT  as  SUBTYPING_REPORT_BCF_CONSENSUS    } from '../modules/local/subtyping_report'
@@ -19,12 +19,12 @@ include { CAT_FASTQ;
           CAT_DB; CAT_CONSENSUS                                   } from '../modules/local/misc'
 include { BLAST_BLASTDBCMD                                        } from '../modules/local/pull_references'
 include { CHECK_SAMPLE_SHEET                                      } from '../modules/local/check_sample_sheet'
-include { REF_FASTA_CHECK                                         } from '../modules/local/ref_fasta_check'
+include { CHECK_REF_FASTA                                         } from '../modules/local/check_ref_fasta'
 
 include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI_NO_PARSEID  } from '../modules/nf-core/modules/blast/makeblastdb/main'
 include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_REFDB            } from '../modules/nf-core/modules/blast/makeblastdb/main'
 include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI_PARSEID     } from '../modules/nf-core/modules/blast/makeblastdb/main'
-include { BLAST_BLASTN as BLAST_BLASTN_NCBI                       } from '../modules/nf-core/modules/blast/blastn/main'
+include { BLAST_BLASTN as BLAST_BLASTN_IRMA                       } from '../modules/nf-core/modules/blast/blastn/main'
 include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS                  } from '../modules/nf-core/modules/blast/blastn/main'
 
 if (params.input) { ch_input= file(params.input) }
@@ -93,8 +93,8 @@ workflow NANOPORE {
 
     if (params.ref_db){
         ref_fasta_file = file(params.ref_db, type: 'file')
-        REF_FASTA_CHECK(ref_fasta_file)
-        CAT_DB(GUNZIP_FLU_FASTA.out.gunzip, REF_FASTA_CHECK.out.fasta)
+        CHECK_REF_FASTA(ref_fasta_file)
+        CAT_DB(GUNZIP_FLU_FASTA.out.gunzip, CHECK_REF_FASTA.out.fasta)
         ch_input_ref_db = CAT_DB.out.fasta
         //BLAST_MAKEBLASTDB_REFDB(REF_FASTA_CHECK.out.fasta)
     }
@@ -134,19 +134,17 @@ workflow NANOPORE {
     IRMA(CAT_FASTQ.out.reads, irma_module)
     //ch_versions.mix(IRMA.out.version)
     // Find the top map sequences against ncbi database
-    BLAST_BLASTN_NCBI(IRMA.out.consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
+    BLAST_BLASTN_IRMA(IRMA.out.consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
     //ch_versions.mix(BLAST_BLASTN.out.versions)
 
     //Generate suptype prediction report
-
     //ch_blast = BLAST_BLASTN_NCBI.out.txt.collect({ it[1] })
     //SUBTYPING_REPORT_IRMA_CONSENSUS(ch_influenza_metadata, ch_blast)
 
-
     // Prepare top ncbi accession id for each segment of each sample sample (id which has top bitscore)
-    PREPARE_NCBI_ACCESSION_ID(BLAST_BLASTN_NCBI.out.txt, ch_influenza_metadata)
+    PULL_TOP_REF_ID(BLAST_BLASTN_IRMA.out.txt, ch_influenza_metadata)
 
-    PREPARE_NCBI_ACCESSION_ID.out.accession_id
+    PULL_TOP_REF_ID.out.accession_id
     | map {it[1]} | splitCsv(header: false, sep:",")
     | map{ it ->
         // 0: sample_name, 1: segment, 2: ref_ncbi_accession_id
