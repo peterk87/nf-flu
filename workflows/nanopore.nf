@@ -138,10 +138,10 @@ workflow NANOPORE {
     //ch_versions.mix(BLAST_BLASTN.out.versions)
 
     //Generate suptype prediction report
-    /* Does not need for now
-    ch_blast = BLAST_BLASTN_NCBI.out.txt.collect({ it[1] })
-    SUBTYPING_REPORT_IRMA_CONSENSUS(ch_influenza_metadata, ch_blast)
-    */
+
+    //ch_blast = BLAST_BLASTN_NCBI.out.txt.collect({ it[1] })
+    //SUBTYPING_REPORT_IRMA_CONSENSUS(ch_influenza_metadata, ch_blast)
+
 
     // Prepare top ncbi accession id for each segment of each sample sample (id which has top bitscore)
     PREPARE_NCBI_ACCESSION_ID(BLAST_BLASTN_NCBI.out.txt, ch_influenza_metadata)

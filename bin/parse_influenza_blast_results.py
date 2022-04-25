@@ -34,7 +34,6 @@ influenza_segment = {
     8: "8_NS",
 }
 
-
 # Column names/types/final report names
 blast_cols = [
     ("qaccver", "category"),
@@ -452,9 +451,11 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
         df_ref_id = df_all_blast[
             ['Sample', 'Sample Genome Segment Number', 'Reference NCBI Accession', 'BLASTN Bitscore',
              'Reference Sequence ID']]
-        df_ref_id.loc[df_ref_id['Reference NCBI Accession'].isna(),'Reference NCBI Accession'] = df_ref_id['Reference Sequence ID']
+        df_ref_id = df_ref_id.reset_index(drop=True)
+        df_ref_id.loc[df_ref_id['Reference NCBI Accession'].isna(), 'Reference NCBI Accession'] = df_ref_id[
+            'Reference Sequence ID']
         df_ref_id['Reference NCBI Accession'] = df_ref_id['Reference NCBI Accession'].str.strip()
-        df_ref_id['Sample Genome Segment Number'] = df_ref_id['Sample Genome Segment Number'].\
+        df_ref_id['Sample Genome Segment Number'] = df_ref_id['Sample Genome Segment Number']. \
             apply(lambda x: influenza_segment[int(x)])
         df_ref_id.to_csv(sample_name + ".topsegments.csv", header=True, index=False)
 
