@@ -18,7 +18,7 @@ process BLAST_BLASTDBCMD{
     path (db)
 
     output:
-    tuple val(sample_name), val(segment), val(id), path('*.fasta'), path(reads), emit: fasta
+    tuple val(sample_name), val(segment), val(id), path('*.fasta'), path(reads), emit: sample_info
     path "versions.yml"                  , emit: versions
 
     script:

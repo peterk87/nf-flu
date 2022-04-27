@@ -40,7 +40,6 @@ if (params.irma_module) {
 
 workflow NANOPORE {
     ch_versions = Channel.empty()
-    ch_input_ref = Channel.empty()
 
     Channel.fromPath(params.input, checkIfExists: true)
     | CHECK_SAMPLE_SHEET
@@ -112,24 +111,6 @@ workflow NANOPORE {
     }
     | set {ch_aggregate_reads}
 
-    if (params.ref_sequences){
-        //ref_sequences in format: ref_id, segment_no, ref_fasta
-        Channel.fromPath(params.ref_sequences, checkIfExists: true) \
-        | splitCsv(header: false) \
-        | map { it ->
-            // 0: ref ID, 1: segment, 2: path ref_fasta
-            return [it[0], it[1], it[2]]
-        } \
-        | combine (ch_aggregate_reads) \
-        | set {ch_input_ref_combine }
-
-        ch_input_ref_combine
-        | map { it ->
-            // get [sample, segment, ref_id, ref_fasta, reads]
-            return [it[3], it[1], it[0], it[2], it[4]]
-        } | set { ch_input_ref }
-    }
-
     // IRMA to generate amended consensus sequences
     IRMA(CAT_FASTQ.out.reads, irma_module)
     //ch_versions.mix(IRMA.out.version)
@@ -138,8 +119,10 @@ workflow NANOPORE {
     //ch_versions.mix(BLAST_BLASTN.out.versions)
 
     //Generate suptype prediction report
-    //ch_blast = BLAST_BLASTN_NCBI.out.txt.collect({ it[1] })
-    //SUBTYPING_REPORT_IRMA_CONSENSUS(ch_influenza_metadata, ch_blast)
+    if (!params.skip_irma_subtyping_report){
+        ch_blast_irma = BLAST_BLASTN_IRMA.out.txt.collect({ it[1] })
+        SUBTYPING_REPORT_IRMA_CONSENSUS(ch_influenza_metadata, ch_blast_irma)
+    }
 
     // Prepare top ncbi accession id for each segment of each sample sample (id which has top bitscore)
     PULL_TOP_REF_ID(BLAST_BLASTN_IRMA.out.txt, ch_influenza_metadata)
@@ -157,7 +140,7 @@ workflow NANOPORE {
     BLAST_BLASTDBCMD(ch_sample_segment, BLAST_MAKEBLASTDB_NCBI_PARSEID.out.db)
 
     // Map reads against segment reference sequences
-    ch_mapping = BLAST_BLASTDBCMD.out.fasta.concat(ch_input_ref)
+    ch_mapping = BLAST_BLASTDBCMD.out.sample_info
     MINIMAP2(ch_mapping)
     //ch_versions.mix(MINIMAP2.out.version)
 
@@ -204,8 +187,8 @@ workflow NANOPORE {
     | map {it ->
         return [[id:it[0]], it[1]]
     }
-    | set { ch_blatn_consensus }
-    BLAST_BLASTN_CONSENSUS(ch_blatn_consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
+    | set { ch_blastn_consensus }
+    BLAST_BLASTN_CONSENSUS(ch_blastn_consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
     ch_blast_consensus = BLAST_BLASTN_CONSENSUS.out.txt.collect({ it[1] })
     SUBTYPING_REPORT_BCF_CONSENSUS(ch_influenza_metadata, ch_blast_consensus)
 }
