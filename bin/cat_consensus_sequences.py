@@ -1,13 +1,7 @@
 #!/usr/bin/env python
 
-from pathlib import Path
 from Bio import SeqIO
-import typer
 import click
-import re
-from typing import Dict, List, Optional, Tuple
-from rich.logging import RichHandler
-import logging
 
 @click.command()
 @click.option("-s", "--sample-name", default="", help="Sample Name.")
