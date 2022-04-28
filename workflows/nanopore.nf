@@ -187,14 +187,14 @@ workflow NANOPORE {
     | map {it ->
         return [[id:it[0]], it[1]]
     }
-    | set { ch_blastn_consensus }
-    BLAST_BLASTN_CONSENSUS(ch_blastn_consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
-    ch_blast_consensus = BLAST_BLASTN_CONSENSUS.out.txt.collect({ it[1] })
-    SUBTYPING_REPORT_BCF_CONSENSUS(ch_influenza_metadata, ch_blast_consensus)
+    | set { ch_cat_consensus }
+    BLAST_BLASTN_CONSENSUS(ch_cat_consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
+    ch_blastn_consensus = BLAST_BLASTN_CONSENSUS.out.txt.collect({ it[1] })
+    SUBTYPING_REPORT_BCF_CONSENSUS(ch_influenza_metadata, ch_blastn_consensus)
 
     if (params.ref_db){
         BLAST_MAKEBLASTDB_REFDB(CHECK_REF_FASTA.out.fasta)
-        BLAST_BLASTN_CONSENSUS_REF_DB(ch_blastn_consensus, BLAST_MAKEBLASTDB_REFDB.out.db)
+        BLAST_BLASTN_CONSENSUS_REF_DB(ch_cat_consensus, BLAST_MAKEBLASTDB_REFDB.out.db)
         BLASTN_REPORT(BLAST_BLASTN_CONSENSUS_REF_DB.out.txt)
     }
 }

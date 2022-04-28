@@ -87,7 +87,7 @@ def report(blast_results, excel_report, min_aln_length):
     df_mismatch_report = pd.DataFrame(index=segments, columns=ref_names)
     for segment in segments:
         for ref_name in ref_names:
-            mismatch = df_filtered.query("ref_name == @ref_name and ""segment_name == @segment")["mismatch"].values
+            mismatch = df_filtered.query("ref_name == @ref_name and segment_name == @segment")["mismatch"].values
             if len(mismatch):
                 df_mismatch_report.loc[segment, ref_name] = mismatch[0]
             else:
