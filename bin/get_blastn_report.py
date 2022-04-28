@@ -94,6 +94,7 @@ def report(blast_results, excel_report, min_aln_length):
                 df_mismatch_report.loc[segment, ref_name] = ''
     df_mismatch_report.insert(0, "Segment", segments)
     df_mismatch_report["Segment"] = df_mismatch_report["Segment"].apply(lambda x: influenza_segment[int(x)])
+    df_mismatch_report.loc["Total"] = pd.Series(df_mismatch_report[ref_names].sum())
     df_blast_result.columns = ["Sample", "Sample Genome Segment Number", "Reference Virus Name",
                                "BLASTN Percent Identity",
                                "BLASTN Alignment Length", "BLASTN Mismatches", "BLASTN Gaps",
