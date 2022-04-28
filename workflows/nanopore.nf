@@ -6,6 +6,7 @@ include { IRMA                                                    } from '../mod
 include { SUBTYPING_REPORT  as  SUBTYPING_REPORT_IRMA_CONSENSUS;
           SUBTYPING_REPORT  as  SUBTYPING_REPORT_BCF_CONSENSUS    } from '../modules/local/subtyping_report'
 include { COVERAGE_PLOT                                           } from '../modules/local/coverage_plot'
+include { BLASTN_REPORT                                           } from '../modules/local/blastn_report'
 include { VCF_FILTER_FRAMESHIFT                                   } from '../modules/local/vcf_filter_frameshift'
 include { MEDAKA                                                  } from '../modules/local/medaka'
 include { MINIMAP2                                                } from '../modules/local/minimap2'
@@ -20,12 +21,12 @@ include { CAT_FASTQ;
 include { BLAST_BLASTDBCMD                                        } from '../modules/local/pull_references'
 include { CHECK_SAMPLE_SHEET                                      } from '../modules/local/check_sample_sheet'
 include { CHECK_REF_FASTA                                         } from '../modules/local/check_ref_fasta'
-
 include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI_NO_PARSEID  } from '../modules/nf-core/modules/blast/makeblastdb/main'
 include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_REFDB            } from '../modules/nf-core/modules/blast/makeblastdb/main'
 include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI_PARSEID     } from '../modules/nf-core/modules/blast/makeblastdb/main'
 include { BLAST_BLASTN as BLAST_BLASTN_IRMA                       } from '../modules/nf-core/modules/blast/blastn/main'
 include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS                  } from '../modules/nf-core/modules/blast/blastn/main'
+include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS_REF_DB           } from '../modules/nf-core/modules/blast/blastn/main'
 
 if (params.input) { ch_input= file(params.input) }
 
@@ -95,7 +96,6 @@ workflow NANOPORE {
         CHECK_REF_FASTA(ref_fasta_file)
         CAT_DB(GUNZIP_FLU_FASTA.out.gunzip, CHECK_REF_FASTA.out.fasta)
         ch_input_ref_db = CAT_DB.out.fasta
-        //BLAST_MAKEBLASTDB_REFDB(REF_FASTA_CHECK.out.fasta)
     }
 
     BLAST_MAKEBLASTDB_NCBI_NO_PARSEID(ch_input_ref_db)
@@ -191,4 +191,10 @@ workflow NANOPORE {
     BLAST_BLASTN_CONSENSUS(ch_blastn_consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
     ch_blast_consensus = BLAST_BLASTN_CONSENSUS.out.txt.collect({ it[1] })
     SUBTYPING_REPORT_BCF_CONSENSUS(ch_influenza_metadata, ch_blast_consensus)
+
+    if (params.ref_db){
+        BLAST_MAKEBLASTDB_REFDB(CHECK_REF_FASTA.out.fasta)
+        BLAST_BLASTN_CONSENSUS_REF_DB(ch_blastn_consensus, BLAST_MAKEBLASTDB_REFDB.out.db)
+        BLASTN_REPORT(BLAST_BLASTN_CONSENSUS_REF_DB.out.txt)
+    }
 }

@@ -25,7 +25,7 @@ def main(input_fasta: Path, output_fasta: Path):
     with open(output_fasta, 'w') as outfile:
         for record in ref_fasta:
             seqid, sequence = record.id.strip(), record.seq
-            seq_record_id = re.sub(r"[-()\"#/@;:<>{}`+=~|.!?,]", "_", seqid)
+            seq_record_id = re.sub(r"[()\"#/@;:<>{}`+=~|!?,]", "_", seqid)
             outfile.write(f'>{seq_record_id}\n{sequence}\n')
 
 
