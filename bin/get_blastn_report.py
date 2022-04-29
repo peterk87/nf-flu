@@ -70,7 +70,15 @@ def report(blast_results, excel_report, min_aln_length):
         dtype={name: coltype for name, coltype in blast_cols},
     )
     if df_blast_result.empty:
-        logging.error(f"No BLASTN results in {blast_results}!")
+        # write empty report, to keep workflow run without stopping due this error
+        write_excel(
+            [
+                ("Mismatch_Report", df_blast_result),
+                ("Blastn_Results", df_blast_result)
+            ],
+            output_dest=excel_report,
+        )
+        logging.warning(f"No BLASTN results in {blast_results}!, empty report")
         return
     df_blast_result["ref_name"] = df_blast_result["stitle"].str.extract('(.+?)_[sS]egment')
     df_blast_result["sample_name"] = df_blast_result["qaccver"].str.extract('(.+?)_[1-9]')

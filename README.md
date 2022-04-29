@@ -61,9 +61,7 @@ for the [IRMA][] assembly and H/N subtyping by nucleotide [BLAST][] against the 
       nextflow run peterk87/nf-iav-illumina \
         --input samplesheet.csv \
         --platform nanopore \
-        --irma_module FLU-minion \
-        --fastq_dir /path/to/fastq_pass \
-        --profile <docker/singularity/podman/shifter/charliecloud/conda>
+        --profile <docker/singularity/conda>
       ```
 
 ## Documentation

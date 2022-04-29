@@ -1,9 +1,10 @@
-# nf-iav-illumina: Usage
+# nf-flu: Usage
 
 ## Introduction
 
-### Illumina samplesheet format
+### Samplesheet format
 
+#### Illuminia Platform
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a tab-delimited (TSV) or comma-separated (CSV) file with 3 columns, and a header row as shown in the examples below.
 
 ```bash
@@ -36,6 +37,30 @@ python ~/.nextflow/assets/peterk87/nf-iav-illumina/bin/fastq_dir_to_samplesheet.
   -i /path/to/illumina_run/Data/Intensities/Basecalls/ \
   -o samplesheet.csv
 ```
+
+#### Nanopore Platform
+
+You have option to provide a samplesheet to the pipeline that maps sample ids to FASTQ file
+
+```bash
+--input '[path to samplesheet file]'
+```
+
+It has to be a comma-separated file with 2 columns. A final samplesheet file may look something like the one below:
+```bash
+sample,barcode
+SAMPLE_1,/path/to/run1/fastq_pass/barcode01
+SAMPLE_2,/path/to/run2/fastq_pass/barcode02
+```
+
+
+| Column    | Description                                                                                                                              |
+|-----------|------------------------------------------------------------------------------------------------------------------------------------------|
+| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample.                            |
+| `barcode` | Full path to FASTQ file for each barcode. Files in the path could be gzipped or unzipped and have the extension ".fastq.gz" or ".fastq". |
+
+
+
 
 ## Running the pipeline
 
@@ -85,6 +110,23 @@ Define where the pipeline should find input data and save output data.
 
 Sample sheet with sample names and paths to reads.
 
+#### `--platform`
+
+- Optional
+- Type: string
+- Default: illumina
+
+Specify the platform for Illumina or Nanopore data
+
+
+
+#### `--ref_db`
+
+- Optional
+- Type: string
+
+Reference database in fasta file
+
 #### `--outdir`
 
 - Optional
@@ -97,7 +139,7 @@ The output directory where the results will be saved.
 
 #### `--irma_module`
 
-- **Required**
+- Optional
 - Type: string
 - Default: `FLU-utr`
 
