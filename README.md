@@ -68,7 +68,7 @@ The pipeline is implemented in [Nextflow][]
 
 ## Documentation
 
-The nf-iav-illumina pipeline comes with:
+The nf-flu pipeline comes with:
 
 * [usage](docs/usage.md) and
 * [output](docs/output.md) documentation.
