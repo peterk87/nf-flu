@@ -5,7 +5,7 @@ process CLAIR3{
     tag "$sample_name - Segment:$segment - Ref ID:$id"
     label 'process_low'
 
-    conda (params.enable_conda ? 'bioconda::clair3==0.1.10--hdfd78af_0' : null)
+    conda (params.enable_conda ? 'bioconda::clair3==0.1.10' : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
       container 'hkubal/clair3:v0.1-r10'
     } else {
@@ -25,12 +25,21 @@ process CLAIR3{
     def software  = getSoftwareName(task.process)
     vcf           = "${sample_name}.Segment_${segment}.${id}.clair3_variant.vcf.gz"
     clair3_log    = "${sample_name}.Segment_${segment}.${id}.clair3_variant.log"
+    model_suffix  = "models/${params.clair3_model}"
     """
+    clair3_path=\$(which run_clair3.sh | sed 's/run_clair3.sh//g')
+    if [ ${params.enable_conda} = true ] ; then
+        model_path=\$clair3_path"$model_suffix"
+    else
+        model_path=/opt/models/${params.clair3_model}
+    fi
+    echo "run_clair3.sh path: \$clair3_path"
+    echo "models path: \$model_path"
     samtools faidx $fasta
     run_clair3.sh \\
         --bam_fn=${bam[0]} \\
         --ref_fn=$fasta \\
-        --model_path="/opt/models/${params.clair3_variant_model}" \\
+        --model_path="\$model_path"\\
         --threads=${task.cpus} \\
         --platform="ont" \\
         --output=clair3_variant \\

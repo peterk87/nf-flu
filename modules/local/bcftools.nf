@@ -5,7 +5,7 @@ process BCF_CONSENSUS {
     tag "$sample_name - Segment:$segment - Ref ID:$id"
     label 'process_medium'
 
-    conda (params.enable_conda ? 'bioconda::bcftools=1.15.1' : null)
+    conda (params.enable_conda ? 'bioconda::bcftools=1.15.1 conda-forge::gsl=2.7' : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container 'https://depot.galaxyproject.org/singularity/run https://depot.galaxyproject.org/singularity/bcftools:1.15--haf5b3da_0'
     } else {
@@ -43,7 +43,7 @@ process BCF_FILTER {
     tag "$sample_name - Segment:$segment - Ref ID:$id"
     label 'process_medium'
 
-    conda (params.enable_conda ? 'bioconda::bcftools=1.15.1' : null)
+    conda (params.enable_conda ? 'bioconda::bcftools=1.15.1 conda-forge::gsl=2.7' : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container 'https://depot.galaxyproject.org/singularity/run https://depot.galaxyproject.org/singularity/bcftools:1.15--haf5b3da_0'
     } else {

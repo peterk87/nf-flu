@@ -65,7 +65,7 @@
                     "default": true,
                     "description": "Skip variant calling from Clair3."
                 },
-                "clair3_variant_model": {
+                "clair3_model": {
                     "type": "string",
                     "description": "[Clair3](https://github.com/HKU-BAL/Clair3) Clair3 variant model",
                     "default": "r941_prom_hac_g360+g422",
