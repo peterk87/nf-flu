@@ -154,11 +154,11 @@ workflow NANOPORE {
         return [it[0], it[1], it[2], it[3], it[4], it[5]]
     } | set {ch_variant_calling}
 
-    if (!params.skip_clair3){
+    if (params.variant_caller == 'clair3'){
         CLAIR3(ch_variant_calling)
         BCF_FILTER_CLAIR3(CLAIR3.out.vcf, params.major_allele_fraction)
         ch_vcf_filter = BCF_FILTER_CLAIR3.out.vcf
-    } else {
+    } else if (params.variant_caller == 'medaka') {
         MEDAKA(ch_variant_calling)
         BCF_FILTER_MEDAKA(MEDAKA.out.vcf, params.major_allele_fraction)
         ch_vcf_filter = BCF_FILTER_MEDAKA.out.vcf

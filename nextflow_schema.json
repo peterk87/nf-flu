@@ -47,6 +47,12 @@
             "description": "Various options for the variant calling branch of the pipeline.",
             "default": "",
             "properties": {
+                "variant_caller": {
+                    "type": "string",
+                    "description": "Variant caller (Clair3 or Medaka)",
+                    "default": "medaka",
+                    "fa_icon": "fas fa-dna"
+                },
                 "medaka_variant_model": {
                     "type": "string",
                     "description": "[Medaka](https://github.com/nanoporetech/medaka) Medaka model for final variant calling from phased reads",
@@ -59,16 +65,10 @@
                     "default": "r941_prom_hac_snp_g507",
                     "fa_icon": "fas fa-dna"
                 },
-                "skip_clair3": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "default": true,
-                    "description": "Skip variant calling from Clair3."
-                },
-                "clair3_model": {
+                "clair3_variant_model": {
                     "type": "string",
                     "description": "[Clair3](https://github.com/HKU-BAL/Clair3) Clair3 variant model",
-                    "default": "r941_prom_hac_g360+g422",
+                    "default": "r941_prom_sup_g5014",
                     "fa_icon": "fas fa-dna"
                 },
                 "minor_allele_fraction": {

@@ -62,7 +62,7 @@ process BCF_FILTER {
     script:
     bcftools_filt_vcf = "${sample_name}.Segment_${segment}.${id}.bcftools_filt.vcf"
     def exclude
-    if (params.skip_clair3){
+    if (params.variant_caller == 'medaka'){
         exclude = "AF < $allele_fraction"
     }else{
         exclude = "%FILTER='RefCall' | AF < $allele_fraction"
