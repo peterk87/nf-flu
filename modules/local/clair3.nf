@@ -46,7 +46,8 @@ process CLAIR3{
         --haploid_sensitive \\
         --enable_long_indel \\
         --fast_mode \\
-        --include_all_ctgs
+        --include_all_ctgs \\
+        --no_phasing_for_fa
     cp clair3_variant/merge_output.vcf.gz ${vcf}
     ln -s .command.log $clair3_log
     cat <<-END_VERSIONS > versions.yml
