@@ -153,6 +153,74 @@ IRMA module to use for analysis.
 
 Set "DEL_TYPE=NNN" to keep deletions to reference sequence as N characters in consensus.
 
+### Variant Calling
+
+#### `--variant_caller`
+
+- Optional
+- Type: string
+- Default: `clair3`
+
+Set Variant Caller 
+
+#### `--medaka_variant_model`
+
+- Optional
+- Type: string
+- Default: `r941_prom_hac_variant_g507`
+
+Medaka model for final variant calling from phased reads
+
+#### `--medaka_snp_model`
+
+- Optional
+- Type: string
+- Default: `r941_prom_hac_snp_g507`
+
+Medaka model for initial SNP calling from mixed reads prior to phasing
+
+#### `--clair3_variant_model`
+
+- Optional
+- Type: string
+- Default: `r941_prom_sup_g5014`
+
+Set Clair3 Variant model
+
+#### `--minor_allele_fraction`
+
+- Optional
+- Type: number
+- Default: `0.25`
+
+Set Minor variant allele frequency/fraction
+
+#### `--major_allele_fraction`
+
+- Optional
+- Type: number
+- Default: `0.75`
+
+Set Major variant allele frequency/fraction. Only major variant alleles are used for generating a consensus sequence
+
+#### `--low_coverage`
+
+- Optional
+- Type: number
+- Default: `10`
+
+Low coverage depth threshold. Consensus sequence positions with less than this coverage depth will be masked with `N`
+
+### Nanopore Options
+
+#### `--min_barcode_reads`
+- Optional
+- Type: number
+- Default: `100`
+
+Minimum number of raw reads required per sample/barcode in order to be considered for the downstream processing 
+                                                steps
+
 ### H/N subtyping options
 
 Hemaglutinin and neuraminase subtype prediction options
