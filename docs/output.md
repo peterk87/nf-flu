@@ -101,6 +101,7 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
   - Concatenated consensus sequences for all segments assembled: `<sample>.consensus.fasta`
 - `consensus/irma/`
   - Assembled consensus sequences for each segment: `<sample>.irma.consensus.fasta`
+</details>
 
 ### Mismatch Report
 
