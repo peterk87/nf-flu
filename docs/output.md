@@ -87,6 +87,8 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
 
 - `coverage_plots/<sample>/`
   - Coverage plot in linear and log scale: `*.pdf`
+</details>
+
 
 ### Assembled Consensus Sequences
 
