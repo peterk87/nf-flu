@@ -125,7 +125,7 @@ Specify the platform for Illumina or Nanopore data
 - Optional
 - Type: string
 
-Reference database in fasta file
+Reference database in fasta file, sequence ID must be in format `SequenceName_segment#_segmentName`, for example `2021-FAV33-OS_segment1_PB2`
 
 #### `--outdir`
 
