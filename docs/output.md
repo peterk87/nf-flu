@@ -8,6 +8,10 @@ The directories listed below will be created in the results directory after the 
 
 - [IRMA](#irma)
 - [BLAST analysis](#blast-analysis)
+- [Coverage Plots](#coverage_plots)
+- [Assembled Consensus Sequences](#assembled_consensus_sequences)
+- [Mismatch Report](#mismatch_report)
+- [Variant Calling](#variant_calling)
 - [H/N Subtyping](#h-n-subtyping)
 
 ### IRMA
@@ -53,7 +57,7 @@ The directories listed below will be created in the results directory after the 
 
 IRMA output is described in the [official IRMA output documentation](https://wonder.cdc.gov/amd/flu/irma/output.html).
 
-The primary output from IRMA are the consensus sequences for gene segments, which are used for H/N subtyping.
+The primary output from IRMA are the consensus sequences for gene segments, which are used for H/N subtyping and performed blastn against influenza database to pull top match reference sequences for each segment of each sample.
 
 ### BLAST analysis
 
@@ -73,7 +77,53 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
 
 </details>
 
+
 [IRMA][] and final assembled gene segments are queried against the [NCBI Influenza DB][] and the reference database (if provided option `--ref_db`) using nucleotide [BLAST][] to determine the closest matching sequences in NCBI and the reference database for each segment of each sample for downstream analysis and to predict the H and N subtype of each sample if possible (i.e. if segments 4 (hemagglutinin) and/or 6 (neuraminidase) were assembled).
+
+### Coverage Plots
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `coverage_plots/<sample>/`
+  - Coverage plot in linear and log scale: `*.pdf`
+
+### Assembled Consensus Sequences
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `consensus/bcftools/<sample>`
+  - Assembled consensus sequences for each segment: `*.bcftools.consensus.fasta`
+- `consensus/bcftools/`
+  - Concatenated consensus sequences for all segments assembled: `<sample>.consensus.fasta`
+- `consensus/irma/`
+  - Assembled consensus sequences for each segment: `<sample>.irma.consensus.fasta`
+
+### Mismatch Report
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `mistmacth_report/`
+  - `<sample>-blastn-report.xlsx`
+</details>
+  The report contains 2 sheets:
+
+  - **1_Mismatch_Report**: Count number of mismatches in BLASTN report (see sheet 2) against each reference sequences in reference database 
+  - **2_Blastn_Results**: Nucleotide BLASTN report of sample final consensus against reference database 
+
+### Variant Calling
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `variants/<sample>`
+  - Filter Frameshift VCF: `*.filt_frameshift.vcf`
+  - Clair3 or Medaka VCF: `*.vcf.gz`
+
+</details>
+
 
 ### H/N Subtyping
 
