@@ -11,6 +11,7 @@ The directories listed below will be created in the results directory after the 
 - [Coverage Plots](#coverage-plots)
 - [Assembled Consensus Sequences](#assembled-consensus-sequences)
 - [Mismatch Report](#mismatch-report)
+- [Reference Sequences](#reference-sequences)
 - [Variant Calling](#variant-calling)
 - [H/N Subtyping](#h-n-subtyping)
 
@@ -95,7 +96,7 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
 <details markdown="1">
 <summary>Output files</summary>
 
-- `consensus/bcftools/<sample>`
+- `consensus/bcftools/<sample>/`
   - Assembled consensus sequences for each segment: `*.bcftools.consensus.fasta`
 - `consensus/bcftools/`
   - Concatenated consensus sequences for all segments assembled: `<sample>.consensus.fasta`
@@ -116,12 +117,33 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
   - **1_Mismatch_Report**: Count number of mismatches in BLASTN report (see sheet 2) against each reference sequences in reference database 
   - **2_Blastn_Results**: Nucleotide BLASTN report of sample final consensus against reference database 
 
+### Reference Sequences
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<sample>/`
+  - Top reference sequences for all segments: `*.reference.fasta`
+  - List of top reference ID pulled from influenza database: `*.topsegments.csv`
+</details>
+
+### Segments Mapping
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `mapping/<sample>/`
+  - The results of segments mapping using minimap2: `*.bam`, `*.bai`, `*.depths.tsv`, `*.flagstat`, `*.idxstats`, `*.stats`
+</details>
+
+
+
 ### Variant Calling
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `variants/<sample>`
+- `variants/<sample>/`
   - Filter Frameshift VCF: `*.filt_frameshift.vcf`
   - Clair3 or Medaka VCF: `*.vcf.gz`
 
