@@ -8,10 +8,10 @@ The directories listed below will be created in the results directory after the 
 
 - [IRMA](#irma)
 - [BLAST analysis](#blast-analysis)
-- [Coverage Plots](#coverage_plots)
-- [Assembled Consensus Sequences](#assembled_consensus_sequences)
-- [Mismatch Report](#mismatch_report)
-- [Variant Calling](#variant_calling)
+- [Coverage Plots](#coverage-plots)
+- [Assembled Consensus Sequences](#assembled-consensus-sequences)
+- [Mismatch Report](#mismatch-report)
+- [Variant Calling](#variant-calling)
 - [H/N Subtyping](#h-n-subtyping)
 
 ### IRMA
