@@ -61,7 +61,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
           mkdir barcode
           cd barcode
-          wget -q https://nf-flu.s3.us-east-2.amazonaws.com/ERR6359501.fastq.gz
+          wget https://nf-flu.s3.us-east-2.amazonaws.com/ERR6359501.fastq.gz
           
 
       - name: Run pipeline with test data
