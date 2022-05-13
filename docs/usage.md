@@ -47,20 +47,17 @@ You have option to provide a samplesheet to the pipeline that maps sample ids to
 ```
 
 It has to be a comma-separated file with 2 columns. A final samplesheet file may look something like the one below:
+
 ```bash
 sample,barcode
 SAMPLE_1,/path/to/run1/fastq_pass/barcode01
 SAMPLE_2,/path/to/run2/fastq_pass/barcode02
 ```
 
-
 | Column    | Description                                                                                                                              |
 |-----------|------------------------------------------------------------------------------------------------------------------------------------------|
 | `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample.                            |
 | `barcode` | Full path to FASTQ file for each barcode. Files in the path could be gzipped or unzipped and have the extension ".fastq.gz" or ".fastq". |
-
-
-
 
 ## Running the pipeline
 
@@ -117,8 +114,6 @@ Sample sheet with sample names and paths to reads.
 - Default: illumina
 
 Specify the platform for Illumina or Nanopore data
-
-
 
 #### `--ref_db`
 
