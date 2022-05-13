@@ -3,6 +3,10 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.0.0](https://github.com/peterk87/nf-iav-illumina/releases/tag/3.0.0)] - 2022-05-13
+
+Add the workflow for nanopore data
+
 ## [[2.0.1](https://github.com/peterk87/nf-iav-illumina/releases/tag/2.0.1)] - 2021-06-15
 
 Patch release to fix issue [#5](https://github.com/peterk87/nf-iav-illumina/issues/5); added check that IRMA `amended_consensus/` exists before concatenation of consensus FASTA files.
