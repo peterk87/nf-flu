@@ -49,7 +49,7 @@ workflow NANOPORE {
         def count = 0
         def fastqFiles = file(it.barcode).listFiles()
         for (x in fastqFiles) {
-            if (x.isFile() && x.toString().contains('.fastq')) {
+            if (x.isFile() && (x.toString().contains('.fastq') || x.toString().contains('.fq'))) {
                 count += x.countFastq()
             }
         }

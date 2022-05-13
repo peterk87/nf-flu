@@ -20,11 +20,16 @@ process CAT_FASTQ {
 
     script:
     """
-    fastqFile=\$(ls $reads | head -1)
-    if grep -q "fastq.gz" <<< "\$fastqFile"; then
+    fastqFile=\$(ls $reads | grep -E ".fastq|fq" | head -1)
+    echo "\$fastqFile"
+    if grep -qE ".fastq.gz" <<< "\$fastqFile"; then
         cat $reads/*.fastq.gz > ${meta.id}.fastq.gz
-    else
+    elif grep -qE ".fastq" <<< "\$fastqFile"; then
         cat $reads/*.fastq | pigz -ck > ${meta.id}.fastq.gz
+    elif grep -qE ".fq.gz" <<< "\$fastqFile"; then
+       cat $reads/*.fq.gz > ${meta.id}.fastq.gz
+    else
+       cat $reads/*.fq | pigz -ck > ${meta.id}.fastq.gz
     fi
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
