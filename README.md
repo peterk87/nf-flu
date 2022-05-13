@@ -47,7 +47,6 @@ The pipeline is implemented in [Nextflow][]
           -i /path/to/illumina_run/Data/Intensities/Basecalls/ \
           -o samplesheet.csv
         ```
-    
     * Typical command for Illumina Platform
 
         ```bash
@@ -56,7 +55,6 @@ The pipeline is implemented in [Nextflow][]
           --platform illumina \
           --profile <docker/singularity/podman/shifter/charliecloud/conda>
         ```
-    
     * Typical command for Nanopore Platform
 
       ```bash
