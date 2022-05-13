@@ -9,8 +9,8 @@
 
 ## Introduction
 
-**nf-flu** is a bioinformatics analysis pipeline for assembly and H/N subtyping of Influenza virus. The pipeline supports both Illumina and Nanopore Platform. 
-Since Influenza is a special virus with multiple gene segments (8 segments) and there might be a reference or multiple we would want to align against, the pipeline will automatically pull top match references for each segment. 
+**nf-flu** is a bioinformatics analysis pipeline for assembly and H/N subtyping of Influenza virus. The pipeline supports both Illumina and Nanopore Platform.
+Since Influenza is a special virus with multiple gene segments (8 segments) and there might be a reference or multiple we would want to align against, the pipeline will automatically pull top match references for each segment.
 To achieve this task, the pipeline downloads Influenza database from NCBI and user could provide their own reference database. The pipline performs read mapping against each reference segment, variant calling and genome assembly.
 
 The pipeline is implemented in [Nextflow][]
@@ -47,7 +47,7 @@ The pipeline is implemented in [Nextflow][]
           -i /path/to/illumina_run/Data/Intensities/Basecalls/ \
           -o samplesheet.csv
         ```
-
+    
     * Typical command for Illumina Platform
 
         ```bash
@@ -56,7 +56,7 @@ The pipeline is implemented in [Nextflow][]
           --platform illumina \
           --profile <docker/singularity/podman/shifter/charliecloud/conda>
         ```
-      
+    
     * Typical command for Nanopore Platform
 
       ```bash

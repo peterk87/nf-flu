@@ -156,7 +156,7 @@ Set "DEL_TYPE=NNN" to keep deletions to reference sequence as N characters in co
 - Type: string
 - Default: `clair3`
 
-Set Variant Caller 
+Set Variant Caller
 
 #### `--medaka_variant_model`
 
@@ -209,11 +209,12 @@ Low coverage depth threshold. Consensus sequence positions with less than this c
 ### Nanopore Options
 
 #### `--min_barcode_reads`
+
 - Optional
 - Type: number
 - Default: `100`
 
-Minimum number of raw reads required per sample/barcode in order to be considered for the downstream processing 
+Minimum number of raw reads required per sample/barcode in order to be considered for the downstream processing
                                                 steps
 
 ### H/N subtyping options

@@ -115,8 +115,8 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
 </details>
 The report contains 2 sheets:
 
-- **1_Mismatch_Report**: Count number of mismatches in BLASTN report (see sheet 2) against each reference sequences in reference database 
-- **2_Blastn_Results**: Nucleotide BLASTN report of sample final consensus against reference database 
+- **1_Mismatch_Report**: Count number of mismatches in BLASTN report (see sheet 2) against each reference sequences in reference database
+- **2_Blastn_Results**: Nucleotide BLASTN report of sample final consensus against reference database
 
 ### Reference Sequences
 
