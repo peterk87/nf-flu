@@ -149,7 +149,7 @@ IRMA module to use for analysis.
 
 Set "DEL_TYPE=NNN" to keep deletions to reference sequence as N characters in consensus.
 
-### Variant Calling
+### Variant Calling options
 
 #### `--variant_caller`
 
@@ -238,6 +238,14 @@ Hemaglutinin and neuraminase subtype prediction options
 - Default: `0.85`
 
 Minimum % identity of nucleotide BLAST results to consider for determining H/N subtypes.
+
+#### `--max_top_blastn`
+
+- Optional
+- Type: number
+- Default: `3`
+
+Maximum of top blastn result reported
 
 #### `--ncbi_influenza_fasta`
 
