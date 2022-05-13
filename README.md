@@ -46,7 +46,7 @@ The pipeline is implemented in [Nextflow][]
         python ~/.nextflow/assets/peterk87/nf-iav-illumina/bin/fastq_dir_to_samplesheet.py \
           -i /path/to/illumina_run/Data/Intensities/Basecalls/ \
           -o samplesheet.csv
-        ``` 
+        ```
 
     * Typical command for Illumina Platform
 
