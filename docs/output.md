@@ -87,6 +87,7 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
 
 - `coverage_plots/<sample>/`
   - Coverage plot in linear and log scale: `*.pdf`
+
 </details>
 
 ### Assembled Consensus Sequences
@@ -100,6 +101,7 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
   - Concatenated consensus sequences for all segments assembled: `<sample>.consensus.fasta`
 - `consensus/irma/`
   - Assembled consensus sequences for each segment: `<sample>.irma.consensus.fasta`
+
 </details>
 
 ### Mismatch Report
@@ -109,6 +111,7 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
 
 - `mistmacth_report/`
   - `<sample>-blastn-report.xlsx`
+
 </details>
   The report contains 2 sheets:
 
@@ -123,6 +126,7 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
 - `<sample>/`
   - Top reference sequences for all segments: `*.reference.fasta`
   - List of top reference ID pulled from influenza database: `*.topsegments.csv`
+
 </details>
 
 ### Segments Mapping
@@ -132,6 +136,7 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
 
 - `mapping/<sample>/`
   - The results of segments mapping using minimap2: `*.bam`, `*.bai`, `*.depths.tsv`, `*.flagstat`, `*.idxstats`, `*.stats`
+
 </details>
 
 ### Variant Calling
