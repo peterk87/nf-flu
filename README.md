@@ -46,8 +46,8 @@ The pipeline is implemented in [Nextflow][]
         python ~/.nextflow/assets/peterk87/nf-iav-illumina/bin/fastq_dir_to_samplesheet.py \
           -i /path/to/illumina_run/Data/Intensities/Basecalls/ \
           -o samplesheet.csv
-        ```
-    
+        ``` 
+
     * Typical command for Illumina Platform
 
         ```bash
@@ -56,7 +56,7 @@ The pipeline is implemented in [Nextflow][]
           --platform illumina \
           --profile <docker/singularity/podman/shifter/charliecloud/conda>
         ```
-    
+
     * Typical command for Nanopore Platform
 
       ```bash
