@@ -169,7 +169,7 @@
             },
             "fa_icon": "fas fa-retweet"
         },"mismatch_report_option": {
-            "title": "Mistmatch report option options",
+            "title": "Mistmatch report options",
             "type": "object",
             "description": "Reporting option.",
             "default": "",

@@ -207,7 +207,7 @@ Set Major variant allele frequency/fraction. Only major variant alleles are used
 
 Low coverage depth threshold. Consensus sequence positions with less than this coverage depth will be masked with `N`
 
-### Nanopore Options
+### Nanopore options
 
 #### `--min_barcode_reads`
 
@@ -217,7 +217,7 @@ Low coverage depth threshold. Consensus sequence positions with less than this c
 
 Minimum number of raw reads required per sample/barcode in order to be considered for the downstream processing steps
 
-### Mismatch Report Option
+### Mismatch Report options
 
 #### `--min_aln_length`
 
