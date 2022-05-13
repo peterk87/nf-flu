@@ -168,6 +168,21 @@
                 }
             },
             "fa_icon": "fas fa-retweet"
+        },"mismatch_report_option": {
+            "title": "Mistmatch report option options",
+            "type": "object",
+            "description": "Reporting option.",
+            "default": "",
+            "properties": {
+                "min_aln_length": {
+                    "type": "integer",
+                    "default": 700,
+                    "description": "Minimum alignment length of nucleotide BLAST results to consider for getting mismatch report from BLAST result against reference database. We normally set this number around the smallest genome segment (Segment 8).",
+                    "fa_icon": "fas fa-balance-scale-right",
+                    "minimum": 0
+                }
+            },
+            "fa_icon": "fas fa-retweet"
         },
         "h_n_subtyping_options": {
             "title": "H/N subtyping options",
@@ -182,13 +197,6 @@
                     "fa_icon": "fas fa-balance-scale-left",
                     "minimum": 0,
                     "maximum": 1
-                },
-                "min_aln_length": {
-                    "type": "integer",
-                    "default": 50,
-                    "description": "Minimum alignment length of nucleotide BLAST results to consider for determining H/N subtypes.",
-                    "fa_icon": "fas fa-balance-scale-right",
-                    "minimum": 0
                 },
                 "max_top_blastn": {
                     "type": "integer",

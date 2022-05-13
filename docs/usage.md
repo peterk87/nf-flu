@@ -215,8 +215,17 @@ Low coverage depth threshold. Consensus sequence positions with less than this c
 - Type: number
 - Default: `100`
 
-Minimum number of raw reads required per sample/barcode in order to be considered for the downstream processing
-                                                steps
+Minimum number of raw reads required per sample/barcode in order to be considered for the downstream processing steps
+
+### Mismatch Report Option
+
+#### `--min_aln_length`
+
+- Optional
+- Type: integer
+- Default: `700`
+
+Minimum alignment length of nucleotide BLAST results to consider for getting mismatch report from BLAST result against reference database. We normally set this number around the smallest genome segment (Segment 8)
 
 ### H/N subtyping options
 
@@ -229,14 +238,6 @@ Hemaglutinin and neuraminase subtype prediction options
 - Default: `0.85`
 
 Minimum % identity of nucleotide BLAST results to consider for determining H/N subtypes.
-
-#### `--min_aln_length`
-
-- Optional
-- Type: integer
-- Default: `50`
-
-Minimum alignment length of nucleotide BLAST results to consider for determining H/N subtypes.
 
 #### `--ncbi_influenza_fasta`
 
