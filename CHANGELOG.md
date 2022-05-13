@@ -47,9 +47,9 @@ Patch release to fix issue [#5](https://github.com/peterk87/nf-iav-illumina/issu
 |               | `--show_hidden_params`                |
 |               | `--schema_ignore_params`              |
 
-* **NB:** Parameter has been __updated__ if both old and new parameter information is present.
-* **NB:** Parameter has been __added__ if just the new parameter information is present.
-* **NB:** Parameter has been __removed__ if new parameter information isn't present.
+* **NB:** Parameter has been **updated** if both old and new parameter information is present.
+* **NB:** Parameter has been **added** if just the new parameter information is present.
+* **NB:** Parameter has been **removed** if new parameter information isn't present.
 
 ### Software dependencies
 
@@ -61,6 +61,6 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `irma`     | 0.6.7       | 1.2.1       |
 | `python`   | 3.7.3       | 3.9.0       |
 
-* **NB:** Dependency has been __updated__ if both old and new version information is present.
-* **NB:** Dependency has been __added__ if just the new version information is present.
-* **NB:** Dependency has been __removed__ if new version information isn't present.
+* **NB:** Dependency has been **updated** if both old and new version information is present.
+* **NB:** Dependency has been **added** if just the new version information is present.
+* **NB:** Dependency has been **removed** if new version information isn't present.

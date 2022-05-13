@@ -78,7 +78,6 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
 
 </details>
 
-
 [IRMA][] and final assembled gene segments are queried against the [NCBI Influenza DB][] and the reference database (if provided option `--ref_db`) using nucleotide [BLAST][] to determine the closest matching sequences in NCBI and the reference database for each segment of each sample for downstream analysis and to predict the H and N subtype of each sample if possible (i.e. if segments 4 (hemagglutinin) and/or 6 (neuraminidase) were assembled).
 
 ### Coverage Plots
@@ -89,7 +88,6 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
 - `coverage_plots/<sample>/`
   - Coverage plot in linear and log scale: `*.pdf`
 </details>
-
 
 ### Assembled Consensus Sequences
 
@@ -136,8 +134,6 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
   - The results of segments mapping using minimap2: `*.bam`, `*.bai`, `*.depths.tsv`, `*.flagstat`, `*.idxstats`, `*.stats`
 </details>
 
-
-
 ### Variant Calling
 
 <details markdown="1">
@@ -148,7 +144,6 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
   - Clair3 or Medaka VCF: `*.vcf.gz`
 
 </details>
-
 
 ### H/N Subtyping
 
