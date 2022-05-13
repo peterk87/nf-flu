@@ -53,7 +53,7 @@ process CAT_DB {
 
     script:
     """
-        cat $fasta1 $fasta2 > influenza_db.fasta
+    cat $fasta1 $fasta2 > influenza_db.fasta
     """
 }
 
@@ -101,10 +101,15 @@ process CAT_CONSENSUS {
 
   output:
   tuple val(sample_name), path('*.fasta'), emit: fasta
+  path "versions.yml" , emit: versions
 
   script:
   """
   cat_consensus_sequences.py --sample-name $sample_name --output-fasta ${sample_name}.consensus.fasta $consensus
+  cat <<-END_VERSIONS > versions.yml
+  "${task.process}":
+     python: \$(python --version | sed 's/Python //g')
+  END_VERSIONS
   """
 }
 

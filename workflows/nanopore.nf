@@ -12,7 +12,7 @@ include { MEDAKA                                                  } from '../mod
 include { MINIMAP2                                                } from '../modules/local/minimap2'
 include { BCF_FILTER as BCF_FILTER_CLAIR3;
           BCF_FILTER as BCF_FILTER_MEDAKA;
-          BCF_CONSENSUS                                           } from '../modules/local/bcftools'
+          BCF_CONSENSUS; BCFTOOLS_STATS                           } from '../modules/local/bcftools'
 include { CLAIR3                                                  } from '../modules/local/clair3'
 include { MOSDEPTH_GENOME                                         } from '../modules/local/mosdepth'
 include { CAT_FASTQ;
@@ -27,8 +27,8 @@ include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI_PARSEID     } from '../mod
 include { BLAST_BLASTN as BLAST_BLASTN_IRMA                       } from '../modules/nf-core/modules/blast/blastn/main'
 include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS                  } from '../modules/nf-core/modules/blast/blastn/main'
 include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS_REF_DB           } from '../modules/nf-core/modules/blast/blastn/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS  as SOFTWARE_VERSIONS       } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 
-if (params.input) { ch_input= file(params.input) }
 
 def pass_barcode_reads = [:]
 def fail_barcode_reads = [:]
@@ -88,20 +88,24 @@ workflow NANOPORE {
     | set { ch_fastq_dirs }
 
     GUNZIP_FLU_FASTA(ch_influenza_db_fasta)
+    ch_versions = ch_versions.mix(GUNZIP_FLU_FASTA.out.versions)
 
     ch_input_ref_db = GUNZIP_FLU_FASTA.out.gunzip
 
     if (params.ref_db){
         ref_fasta_file = file(params.ref_db, type: 'file')
         CHECK_REF_FASTA(ref_fasta_file)
+        ch_versions = ch_versions.mix(CHECK_REF_FASTA.out.versions)
         CAT_DB(GUNZIP_FLU_FASTA.out.gunzip, CHECK_REF_FASTA.out.fasta)
         ch_input_ref_db = CAT_DB.out.fasta
     }
 
     BLAST_MAKEBLASTDB_NCBI_NO_PARSEID(ch_input_ref_db)
+    ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.versions)
 
     // Make another blast db with parse_id option for pulling reference based on Accession ID
     BLAST_MAKEBLASTDB_NCBI_PARSEID(ch_input_ref_db)
+    ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB_NCBI_PARSEID.out.versions)
 
     CAT_FASTQ(ch_fastq_dirs)
 
@@ -113,10 +117,10 @@ workflow NANOPORE {
 
     // IRMA to generate amended consensus sequences
     IRMA(CAT_FASTQ.out.reads, irma_module)
-    //ch_versions.mix(IRMA.out.version)
+    ch_versions = ch_versions.mix(IRMA.out.versions)
     // Find the top map sequences against ncbi database
     BLAST_BLASTN_IRMA(IRMA.out.consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
-    //ch_versions.mix(BLAST_BLASTN.out.versions)
+    ch_versions = ch_versions.mix(BLAST_BLASTN_IRMA.out.versions)
 
     //Generate suptype prediction report
     if (!params.skip_irma_subtyping_report){
@@ -126,6 +130,7 @@ workflow NANOPORE {
 
     // Prepare top ncbi accession id for each segment of each sample sample (id which has top bitscore)
     PULL_TOP_REF_ID(BLAST_BLASTN_IRMA.out.txt, ch_influenza_metadata)
+    ch_versions = ch_versions.mix(PULL_TOP_REF_ID.out.versions)
 
     PULL_TOP_REF_ID.out.accession_id
     | map {it[1]} | splitCsv(header: false, sep:",")
@@ -138,14 +143,15 @@ workflow NANOPORE {
 
     //Pull segment reference sequence for each sample
     BLAST_BLASTDBCMD(ch_sample_segment, BLAST_MAKEBLASTDB_NCBI_PARSEID.out.db)
+    ch_versions = ch_versions.mix(BLAST_BLASTDBCMD.out.versions)
 
     // Map reads against segment reference sequences
     ch_mapping = BLAST_BLASTDBCMD.out.sample_info
     MINIMAP2(ch_mapping)
-    //ch_versions.mix(MINIMAP2.out.version)
+    ch_versions = ch_versions.mix(MINIMAP2.out.versions)
 
     MOSDEPTH_GENOME(MINIMAP2.out.alignment)
-    //ch_versions.mix(MOSDEPTH_GENOME.out.version)
+    ch_versions = ch_versions.mix(MOSDEPTH_GENOME.out.versions)
 
     // Variants calling
     MINIMAP2.out.alignment
@@ -156,17 +162,28 @@ workflow NANOPORE {
 
     if (params.variant_caller == 'clair3'){
         CLAIR3(ch_variant_calling)
+        ch_versions = ch_versions.mix(CLAIR3.out.versions)
+
         BCF_FILTER_CLAIR3(CLAIR3.out.vcf, params.major_allele_fraction)
+        ch_versions = ch_versions.mix(BCF_FILTER_CLAIR3.out.versions)
         ch_vcf_filter = BCF_FILTER_CLAIR3.out.vcf
     } else if (params.variant_caller == 'medaka') {
         MEDAKA(ch_variant_calling)
+        ch_versions = ch_versions.mix(MEDAKA.out.versions)
+
         BCF_FILTER_MEDAKA(MEDAKA.out.vcf, params.major_allele_fraction)
+        ch_versions = ch_versions.mix(BCF_FILTER_MEDAKA.out.versions)
         ch_vcf_filter = BCF_FILTER_MEDAKA.out.vcf
     }
 
     VCF_FILTER_FRAMESHIFT(ch_vcf_filter)
+    ch_versions = ch_versions.mix(VCF_FILTER_FRAMESHIFT.out.versions)
+
+    BCFTOOLS_STATS(VCF_FILTER_FRAMESHIFT.out.vcf)
+    ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions)
 
     COVERAGE_PLOT (VCF_FILTER_FRAMESHIFT.out.vcf, params.low_coverage)
+    ch_versions = ch_versions.mix(COVERAGE_PLOT.out.versions)
 
     VCF_FILTER_FRAMESHIFT.out.vcf
     | map { it ->
@@ -178,23 +195,40 @@ workflow NANOPORE {
 
     // Generate consensus sequences
     BCF_CONSENSUS(ch_bcf_consensus, params.low_coverage)
+    ch_versions = ch_versions.mix(BCF_CONSENSUS.out.versions)
+
     BCF_CONSENSUS.out.fasta
     | groupTuple(by: 0)
     | set { ch_final_consensus }
 
     CAT_CONSENSUS(ch_final_consensus)
+    ch_versions = ch_versions.mix(CAT_CONSENSUS.out.versions)
+
     CAT_CONSENSUS.out.fasta
     | map {it ->
         return [[id:it[0]], it[1]]
     }
     | set { ch_cat_consensus }
+
     BLAST_BLASTN_CONSENSUS(ch_cat_consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
+    ch_versions = ch_versions.mix(BLAST_BLASTN_CONSENSUS.out.versions)
+
     ch_blastn_consensus = BLAST_BLASTN_CONSENSUS.out.txt.collect({ it[1] })
     SUBTYPING_REPORT_BCF_CONSENSUS(ch_influenza_metadata, ch_blastn_consensus)
+    ch_versions = ch_versions.mix(SUBTYPING_REPORT_BCF_CONSENSUS.out.versions)
 
     if (params.ref_db){
         BLAST_MAKEBLASTDB_REFDB(CHECK_REF_FASTA.out.fasta)
+        ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB_REFDB.out.versions)
+
         BLAST_BLASTN_CONSENSUS_REF_DB(ch_cat_consensus, BLAST_MAKEBLASTDB_REFDB.out.db)
+        ch_versions = ch_versions.mix(BLAST_BLASTN_CONSENSUS_REF_DB.out.versions)
+
         BLASTN_REPORT(BLAST_BLASTN_CONSENSUS_REF_DB.out.txt)
+        ch_versions = ch_versions.mix(BLASTN_REPORT.out.versions)
     }
+
+    SOFTWARE_VERSIONS (
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
 }

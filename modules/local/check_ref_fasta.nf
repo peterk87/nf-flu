@@ -12,9 +12,14 @@ process CHECK_REF_FASTA {
 
   output:
   path('ref_fasta.fixed.fasta'), emit: fasta
+  path "versions.yml", emit: versions
 
   script:
   """
   ref_fasta_check.py $fasta ref_fasta.fixed.fasta
+  cat <<-END_VERSIONS > versions.yml
+  "${task.process}":
+    python: \$(python --version | sed 's/Python //g')
+  END_VERSIONS
   """
 }
