@@ -228,7 +228,7 @@ workflow NANOPORE {
         ch_versions = ch_versions.mix(BLASTN_REPORT.out.versions)
     }
 
-    SOFTWARE_VERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
+    //SOFTWARE_VERSIONS (
+    //    ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    //)
 }
