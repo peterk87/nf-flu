@@ -213,9 +213,9 @@ def parse_blast_result(
     logging.info(
         f"{sample_name} | n={df_filtered.shape[0]} | Filtered for hits above {pident_threshold}% identity."
     )
-    df_filtered["accession"] = df_filtered.saccver.str.extract(
-        r"gi\|\d+\|gb\|(\w+)\|\w+"
-    )
+    # Sequences header has been corrected by GUNZIP Process
+    # zcat $archive | sed -E 's/^>gi\\|[0-9]+\\|gb\\|(\\w+)\\|(.*)/>\\1 \\2/' > influenza.fna
+    df_filtered["accession"] = df_filtered.saccver.str.strip()
     df_filtered["sample"] = sample_name
     df_filtered["sample"] = pd.Categorical(df_filtered["sample"])
     df_filtered["sample_segment"] = df_filtered.qaccver.str.extract(r".+_(\d)$").astype(

@@ -146,7 +146,8 @@ The report contains 2 sheets:
 
 - `variants/<sample>/`
   - Filter Frameshift VCF: `*.filt_frameshift.vcf`
-  - Clair3 or Medaka VCF: `*.vcf.gz`
+  - BCF Tools stats: `*.bcf_tools.stats.txt`
+  - Clair3 or Medaka output directory
 
 </details>
 

@@ -1,6 +1,6 @@
 
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_BARCODE_COUNT_FAIL } from '../modules/local/multiqc_tsv_from_list'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_BARCODE_COUNT_PASS } from '../modules/local/multiqc_tsv_from_list'
+include { MULTIQC_TSV_FROM_LIST as BARCODE_COUNT_FAIL             } from '../modules/local/multiqc_tsv_from_list'
+include { MULTIQC_TSV_FROM_LIST as BARCODE_COUNT_PASS             } from '../modules/local/multiqc_tsv_from_list'
 include { PULL_TOP_REF_ID                                         } from '../modules/local/pull_top_ref_id'
 include { IRMA                                                    } from '../modules/local/irma'
 include { SUBTYPING_REPORT  as  SUBTYPING_REPORT_IRMA_CONSENSUS;
@@ -18,12 +18,11 @@ include { MOSDEPTH_GENOME                                         } from '../mod
 include { CAT_FASTQ;
           GUNZIP as GUNZIP_FLU_FASTA;
           CAT_DB; CAT_CONSENSUS                                   } from '../modules/local/misc'
-include { BLAST_BLASTDBCMD                                        } from '../modules/local/pull_references'
+include { SEQTK_SEQ                                               } from '../modules/local/seqtk_seq'
 include { CHECK_SAMPLE_SHEET                                      } from '../modules/local/check_sample_sheet'
 include { CHECK_REF_FASTA                                         } from '../modules/local/check_ref_fasta'
-include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI_NO_PARSEID  } from '../modules/nf-core/modules/blast/makeblastdb/main'
+include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI             } from '../modules/nf-core/modules/blast/makeblastdb/main'
 include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_REFDB            } from '../modules/nf-core/modules/blast/makeblastdb/main'
-include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI_PARSEID     } from '../modules/nf-core/modules/blast/makeblastdb/main'
 include { BLAST_BLASTN as BLAST_BLASTN_IRMA                       } from '../modules/nf-core/modules/blast/blastn/main'
 include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS                  } from '../modules/nf-core/modules/blast/blastn/main'
 include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS_REF_DB           } from '../modules/nf-core/modules/blast/blastn/main'
@@ -68,13 +67,13 @@ workflow NANOPORE {
     | set { ch_pass_fail_barcode_count }
 
     // Report samples which have reads count  <= min_barcode_reads
-    MULTIQC_TSV_BARCODE_COUNT_FAIL (
+    BARCODE_COUNT_FAIL (
         ch_pass_fail_barcode_count.fail.collect(),
         ['Sample', 'Barcode count'],
         'fail_barcode_count_samples'
     )
     // Report samples which have reads count  > min_barcode_reads
-    MULTIQC_TSV_BARCODE_COUNT_PASS (
+    BARCODE_COUNT_PASS (
         ch_pass_fail_barcode_count.pass.collect(),
         ['Sample', 'Barcode count'],
         'pass_barcode_count_samples'
@@ -100,15 +99,10 @@ workflow NANOPORE {
         ch_input_ref_db = CAT_DB.out.fasta
     }
 
-    BLAST_MAKEBLASTDB_NCBI_NO_PARSEID(ch_input_ref_db)
-    ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.versions)
-
-    // Make another blast db with parse_id option for pulling reference based on Accession ID
-    BLAST_MAKEBLASTDB_NCBI_PARSEID(ch_input_ref_db)
-    ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB_NCBI_PARSEID.out.versions)
+    BLAST_MAKEBLASTDB_NCBI(ch_input_ref_db)
+    ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB_NCBI.out.versions)
 
     CAT_FASTQ(ch_fastq_dirs)
-
     CAT_FASTQ.out.reads
     | map { it ->
         return [it[0].id, it[1]]
@@ -119,7 +113,7 @@ workflow NANOPORE {
     IRMA(CAT_FASTQ.out.reads, irma_module)
     ch_versions = ch_versions.mix(IRMA.out.versions)
     // Find the top map sequences against ncbi database
-    BLAST_BLASTN_IRMA(IRMA.out.consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
+    BLAST_BLASTN_IRMA(IRMA.out.consensus, BLAST_MAKEBLASTDB_NCBI.out.db)
     ch_versions = ch_versions.mix(BLAST_BLASTN_IRMA.out.versions)
 
     //Generate suptype prediction report
@@ -135,18 +129,19 @@ workflow NANOPORE {
     PULL_TOP_REF_ID.out.accession_id
     | map {it[1]} | splitCsv(header: false, sep:",")
     | map{ it ->
-        // 0: sample_name, 1: segment, 2: ref_ncbi_accession_id
+        // 0: sample_name, 1: segment, 2: ref_ncbi_accession_id, 3: ref_sequence_name
         return [it[0],it[1],it[2]]
     }
     | combine(ch_aggregate_reads, by: 0)
     | set {ch_sample_segment} // ch_sample_segment: [sample_name, segment, id, reads]
 
     //Pull segment reference sequence for each sample
-    BLAST_BLASTDBCMD(ch_sample_segment, BLAST_MAKEBLASTDB_NCBI_PARSEID.out.db)
-    ch_versions = ch_versions.mix(BLAST_BLASTDBCMD.out.versions)
+    SEQTK_SEQ(ch_sample_segment, ch_input_ref_db)
+    ch_versions = ch_versions.mix(SEQTK_SEQ.out.versions)
 
     // Map reads against segment reference sequences
-    ch_mapping = BLAST_BLASTDBCMD.out.sample_info
+    ch_mapping = SEQTK_SEQ.out.sample_info
+
     MINIMAP2(ch_mapping)
     ch_versions = ch_versions.mix(MINIMAP2.out.versions)
 
@@ -182,7 +177,7 @@ workflow NANOPORE {
     BCFTOOLS_STATS(VCF_FILTER_FRAMESHIFT.out.vcf)
     ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions)
 
-    COVERAGE_PLOT (VCF_FILTER_FRAMESHIFT.out.vcf, params.low_coverage)
+    COVERAGE_PLOT(VCF_FILTER_FRAMESHIFT.out.vcf, params.low_coverage)
     ch_versions = ch_versions.mix(COVERAGE_PLOT.out.versions)
 
     VCF_FILTER_FRAMESHIFT.out.vcf
@@ -210,7 +205,7 @@ workflow NANOPORE {
     }
     | set { ch_cat_consensus }
 
-    BLAST_BLASTN_CONSENSUS(ch_cat_consensus, BLAST_MAKEBLASTDB_NCBI_NO_PARSEID.out.db)
+    BLAST_BLASTN_CONSENSUS(ch_cat_consensus, BLAST_MAKEBLASTDB_NCBI.out.db)
     ch_versions = ch_versions.mix(BLAST_BLASTN_CONSENSUS.out.versions)
 
     ch_blastn_consensus = BLAST_BLASTN_CONSENSUS.out.txt.collect({ it[1] })
@@ -227,8 +222,5 @@ workflow NANOPORE {
         BLASTN_REPORT(BLAST_BLASTN_CONSENSUS_REF_DB.out.txt)
         ch_versions = ch_versions.mix(BLASTN_REPORT.out.versions)
     }
-
-    //SOFTWARE_VERSIONS (
-    //    ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    //)
+    SOFTWARE_VERSIONS (ch_versions.unique().collectFile(name: 'collated_versions.yml'))
 }

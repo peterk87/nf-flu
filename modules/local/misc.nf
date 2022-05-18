@@ -77,17 +77,16 @@ process GUNZIP {
     path archive
 
     output:
-    path "$gunzip",       emit: gunzip
+    path "*.fna",       emit: gunzip
     path "versions.yml" , emit: versions
 
     script:
     def software = getSoftwareName(task.process)
-    gunzip       = archive.toString() - '.gz'
     """
-    gunzip -f $archive
+    zcat $archive | sed -E 's/^>gi\\|[0-9]+\\|gb\\|(\\w+)\\|(.*)/>\\1 \\2/' > influenza.fna
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gunzip: \$(echo \$(gunzip --version 2>&1) | sed 's/^.*(gzip) //; s/ Copyright.*\$//')
+        zcat: \$(echo \$(zcat --version 2>&1) | sed 's/^.*(gzip) //; s/ Copyright.*\$//')
     END_VERSIONS
     """
 }
