@@ -59,11 +59,11 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
+      - name: Fetch and prepare test data
+        run: |
           mkdir barcode
           cd barcode
           wget https://nf-flu.s3.us-east-2.amazonaws.com/ERR6359501.fastq.gz
-          
-
       - name: Run pipeline with test data
         # TODO You can customise CI pipeline run tests as required
         # For example: adding multiple test runs with different parameters

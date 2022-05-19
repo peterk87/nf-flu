@@ -18,23 +18,25 @@ process MEDAKA{
 
     output:
     tuple val(sample_name), val(segment), val(id), path(fasta), path(depths), path(vcf), emit: vcf
-    path('*.medaka_variant.log'), emit: log
+    path (medaka_dir) , emit: output_dir
+    path (medaka_log), emit: log
     path "versions.yml" , emit: versions
 
     script:
     def software  = getSoftwareName(task.process)
     vcf           = "${sample_name}.Segment_${segment}.${id}.medaka_variant.vcf"
+    medaka_dir    = "${sample_name}.Segment_${segment}.${id}.medaka_variant"
     medaka_log    = "${sample_name}.Segment_${segment}.${id}.medaka_variant.log"
     """
     medaka_variant \\
-        -o medaka_variant \\
+        -o ${medaka_dir} \\
         -t ${task.cpus} \\
         -f $fasta \\
         -i ${bam[0]} \\
         -m ${params.medaka_variant_model} \\
         -s ${params.medaka_snp_model}
     medaka tools annotate \\
-        medaka_variant/round_1.vcf \\
+        ${medaka_dir}/round_1.vcf \\
         $fasta \\
         ${bam[0]} \\
         ${vcf} \\

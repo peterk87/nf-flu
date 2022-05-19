@@ -19,6 +19,7 @@ process CLAIR3{
     output:
     tuple val(sample_name), val(segment), val(id), path(fasta), path(depths), path(vcf), emit: vcf
     path (clair3_dir) , emit: output_dir
+    path (clair3_log), emit: log
     path "versions.yml" , emit: versions
 
     script:
