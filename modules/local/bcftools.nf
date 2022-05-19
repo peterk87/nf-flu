@@ -102,7 +102,7 @@ process BCFTOOLS_STATS {
   tuple val(sample_name), val(segment), val(id), path(fasta), path(depths), path(vcf)
 
   output:
-  path("*.bcftools_stats.txt")
+  path("*.bcftools_stats.txt"), emit: stats
   path "versions.yml" , emit: versions
 
   script:

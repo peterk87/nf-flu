@@ -13,8 +13,8 @@ process MINIMAP2{
     tuple val(sample_name), val(segment), val(id), path(fasta), path(reads)
 
     output:
-    tuple val(sample_name), val(segment), val(id), path(fasta), path('*.{bam,bam.bai}'),
-    path(depths), path(flagstat), path(idxstats), path(stats), emit: alignment
+    tuple val(sample_name), val(segment), val(id), path(fasta), path('*.{bam,bam.bai}'), path(depths), emit: alignment
+    path '*.{flagstat,idxstats,stats}', emit: stats
     path('*.minimap2.log'), emit: log
     path "versions.yml" , emit: versions
 

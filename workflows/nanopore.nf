@@ -27,7 +27,7 @@ include { BLAST_BLASTN as BLAST_BLASTN_IRMA                       } from '../mod
 include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS                  } from '../modules/nf-core/modules/blast/blastn/main'
 include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS_REF_DB           } from '../modules/nf-core/modules/blast/blastn/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS  as SOFTWARE_VERSIONS       } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
-
+include { MULTIQC as MULTIQC_NANOPORE                             } from '../modules/local/multiqc'
 
 def pass_barcode_reads = [:]
 def fail_barcode_reads = [:]
@@ -37,6 +37,8 @@ def irma_module = 'FLU-minion'
 if (params.irma_module) {
     irma_module = params.irma_module
 }
+def json_schema = "$projectDir/nextflow_schema.json"
+def summary_params = NfcoreSchema.params_summary_map(workflow, params, json_schema)
 
 workflow NANOPORE {
     ch_versions = Channel.empty()
@@ -222,5 +224,16 @@ workflow NANOPORE {
         BLASTN_REPORT(BLAST_BLASTN_CONSENSUS_REF_DB.out.txt)
         ch_versions = ch_versions.mix(BLASTN_REPORT.out.versions)
     }
+    workflow_summary    = Schema.params_summary_multiqc(workflow, summary_params)
+    ch_workflow_summary = Channel.value(workflow_summary)
+    ch_multiqc_config = Channel.fromPath("$projectDir/assets/multiqc_config.yaml")
     SOFTWARE_VERSIONS (ch_versions.unique().collectFile(name: 'collated_versions.yml'))
+    MULTIQC_NANOPORE(
+        ch_multiqc_config,
+        MINIMAP2.out.stats.collect().ifEmpty([]),
+        MOSDEPTH_GENOME.out.mqc.collect().ifEmpty([]),
+        BCFTOOLS_STATS.out.stats.collect().ifEmpty([]),
+        SOFTWARE_VERSIONS.out.mqc_yml.collect(),
+        ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
+    )
 }

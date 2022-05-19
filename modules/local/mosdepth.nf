@@ -11,8 +11,7 @@ process MOSDEPTH_GENOME {
       container "quay.io/biocontainers/mosdepth:0.3.3--h01d7912_0"
   }
   input:
-  tuple val(sample_name), val(segment), val(id), path(fasta), path(bam),
-    path(depths), path(flagstat), path(idxstats), path(stats)
+  tuple val(sample_name), val(segment), val(id), path(fasta), path(bam), path(depths)
 
   output:
   tuple val(sample_name), val(segment), val(id), path("*.per-base.bed.gz"), emit: bedgz
