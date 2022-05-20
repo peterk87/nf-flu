@@ -81,7 +81,7 @@ def report(blast_results, excel_report, min_aln_length):
         logging.warning(f"No BLASTN results in {blast_results}!, empty report")
         return
     df_blast_result["ref_name"] = df_blast_result["stitle"].str.extract('(.+?)_[sS]egment')
-    df_blast_result["sample_name"] = df_blast_result["qaccver"].str.extract('(.+?)_[1-9]')
+    df_blast_result["sample_name"] = df_blast_result["qaccver"].str.extract('(.+?)_[1-9]$')
     df_blast_result["segment_name"] = df_blast_result["qaccver"].str.extract(r".+_(\d)$")
     df_blast_result.drop(columns=["qaccver", "saccver", "stitle"], inplace=True)
     df_blast_result = df_blast_result.reindex(
@@ -103,6 +103,9 @@ def report(blast_results, excel_report, min_aln_length):
     df_mismatch_report.insert(0, "Segment", segments)
     df_mismatch_report["Segment"] = df_mismatch_report["Segment"].apply(lambda x: influenza_segment[int(x)])
     df_mismatch_report.loc["Total"] = pd.Series(df_mismatch_report[ref_names].sum())
+    # Add segment name for more informative
+    df_blast_result["segment_name"] = df_blast_result["segment_name"]. \
+        apply(lambda x: influenza_segment[int(x)])
     df_blast_result.columns = ["Sample", "Sample Genome Segment Number", "Reference Virus Name",
                                "BLASTN Percent Identity",
                                "BLASTN Alignment Length", "BLASTN Mismatches", "BLASTN Gaps",

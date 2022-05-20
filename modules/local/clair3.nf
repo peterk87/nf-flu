@@ -26,7 +26,7 @@ process CLAIR3{
     def software  = getSoftwareName(task.process)
     vcf           = "${sample_name}.Segment_${segment}.${id}.clair3_variant.vcf.gz"
     clair3_log    = "${sample_name}.Segment_${segment}.${id}.clair3_variant.log"
-    clair3_dir    = "${sample_name}.Segment_${segment}.${id}.clair3_variant"
+    clair3_dir    = "${sample_name}.Segment_${segment}.${id}.clair3_variant/"
     model_suffix  = "models/${params.clair3_variant_model}"
     """
     clair3_path=\$(which run_clair3.sh | sed 's/run_clair3.sh//g')

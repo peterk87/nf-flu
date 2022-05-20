@@ -25,7 +25,7 @@ process MEDAKA{
     script:
     def software  = getSoftwareName(task.process)
     vcf           = "${sample_name}.Segment_${segment}.${id}.medaka_variant.vcf"
-    medaka_dir    = "${sample_name}.Segment_${segment}.${id}.medaka_variant"
+    medaka_dir    = "${sample_name}.Segment_${segment}.${id}.medaka_variant/"
     medaka_log    = "${sample_name}.Segment_${segment}.${id}.medaka_variant.log"
     """
     medaka_variant \\

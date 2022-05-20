@@ -438,6 +438,9 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
     cols = cols[cols.isin(df_subtype_results.columns)]
     df_N = df_subtype_results[cols].rename(columns=subtype_results_summary_final_names)
     if not get_top_ref:
+        # Add segment name for more informative
+        df_all_blast["Sample Genome Segment Number"] = df_all_blast["Sample Genome Segment Number"]. \
+            apply(lambda x: influenza_segment[int(x)])
         write_excel(
             [
                 ("Subtype Predictions", df_subtype_predictions),
