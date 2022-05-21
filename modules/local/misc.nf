@@ -104,12 +104,17 @@ process CAT_CONSENSUS {
   tuple val(sample_name), path(consensus)
 
   output:
-  tuple val(sample_name), path('*.fasta'), emit: fasta
+  tuple val(sample_name), path('*.consensus.blastn.fasta'), emit: fasta
+  path('*.consensus.fasta'), emit: consensus_fasta
   path "versions.yml" , emit: versions
 
   script:
   """
-  cat_consensus_sequences.py --sample-name $sample_name --output-fasta ${sample_name}.consensus.fasta $consensus
+  cat_consensus_sequences.py \\
+  --sample-name $sample_name \\
+  --output1-fasta ${sample_name}.consensus.fasta \\
+  --output2-fasta ${sample_name}.consensus.blastn.fasta \\
+  $consensus
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
      python: \$(python --version | sed 's/Python //g')
