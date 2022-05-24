@@ -9,11 +9,11 @@
 
 ## Introduction
 
-**nf-iav-illumina** is a bioinformatics analysis pipeline for assembly and H/N subtyping of Influenza A virus Illumina sequence data.
+**nf-flu** is a bioinformatics analysis pipeline for assembly and H/N subtyping of Influenza A virus. The pipeline supports both Illumina and Nanopore Platform.
+Since Influenza is a special virus with multiple gene segments (8 segments) and there might be a reference or multiple we would want to align against, the pipeline will automatically pull top match references for each segment.
+To achieve this task, the pipeline downloads Influenza database from NCBI and user could provide their own reference database. The pipline performs read mapping against each reference segment, variant calling and genome assembly.
 
 The pipeline is implemented in [Nextflow][]
-
-for the [IRMA][] assembly and H/N subtyping by nucleotide [BLAST][] against the [NCBI Influenza DB][].
 
 ## Pipeline summary
 
@@ -21,7 +21,9 @@ for the [IRMA][] assembly and H/N subtyping by nucleotide [BLAST][] against the 
 2. Merge reads of re-sequenced samples ([`cat`](http://www.linfo.org/cat.html)) (if needed)
 3. Assembly of Influenza gene segments with [IRMA][] using the built-in FLU module
 4. Nucleotide [BLAST][] search against [NCBI Influenza DB][]
-5. H/N subtype prediction and Excel XLSX report generation based on BLAST results
+5. Automatically pull top match references for segments
+6. H/N subtype prediction and Excel XLSX report generation based on BLAST results
+7. Perform Variant calling and genome assembly for all segments.
 
 ## Quick Start
 
@@ -46,17 +48,27 @@ for the [IRMA][] assembly and H/N subtyping by nucleotide [BLAST][] against the 
           -o samplesheet.csv
         ```
 
-    * Typical command
+    * Typical command for Illumina Platform
 
         ```bash
         nextflow run peterk87/nf-iav-illumina \
           --input samplesheet.csv \
+          --platform illumina \
           --profile <docker/singularity/podman/shifter/charliecloud/conda>
         ```
 
+    * Typical command for Nanopore Platform
+
+      ```bash
+      nextflow run peterk87/nf-iav-illumina \
+        --input samplesheet.csv \
+        --platform nanopore \
+        --profile <docker/singularity/conda>
+      ```
+
 ## Documentation
 
-The nf-iav-illumina pipeline comes with:
+The nf-flu pipeline comes with:
 
 * [usage](docs/usage.md) and
 * [output](docs/output.md) documentation.
@@ -68,6 +80,8 @@ The nf-iav-illumina pipeline comes with:
   * [IRMA Publication](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3030-6)
 
 ## Credits
+
+The nf-flu pipeline was originally developed by [Peter Kruczkiewicz](https://github.com/peterk87) from [CFIA-NCFAD](https://github.com/CFIA-NCFAD), [Hai Nguyen](https://github.com/nhhaidee) extended the piepline for Nanopore data.
 
 * [nf-core](https://nf-co.re) project for establishing Nextflow workflow development best-practices, [nf-core tools](https://nf-co.re/tools-docs/) and [nf-core modules](https://github.com/nf-core/modules)
 * [nf-core/viralrecon](https://github.com/nf-core/viralrecon) for inspiration and setting a high standard for viral sequence data analysis pipelines

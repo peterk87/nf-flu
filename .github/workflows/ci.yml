@@ -9,7 +9,7 @@ on:
     types: [published]
 
 jobs:
-  test:
+  test_illumina:
     name: Run workflow tests
     # Only run on push if this is the nf-iav-illumina dev branch (merged PRs)
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'peterk87/nf-iav-illumina') }}
@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['21.04.0', '21.05.0-edge']
+        nxf_ver: ['21.10.6', '22.04.0']
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -36,4 +36,37 @@ jobs:
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker
+          nextflow run ${GITHUB_WORKSPACE} -profile test_illumina,docker
+
+  test_nanopore:
+    name: Run workflow tests
+    # Only run on push if this is the nf-iav-illumina dev branch (merged PRs)
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'peterk87/nf-iav-illumina') }}
+    runs-on: ubuntu-latest
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
+    strategy:
+      matrix:
+        # Nextflow versions: check pipeline minimum and current latest
+        nxf_ver: ['21.10.6', '22.04.0']
+    steps:
+      - name: Check out pipeline code
+        uses: actions/checkout@v2
+      - name: Install Nextflow
+        env:
+          CAPSULE_LOG: none
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Fetch and prepare test data
+        run: |
+          mkdir barcode
+          cd barcode
+          wget https://nf-flu.s3.us-east-2.amazonaws.com/ERR6359501.fastq.gz
+      - name: Run pipeline with test data
+        # TODO You can customise CI pipeline run tests as required
+        # For example: adding multiple test runs with different parameters
+        # Remember that you can parallelise this by using strategy.matrix
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker --platform nanopore
