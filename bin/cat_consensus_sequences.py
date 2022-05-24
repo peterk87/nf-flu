@@ -15,12 +15,10 @@ def write_consensus(sample_name, output1_fasta, output2_fasta, consensus_sequenc
         fasta_file = SeqIO.parse(open(infile), 'fasta')
         for record in fasta_file:
             seqid, sequence = record.id, record.seq
-            segment_number = seqid.split('_')[-2]
-            segment_name = seqid.split('_')[-1]
+            *_, segment_number, segment_name = seqid.split('_')
             sequence_list.append([seqid, segment_number, segment_name, sequence])
     sequence_list.sort(key=lambda tup: tup[1])
     # Outfile for publishing to output dir with header format SampleName_segment1_PB2
-    # (solution for now as consensus file is very small)
     with open(output1_fasta, 'w') as outfile1:
         for item1 in sequence_list:
             outfile1.write(f'>{sample_name}_segment{item1[1]}_{item1[2]}\n{item1[3]}\n')

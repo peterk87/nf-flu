@@ -1,3 +1,4 @@
+//Credit https://github.com/nf-core/viralrecon/blob/master/modules/local/multiqc_tsv_from_list.nf
 process MULTIQC_TSV_FROM_LIST {
 
     executor 'local'

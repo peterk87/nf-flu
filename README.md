@@ -81,6 +81,8 @@ The nf-flu pipeline comes with:
 
 ## Credits
 
+The nf-flu pipeline was originally developed by [Peter Kruczkiewicz](https://github.com/peterk87) from [CFIA-NCFAD](https://github.com/CFIA-NCFAD), [Hai Nguyen](https://github.com/nhhaidee) extended the piepline for Nanopore data.
+
 * [nf-core](https://nf-co.re) project for establishing Nextflow workflow development best-practices, [nf-core tools](https://nf-co.re/tools-docs/) and [nf-core modules](https://github.com/nf-core/modules)
 * [nf-core/viralrecon](https://github.com/nf-core/viralrecon) for inspiration and setting a high standard for viral sequence data analysis pipelines
 * [Conda](https://docs.conda.io/projects/conda/en/latest/) and [Bioconda](https://bioconda.github.io/) project for making it easy to install, distribute and use bioinformatics software.
