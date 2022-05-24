@@ -1,10 +1,8 @@
-# nf-flu: Usage
+# nf-iav-illumina: Usage
 
 ## Introduction
 
-### Samplesheet format
-
-#### Illuminia Platform
+### Illumina samplesheet format
 
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a tab-delimited (TSV) or comma-separated (CSV) file with 3 columns, and a header row as shown in the examples below.
 
@@ -38,27 +36,6 @@ python ~/.nextflow/assets/peterk87/nf-iav-illumina/bin/fastq_dir_to_samplesheet.
   -i /path/to/illumina_run/Data/Intensities/Basecalls/ \
   -o samplesheet.csv
 ```
-
-#### Nanopore Platform
-
-You have option to provide a samplesheet to the pipeline that maps sample ids to FASTQ file
-
-```bash
---input '[path to samplesheet file]'
-```
-
-It has to be a comma-separated file with 2 columns. A final samplesheet file may look something like the one below:
-
-```bash
-sample,barcode
-SAMPLE_1,/path/to/run1/fastq_pass/barcode01
-SAMPLE_2,/path/to/run2/fastq_pass/barcode02
-```
-
-| Column    | Description                                                                                                                              |
-|-----------|------------------------------------------------------------------------------------------------------------------------------------------|
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample.                            |
-| `barcode` | Full path to FASTQ file for each barcode. Files in the path could be gzipped or unzipped and have the extension ".fastq.gz" or ".fastq". |
 
 ## Running the pipeline
 
@@ -108,21 +85,6 @@ Define where the pipeline should find input data and save output data.
 
 Sample sheet with sample names and paths to reads.
 
-#### `--platform`
-
-- Optional
-- Type: string
-- Default: illumina
-
-Specify the platform for Illumina or Nanopore data
-
-#### `--ref_db`
-
-- Optional
-- Type: string
-
-Reference database in fasta file, sequence ID must be in format `SequenceName_segment#_segmentName`, for example `2021-FAV33-OS_segment1_PB2`
-
 #### `--outdir`
 
 - Optional
@@ -135,7 +97,7 @@ The output directory where the results will be saved.
 
 #### `--irma_module`
 
-- Optional
+- **Required**
 - Type: string
 - Default: `FLU-utr`
 
@@ -149,84 +111,6 @@ IRMA module to use for analysis.
 
 Set "DEL_TYPE=NNN" to keep deletions to reference sequence as N characters in consensus.
 
-### Variant Calling options
-
-#### `--variant_caller`
-
-- Optional
-- Type: string
-- Default: `clair3`
-
-Set Variant Caller
-
-#### `--medaka_variant_model`
-
-- Optional
-- Type: string
-- Default: `r941_prom_hac_variant_g507`
-
-Medaka model for final variant calling from phased reads
-
-#### `--medaka_snp_model`
-
-- Optional
-- Type: string
-- Default: `r941_prom_hac_snp_g507`
-
-Medaka model for initial SNP calling from mixed reads prior to phasing
-
-#### `--clair3_variant_model`
-
-- Optional
-- Type: string
-- Default: `r941_prom_sup_g5014`
-
-Set Clair3 Variant model
-
-#### `--minor_allele_fraction`
-
-- Optional
-- Type: number
-- Default: `0.25`
-
-Set Minor variant allele frequency/fraction
-
-#### `--major_allele_fraction`
-
-- Optional
-- Type: number
-- Default: `0.75`
-
-Set Major variant allele frequency/fraction. Only major variant alleles are used for generating a consensus sequence
-
-#### `--low_coverage`
-
-- Optional
-- Type: number
-- Default: `10`
-
-Low coverage depth threshold. Consensus sequence positions with less than this coverage depth will be masked with `N`
-
-### Nanopore options
-
-#### `--min_barcode_reads`
-
-- Optional
-- Type: number
-- Default: `100`
-
-Minimum number of raw reads required per sample/barcode in order to be considered for the downstream processing steps
-
-### Mismatch Report options
-
-#### `--min_aln_length`
-
-- Optional
-- Type: integer
-- Default: `700`
-
-Minimum alignment length of nucleotide BLAST results to consider for getting mismatch report from BLAST result against reference database. We normally set this number around the smallest genome segment (Segment 8)
-
 ### H/N subtyping options
 
 Hemaglutinin and neuraminase subtype prediction options
@@ -239,13 +123,13 @@ Hemaglutinin and neuraminase subtype prediction options
 
 Minimum % identity of nucleotide BLAST results to consider for determining H/N subtypes.
 
-#### `--max_top_blastn`
+#### `--min_aln_length`
 
 - Optional
-- Type: number
-- Default: `3`
+- Type: integer
+- Default: `50`
 
-Maximum of top blastn result reported
+Minimum alignment length of nucleotide BLAST results to consider for determining H/N subtypes.
 
 #### `--ncbi_influenza_fasta`
 

@@ -16,21 +16,6 @@
                     "fa_icon": "fas fa-file-csv",
                     "description": "Sample sheet with sample names and paths to reads."
                 },
-                "platform": {
-                    "type": "string",
-                    "fa_icon": "fas fa-hdd",
-                    "description": "NGS platform used to sequence the samples.",
-                    "enum": [
-                        "illumina",
-                        "nanopore"
-                    ]
-                },
-                "ref_db": {
-                    "type": "string",
-                    "fa_icon": "fas fa-hdd",
-                    "description": "Provide fasta database of interesting reference sequences",
-                    "default": ""
-                },
                 "outdir": {
                     "type": "string",
                     "description": "The output directory where the results will be saved.",
@@ -41,75 +26,6 @@
             "required": [
                 "input"
             ]
-        },"variant_calling_options": {
-            "title": "Variant calling options",
-            "type": "object",
-            "description": "Various options for the variant calling branch of the pipeline.",
-            "default": "",
-            "properties": {
-                "variant_caller": {
-                    "type": "string",
-                    "description": "Variant caller (Clair3 or Medaka)",
-                    "default": "clair3",
-                    "fa_icon": "fas fa-dna"
-                },
-                "medaka_variant_model": {
-                    "type": "string",
-                    "description": "[Medaka](https://github.com/nanoporetech/medaka) Medaka model for final variant calling from phased reads",
-                    "default": "r941_prom_hac_variant_g507",
-                    "fa_icon": "fas fa-dna"
-                },
-                "medaka_snp_model": {
-                    "type": "string",
-                    "description": "[Medaka](https://github.com/nanoporetech/medaka) Medaka model for initial SNP calling from mixed reads prior to phasing",
-                    "default": "r941_prom_hac_snp_g507",
-                    "fa_icon": "fas fa-dna"
-                },
-                "clair3_variant_model": {
-                    "type": "string",
-                    "description": "[Clair3](https://github.com/HKU-BAL/Clair3) Clair3 variant model",
-                    "default": "r941_prom_sup_g5014",
-                    "fa_icon": "fas fa-dna"
-                },
-                "minor_allele_fraction": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 1.0,
-                    "default": 0.25,
-                    "description": "Minor variant allele frequency/fraction.",
-                    "fa_icon": "fas fa-compress-alt"
-                },
-                "major_allele_fraction": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 1.0,
-                    "default": 0.75,
-                    "description": "Major variant allele frequency/fraction. Only major variant alleles are used for generating a consensus sequence.",
-                    "fa_icon": "fas fa-expand-alt"
-                },
-                "low_coverage": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "default": 10,
-                    "description": "Low coverage depth threshold. Consensus sequence positions with less than this coverage depth will be masked with `N`."
-                }
-            },
-            "fa_icon": "fas fa-dna"
-        },
-        "nanopore_options": {
-            "title": "Nanopore options",
-            "type": "object",
-            "description": "Options exclusive to running the pipeline on Nanopore data using the ARTIC fieldbioinformatics pipeline.",
-            "default": "",
-            "fa_icon": "fas fa-truck-loading",
-            "properties": {
-                "min_barcode_reads": {
-                    "type": "integer",
-                    "default": 100,
-                    "description": "Minimum number of raw reads required per sample/barcode in order to be considered for the downstream processing steps.",
-                    "fa_icon": "fas fa-hand-paper"
-                }
-            }
         },
         "irma_assembly_options": {
             "title": "IRMA assembly options",
@@ -119,7 +35,7 @@
             "properties": {
                 "irma_module": {
                     "type": "string",
-                    "default": "",
+                    "default": "FLU-utr",
                     "fa_icon": "fas fa-cube",
                     "description": "IRMA module to use for analysis.",
                     "enum": [
@@ -145,44 +61,12 @@
                     "default": "true",
                     "fa_icon": "fas fa-trash-alt",
                     "description": "Set \"DEL_TYPE=NNN\" to keep deletions to reference sequence as N characters in consensus."
-                },
-                "skip_irma_subtyping_report": {
-                    "type": "boolean",
-                    "default": "true",
-                    "fa_icon": "fas fa-trash-alt",
-                    "description": "Skip the output of subtyping report generated by IRMA consensus sequences."
                 }
             },
+            "required": [
+                "irma_module"
+            ],
             "fa_icon": "fas fa-cogs"
-        },"nanopore_illumina_options": {
-            "title": "Nanopore/Illumina options",
-            "type": "object",
-            "description": "Options common to both the Nanopore and Illumina workflows in the pipeline.",
-            "default": "",
-            "properties": {
-                "skip_mosdepth": {
-                    "type": "boolean",
-                    "default": false,
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip genome-wide and amplicon coverage plot generation from mosdepth output."
-                }
-            },
-            "fa_icon": "fas fa-retweet"
-        },"mismatch_report_option": {
-            "title": "Mistmatch report options",
-            "type": "object",
-            "description": "Reporting option.",
-            "default": "",
-            "properties": {
-                "min_aln_length": {
-                    "type": "integer",
-                    "default": 700,
-                    "description": "Minimum alignment length of nucleotide BLAST results to consider for getting mismatch report from BLAST result against reference database. We normally set this number around the smallest genome segment (Segment 8).",
-                    "fa_icon": "fas fa-balance-scale-right",
-                    "minimum": 0
-                }
-            },
-            "fa_icon": "fas fa-retweet"
         },
         "h_n_subtyping_options": {
             "title": "H/N subtyping options",
@@ -198,12 +82,12 @@
                     "minimum": 0,
                     "maximum": 1
                 },
-                "max_top_blastn": {
+                "min_aln_length": {
                     "type": "integer",
-                    "default": 3,
-                    "description": "Maximum of top blastn result reported",
+                    "default": 50,
+                    "description": "Minimum alignment length of nucleotide BLAST results to consider for determining H/N subtypes.",
                     "fa_icon": "fas fa-balance-scale-right",
-                    "minimum": 1
+                    "minimum": 0
                 },
                 "ncbi_influenza_fasta": {
                     "type": "string",

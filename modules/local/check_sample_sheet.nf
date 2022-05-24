@@ -1,3 +1,9 @@
+// Import generic module functions
+include { initOptions; saveFiles; getSoftwareName } from './functions'
+
+params.options = [:]
+options        = initOptions(params.options)
+
 process CHECK_SAMPLE_SHEET {
   publishDir "${params.tracedir}/",
              mode: params.publish_dir_mode
@@ -17,6 +23,6 @@ process CHECK_SAMPLE_SHEET {
 
   script:
   """
-  check_sample_sheet.py $samplesheet ${params.platform} samplesheet.fixed.csv
+  check_sample_sheet.py $samplesheet samplesheet.fixed.csv
   """
 }

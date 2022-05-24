@@ -2,7 +2,9 @@
 
 """
 Generate an Influenza H/N subtyping report from nucleotide BLAST results for one or more genomes.
-Metadata from the NCBI Influenza DB is merged in with the BLAST results to improve subtyping results and provide context for the results obtained.
+
+Metadata from the NCBI Influenza DB is merged in with the BLAST results to improve subtyping results and provide context for the results obtained. 
+
 For reference:
 Segment 4 - hemagglutinin (HA) gene
 Segment 6 - neuraminidase (NA) gene
@@ -22,17 +24,6 @@ from rich.logging import RichHandler
 
 LOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s [in %(filename)s:%(lineno)d]"
 logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
-
-influenza_segment = {
-    1: "1_PB2",
-    2: "2_PB1",
-    3: "3_PA",
-    4: "4_HA",
-    5: "5_NP",
-    6: "6_NA",
-    7: "7_M",
-    8: "8_NS",
-}
 
 # Column names/types/final report names
 blast_cols = [
@@ -180,12 +171,12 @@ REGEX_UNALLOWED_EXCEL_WS_CHARS = re.compile(r"[\\:/?*\[\]]+")
 
 
 def parse_blast_result(
-        blast_result: str,
-        df_metadata: pd.DataFrame,
-        regex_subtype_pattern: str,
-        top: int = 3,
-        pident_threshold: float = 0.85,
-        min_aln_length: int = 50,
+    blast_result: str,
+    df_metadata: pd.DataFrame,
+    regex_subtype_pattern: str,
+    top: int = 3,
+    pident_threshold: float = 0.85,
+    min_aln_length: int = 50,
 ) -> Optional[
     Tuple[pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame], Dict]
 ]:
@@ -209,13 +200,13 @@ def parse_blast_result(
     )
     df_filtered = df[
         (df["pident"] >= (pident_threshold * 100)) & (df["length"] >= min_aln_length)
-        ]
+    ]
     logging.info(
         f"{sample_name} | n={df_filtered.shape[0]} | Filtered for hits above {pident_threshold}% identity."
     )
-    # Sequences header has been corrected by GUNZIP Process
-    # zcat $archive | sed -E 's/^>gi\\|[0-9]+\\|gb\\|(\\w+)\\|(.*)/>\\1 \\2/' > influenza.fna
-    df_filtered["accession"] = df_filtered.saccver.str.strip()
+    df_filtered["accession"] = df_filtered.saccver.str.extract(
+        r"gi\|\d+\|gb\|(\w+)\|\w+"
+    )
     df_filtered["sample"] = sample_name
     df_filtered["sample"] = pd.Categorical(df_filtered["sample"])
     df_filtered["sample_segment"] = df_filtered.qaccver.str.extract(r".+_(\d)$").astype(
@@ -348,11 +339,8 @@ def find_h_or_n_type(df_merge, seg):
 )
 @click.option('--min-aln-length', default=50, help="Min BLAST alignment length threshold")
 @click.option("--threads", default=4, help="Number of BLAST result parsing threads.")
-@click.option("--get-top-ref", default=False, help="Get top ref accession id from ncbi database.")
-@click.option("--sample-name", default="", help="Sample Name.")
 @click.argument("blast_results", nargs=-1)
-def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
-           min_aln_length, threads, get_top_ref, sample_name):
+def report(flu_metadata, blast_results, excel_report, top, pident_threshold, min_aln_length, threads):
     from rich.traceback import install
 
     install(show_locals=True, width=120, word_wrap=True)
@@ -390,7 +378,7 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
     )
     regex_subtype_pattern = r"\((H\d+N\d+|" + "|".join(list(unique_subtypes)) + r")\)"
 
-    if threads > 1:
+    if threads > 1 :
         pool = Pool(processes=threads)
         logging.info(
             f"Initialized multiprocessing pool with {threads} processes. Submitting async parsing jobs."
@@ -409,9 +397,7 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
             f'Got {len(results)} async parsing results. Merging into report "{excel_report}".'
         )
     else:
-        results = [
-            parse_blast_result(blast_result, df_md, regex_subtype_pattern, top=top, pident_threshold=pident_threshold,
-                               min_aln_length=min_aln_length) for blast_result in blast_results]
+        results = [parse_blast_result(blast_result, df_md, regex_subtype_pattern, top=top, pident_threshold=pident_threshold, min_aln_length=min_aln_length) for blast_result in blast_results]
     dfs_blast = []
     all_subtype_results = {}
     for parsed_result in results:
@@ -437,30 +423,15 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
     cols = pd.Series(columns_N_summary_results)
     cols = cols[cols.isin(df_subtype_results.columns)]
     df_N = df_subtype_results[cols].rename(columns=subtype_results_summary_final_names)
-    if not get_top_ref:
-        # Add segment name for more informative
-        df_all_blast["Sample Genome Segment Number"] = df_all_blast["Sample Genome Segment Number"]. \
-            apply(lambda x: influenza_segment[int(x)])
-        write_excel(
-            [
-                ("Subtype Predictions", df_subtype_predictions),
-                ("Top Segment Matches", df_all_blast),
-                ("H Segment Results", df_H),
-                ("N Segment Results", df_N),
-            ],
-            output_dest=excel_report,
-        )
-    else:
-        df_ref_id = df_all_blast[
-            ['Sample', 'Sample Genome Segment Number', 'Reference NCBI Accession', 'BLASTN Bitscore',
-             'Reference Sequence ID']]
-        df_ref_id = df_ref_id.reset_index(drop=True)
-        df_ref_id.loc[df_ref_id['Reference NCBI Accession'].isna(), 'Reference NCBI Accession'] = df_ref_id[
-            'Reference Sequence ID']
-        df_ref_id['Reference NCBI Accession'] = df_ref_id['Reference NCBI Accession'].str.strip()
-        df_ref_id['Sample Genome Segment Number'] = df_ref_id['Sample Genome Segment Number']. \
-            apply(lambda x: influenza_segment[int(x)])
-        df_ref_id.to_csv(sample_name + ".topsegments.csv", header=True, index=False)
+    write_excel(
+        [
+            ("Subtype Predictions", df_subtype_predictions),
+            ("Top Segment Matches", df_all_blast),
+            ("H Segment Results", df_H),
+            ("N Segment Results", df_N),
+        ],
+        output_dest=excel_report,
+    )
 
 
 def get_col_widths(df, index=False):
@@ -476,9 +447,9 @@ def get_col_widths(df, index=False):
 
 
 def write_excel(
-        name_dfs: List[Tuple[str, pd.DataFrame]],
-        output_dest: str,
-        sheet_name_index: bool = True,
+    name_dfs: List[Tuple[str, pd.DataFrame]],
+    output_dest: str,
+    sheet_name_index: bool = True,
 ) -> None:
     logging.info("Starting to write tabular data to worksheets in Excel workbook")
     with pd.ExcelWriter(output_dest, engine="xlsxwriter") as writer:

@@ -8,11 +8,6 @@ The directories listed below will be created in the results directory after the 
 
 - [IRMA](#irma)
 - [BLAST analysis](#blast-analysis)
-- [Coverage Plots](#coverage-plots)
-- [Assembled Consensus Sequences](#assembled-consensus-sequences)
-- [Mismatch Report](#mismatch-report)
-- [Reference Sequences](#reference-sequences)
-- [Variant Calling](#variant-calling)
 - [H/N Subtyping](#h-n-subtyping)
 
 ### IRMA
@@ -52,104 +47,28 @@ The directories listed below will be created in the results directory after the 
   - Sorted BAM file for gene segment assembly: `*.bam`
   - Final assembled plurality consensus (no mixed basecalls) for gene segment: `*.fa`
   - IRMA variant call file for gene segment: `*.vcf`
-- Concatenated "amended" IRMA consensus sequences for all gene segments assembled: `<sample>.irma.consensus.fasta`
+- `consensus/`
+  - Concatenated "amended" IRMA consensus sequences for all gene segments assembled: `<sample>.consensus.fasta`
 
 </details>
 
 IRMA output is described in the [official IRMA output documentation](https://wonder.cdc.gov/amd/flu/irma/output.html).
 
-The primary output from IRMA are the consensus sequences for gene segments, which are used for H/N subtyping and performed blastn against influenza database to pull top match reference sequences for each segment of each sample.
+The primary output from IRMA are the consensus sequences for gene segments, which are used for H/N subtyping.
 
 ### BLAST analysis
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `blast/ncbi/blast_db/`
-  - Nucleotide BLAST database of [NCBI Influenza DB][] and reference database (if provided option `--ref_db`): `influenza_db.*`
-- `blast/ref_db/blast_db/`
-  - Nucleotide BLAST database of the reference database (if provided option `--ref_db`) ref_fasta.fixed.*`
-- `blast/blastn/irma`
-  - Nucleotide BLAST tabular output files (`-outfmt "6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qcovs stitle"`) of sample IRMA assembled gene segments against the [NCBI Influenza DB][] and the reference database (if provided option `--ref_db`)
-- `blast/blastn/consensus`
-  - Nucleotide BLAST tabular output files (`-outfmt "6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qcovs stitle"`) of sample final consensus assembled gene segments against the [NCBI Influenza DB][] and the reference database (if provided option `--ref_db`)
-- `blast/blastn/against_ref_db`
-  - Nucleotide BLAST tabular output files (`-outfmt "6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qcovs stitle"`) of sample final consensus assembled gene segments against the reference database only (if provided option `--ref_db`)
+- `blast/blast_db/`
+  - Nucleotide BLAST database of [NCBI Influenza DB][]: `influenza.fna*`
+- `blast/`
+  - Nucleotide BLAST tabular output files (`-outfmt "6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qcovs stitle"`) of sample IRMA assembled gene segments against the [NCBI Influenza DB][]
 
 </details>
 
-[IRMA][] and final assembled gene segments are queried against the [NCBI Influenza DB][] and the reference database (if provided option `--ref_db`) using nucleotide [BLAST][] to determine the closest matching sequences in NCBI and the reference database for each segment of each sample for downstream analysis and to predict the H and N subtype of each sample if possible (i.e. if segments 4 (hemagglutinin) and/or 6 (neuraminidase) were assembled).
-
-### Coverage Plots
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `coverage_plots/<sample>/`
-  - Coverage plot in linear and log scale: `*.pdf`
-
-</details>
-
-### Assembled Consensus Sequences
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `consensus/bcftools/<sample>/`
-  - Assembled consensus sequences for each segment: `*.bcftools.consensus.fasta`
-- `consensus/bcftools/`
-  - Concatenated consensus sequences for all segments assembled: `<sample>.consensus.fasta`
-- `consensus/irma/`
-  - Assembled consensus sequences for each segment: `<sample>.irma.consensus.fasta`
-
-</details>
-
-### Mismatch Report
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `mistmacth_report/`
-  - `<sample>-blastn-report.xlsx`
-
-</details>
-The report contains 2 sheets:
-
-- **1_Mismatch_Report**: Count number of mismatches in BLASTN report (see sheet 2) against each reference sequences in reference database
-- **2_Blastn_Results**: Nucleotide BLASTN report of sample final consensus against reference database
-
-### Reference Sequences
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `<sample>/`
-  - Top reference sequences for all segments: `*.reference.fasta`
-  - List of top reference ID pulled from influenza database: `*.topsegments.csv`
-
-</details>
-
-### Segments Mapping
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `mapping/<sample>/`
-  - The results of segments mapping using minimap2: `*.bam`, `*.bai`, `*.depths.tsv`, `*.flagstat`, `*.idxstats`, `*.stats`
-
-</details>
-
-### Variant Calling
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `variants/<sample>/`
-  - Filter Frameshift VCF: `*.filt_frameshift.vcf`
-  - BCF Tools stats: `*.bcf_tools.stats.txt`
-  - Clair3 or Medaka output directory
-
-</details>
+[IRMA][] assembled gene segments are queried against the [NCBI Influenza DB][] using nucleotide [BLAST][] to determine the closest matching sequences in NCBI for each segment of each sample and to predict the H and N subtype of each sample if possible (i.e. if segments 4 (hemagglutinin) and/or 6 (neuraminidase) were assembled).
 
 ### H/N Subtyping
 
@@ -160,35 +79,35 @@ The report contains 2 sheets:
 
 </details>
 
-A H/N subtyping Excel report is generated from all [BLAST analysis](#blast-analysis) results for all samples and final assembled gene segments.
+A H/N subtyping Excel report is generated from all [BLAST analysis](#blast-analysis) results for all samples and IRMA assembled gene segments.
 
 The subtyping report spreadsheet contains four sheets:
 
-- **1_Subtype Predictions**: H/N subtype prediction results for each sample along with top matching Influenza DB segment for the H and N segments
-- **2_Top Segment Matches**: Top 3 Influenza DB sequence matches for each segment of each sample along with BLASTN hit values and reference sequence metadata.
+- **1_Subtype Predictions**: H/N subtype prediction results for each sample along with top matching [NCBI Influenza DB][] segment for the H and N segments
+- **2_Top Segment Matches**: Top 3 [NCBI Influenza DB][] sequence matches for each segment of each sample along with BLASTN hit values and reference sequence metadata.
 - **3_H Segment Results**: Top H subtype prediction, BLASTN results and top matching sequence metadata for each sample.
 - **4_N Segment Results**: Top N subtype prediction, BLASTN results and top matching sequence metadata for each sample.
 
 #### Sheet: 1_Subtype Predictions
 
-This sheet contains the H/N subtype prediction results for each sample along with top matching Influenza DB segment for the H and N segments
+This sheet contains the H/N subtype prediction results for each sample along with top matching [NCBI Influenza DB][] segment for the H and N segments
 
-| Field | Description                                                                                                                                                                                                                                                                                               | Example |
-|-------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
-| Sample | Sample name                                                                                                                                                                                                                                                                                               | ERR3338653 |
-| Subtype Prediction | H/N subtype prediction based on BLAST+ against the Influenza DB. If a type could not be assigned to either H or N segment or both, then the subtype prediction will be missing the H or N value or if both the H and N cannot be assigned then the subtype prediction will be null or an empty cell value | H1N1 |
-| H: top match accession | NCBI accession of top matching Influenza sequence for the H segment                                                                                                                                                                                                                                       | CY147779 |
-| H: type prediction | H subtype prediction number. Value is a number.                                                                                                                                                                                                                                                           | 1 |
-| H: top match virus name | Top matching sequence virus name                                                                                                                                                                                                                                                                          | Influenza A virus (A/Mexico/24036/2009(H1N1)) |
-| H: NCBI Influenza DB subtype match proportion | Proportion of BLAST matches that support the H subtype prediction. This value is a decimal number where 1.0 indicates 100% of matches support the subtype prediction.                                                                                                                                     | 0.9980057896 |
-| N: top match accession | NCBI accession of top matching Influenza DB sequence for the N segment                                                                                                                                                                                                                                    | MN371610 |
-| N: type prediction | N subtype prediction. Value is a number.                                                                                                                                                                                                                                                                  | 1 |
-| N: top match virus name  | Top matching sequence virus name                                                                                                                                                                                                                                                                          | Influenza A virus (A/California/04/2009) |
-| N: NCBI Influenza DB subtype match proportion | Proportion of BLAST matches that support the N subtype prediction. This value is a decimal number where 1.0 indicates 100% of matches support the subtype prediction.                                                                                                                                     | 0.9993240503 |
+| Field | Description | Example |
+|-------|-------------|---------|
+| Sample | Sample name | ERR3338653 |
+| Subtype Prediction | H/N subtype prediction based on BLAST+ against the [NCBI Influenza DB][]. If a type could not be assigned to either H or N segment or both, then the subtype prediction will be missing the H or N value or if both the H and N cannot be assigned then the subtype prediction will be null or an empty cell value  | H1N1 |
+| H: top match accession | NCBI accession of top matching [NCBI Influenza DB] sequence for the H segment | CY147779 |
+| H: type prediction | H subtype prediction number. Value is a number. | 1 |
+| H: top match virus name | Top matching sequence virus name | Influenza A virus (A/Mexico/24036/2009(H1N1)) |
+| H: NCBI Influenza DB subtype match proportion | Proportion of BLAST matches that support the H subtype prediction. This value is a decimal number where 1.0 indicates 100% of matches support the subtype prediction. | 0.9980057896 |
+| N: top match accession | NCBI accession of top matching [NCBI Influenza DB] sequence for the N segment | MN371610 |
+| N: type prediction | N subtype prediction. Value is a number. | 1 |
+| N: top match virus name  | Top matching sequence virus name | Influenza A virus (A/California/04/2009) |
+| N: NCBI Influenza DB subtype match proportion | Proportion of BLAST matches that support the N subtype prediction. This value is a decimal number where 1.0 indicates 100% of matches support the subtype prediction. | 0.9993240503 |
 
 #### Sheet: 2_Top Segment Matches
 
-This sheet contains the top 3 Influenza DB sequence matches for each segment of each sample along with BLASTN hit values and reference sequence metadata.
+This sheet contains the top 3 [NCBI Influenza DB][] sequence matches for each segment of each sample along with BLASTN hit values and reference sequence metadata.
 
 | Field | Description | Example |
 |-------|-------------|---------|
