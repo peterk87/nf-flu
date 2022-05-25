@@ -11,8 +11,8 @@ on:
 jobs:
   test_illumina:
     name: Run workflow tests
-    # Only run on push if this is the nf-iav-illumina dev branch (merged PRs)
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'peterk87/nf-iav-illumina') }}
+    # Only run on push if this is the nf-flu dev branch (merged PRs)
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'CFIA-NCFAD/nf-flu') }}
     runs-on: ubuntu-latest
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
@@ -40,8 +40,8 @@ jobs:
 
   test_nanopore:
     name: Run workflow tests
-    # Only run on push if this is the nf-iav-illumina dev branch (merged PRs)
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'peterk87/nf-iav-illumina') }}
+    # Only run on push if this is the nf-flu dev branch (merged PRs)
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'CFIA-NCFAD/nf-flu') }}
     runs-on: ubuntu-latest
     env:
       NXF_VER: ${{ matrix.nxf_ver }}

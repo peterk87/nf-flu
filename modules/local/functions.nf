@@ -66,3 +66,11 @@ def saveFiles(Map args) {
         }
     }
 }
+
+
+// 
+// Get Influenza sample segment filename prefix
+//
+def fluPrefix(sample, segment, ref_id) {
+    return "${sample}.Segment_${segment}.${ref_id}"
+}

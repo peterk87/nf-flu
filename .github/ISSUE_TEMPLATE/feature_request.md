@@ -1,5 +1,5 @@
 <!--
-# peterk87/nf-iav-illumina feature request
+# CFIA-NCFAD/nf-flu feature request
 
 Hi there!
 

@@ -1,7 +1,7 @@
-include { getSoftwareName } from './functions'
+include { getSoftwareName; fluPrefix } from './functions'
 
 process MOSDEPTH_GENOME {
-  tag "$sample_name - Segment:$segment - Ref ID:$id"
+  tag "$sample|$segment|$ref_id"
   label 'process_low'
 
   conda (params.enable_conda ? 'bioconda::mosdepth=0.3.3' : null)
@@ -11,22 +11,22 @@ process MOSDEPTH_GENOME {
       container "quay.io/biocontainers/mosdepth:0.3.3--h01d7912_0"
   }
   input:
-  tuple val(sample_name), val(segment), val(id), path(fasta), path(bam), path(depths)
+  tuple val(sample), val(segment), val(ref_id), path(fasta), path(bam_bai)
 
   output:
-  tuple val(sample_name), val(segment), val(id), path("*.per-base.bed.gz"), emit: bedgz
+  tuple val(sample), val(segment), val(ref_id), path("*.per-base.bed.gz"), emit: bedgz
   path "*.global.dist.txt", emit: mqc
   path "*.{txt,gz,csi,tsv}"
   path  "versions.yml"                          , emit: versions
 
   script:
   def software = getSoftwareName(task.process)
-  def prefix = "${sample_name}.Segment_${segment}.${id}"
+  def prefix = fluPrefix(sample, segment, ref_id)
   """
   mosdepth \\
       --fast-mode \\
       $prefix \\
-      ${bam[0]}
+      ${bam_bai[0]}
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
      mosdepth: \$(mosdepth --version 2>&1 | sed 's/^.*mosdepth //; s/ .*\$//')

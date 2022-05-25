@@ -1,5 +1,5 @@
 <!--
-# peterk87/nf-iav-illumina bug report
+# CFIA-NCFAD/nf-flu bug report
 
 Hi there!
 
@@ -38,7 +38,7 @@ Steps to reproduce the behaviour:
 
 - Engine: <!-- [e.g. Conda, Docker or Singularity] -->
 - version: <!-- [e.g. 1.0.0] -->
-- Image tag: <!-- [e.g. peterk87/nf-iav-illumina:1.0.0] -->
+- Image tag: <!-- [e.g. CFIA-NCFAD/nf-flu:1.0.0] -->
 
 ## Additional context
 

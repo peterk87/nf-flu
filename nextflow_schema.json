@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/peterk87/nf-iav-illumina/master/nextflow_schema.json",
-    "title": "peterk87/nf-iav-illumina pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/CFIA-NCFAD/nf-flu/master/nextflow_schema.json",
+    "title": "CFIA-NCFAD/nf-flu pipeline parameters",
     "description": "Influenza genome assembly with IRMA and consensus sequence analysis",
     "type": "object",
     "definitions": {
@@ -103,10 +103,10 @@
             "default": "",
             "fa_icon": "fas fa-truck-loading",
             "properties": {
-                "min_barcode_reads": {
+                "min_sample_reads": {
                     "type": "integer",
                     "default": 100,
-                    "description": "Minimum number of raw reads required per sample/barcode in order to be considered for the downstream processing steps.",
+                    "description": "Minimum number of raw reads required per sample in order to be considered for the downstream processing steps.",
                     "fa_icon": "fas fa-hand-paper"
                 }
             }
@@ -266,6 +266,7 @@
                 "enable_conda": {
                     "type": "boolean",
                     "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
+                    "default": false,
                     "hidden": true,
                     "fa_icon": "fas fa-bacon"
                 },

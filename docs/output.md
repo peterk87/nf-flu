@@ -1,6 +1,6 @@
-# nf-iav-illumina: Output
+# nf-flu: Output
 
-The output produced by the nf-iav-illumina pipeline is described here.
+The output produced by the CFIA-NCFAD/nf-flu pipeline is described here.
 
 The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 

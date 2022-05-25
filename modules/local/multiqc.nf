@@ -1,10 +1,12 @@
 process MULTIQC {
-  label 'process_medium'
+  label 'process_low'
 
-  conda (params.enable_conda ? "bioconda::multiqc=1.11" : null)
-  container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/multiqc:1.11--pyhdfd78af_0' :
-        'quay.io/biocontainers/multiqc:1.11--pyhdfd78af_0' }"
+  conda (params.enable_conda ? "bioconda::multiqc=1.12" : null)
+  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+    container 'https://depot.galaxyproject.org/singularity/multiqc:1.12--pyhdfd78af_0'
+  } else {
+    container 'quay.io/biocontainers/multiqc:1.12--pyhdfd78af_0'
+  }
 
   input:
   path(multiqc_custom_config)
@@ -18,7 +20,7 @@ process MULTIQC {
   path "*.html", emit: multiqc_report
   path "*_data"
   path "multiqc_plots"
-  path "versions.yml"        , emit: versions
+  path "versions.yml", emit: versions
 
   script:
   def custom_config = multiqc_custom_config ? "--config $multiqc_custom_config" : ''

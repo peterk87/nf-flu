@@ -5,7 +5,7 @@ nextflow.enable.dsl = 2
 def json_schema = "$projectDir/nextflow_schema.json"
 
 if (params.help){
-  def command = "nextflow run peterk87/nf-iav-illumina --input --platfrom illumina samplesheet.csv -profile singularity/docker/conda"
+  def command = "nextflow run CFIA-NCFAD/nf-flu --input --platfrom illumina samplesheet.csv -profile singularity/docker/conda"
   log.info NfcoreSchema.params_help(workflow, params, json_schema, command)
   exit 0
 }

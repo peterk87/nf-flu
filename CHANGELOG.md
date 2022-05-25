@@ -1,19 +1,23 @@
-# peterk87/nf-iav-illumina
+# CFIA-NCFAD/nf-flu
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [[3.0.0](https://github.com/peterk87/nf-iav-illumina/releases/tag/3.0.0)] - 2022-05-24
+## [[3.0.1](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.0.1)] - 2022-05-25
+
+Patch release to migrate workflow to [CFIA-NCFAD/nf-flu](https://github.com/CFIA-NCFAD/nf-flu/) and adding back `bin/fastq_dir_to_samplesheet.py` for Illumina `--input` samplesheet creation from Illumina FASTQ reads directory.
+
+## [[3.0.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.0.0)] - 2022-05-24
 
 This is a major release adding a Nanopore influenza sequence analysis subworkflow using IRMA for initial assembly and BLAST against NCBI Influenza DB sequences and optionally, user-specified sequences to identify the top reference sequence for each segment for each sample. A standard read mapping/variant calling analysis is performed: for each sample, Nanopore reads are mapped separately against each gene segment reference sequence using Minimap2; variant calling of read alignments is performed using Clair3; depth-masked consensus sequence is generated using Bcftools. Consensus sequences are BLAST searched against NCBI Influenza (and user-specified sequences) to generate a BLAST summary report and H/N subtyping report. MultiQC is used to summarize results into an interactive HTML report.
 
 NOTE: Read mapping/variant calling analysis has not been ported to the Illumina sequence analysis subworkflow.
 
-## [[2.0.1](https://github.com/peterk87/nf-iav-illumina/releases/tag/2.0.1)] - 2021-06-15
+## [[2.0.1](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/2.0.1)] - 2021-06-15
 
-Patch release to fix issue [#5](https://github.com/peterk87/nf-iav-illumina/issues/5); added check that IRMA `amended_consensus/` exists before concatenation of consensus FASTA files.
+Patch release to fix issue [#5](https://github.com/CFIA-NCFAD/nf-flu/issues/5); added check that IRMA `amended_consensus/` exists before concatenation of consensus FASTA files.
 
-## [[2.0.0](https://github.com/peterk87/nf-iav-illumina/releases/tag/2.0.0)] - 2021-06-10
+## [[2.0.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/2.0.0)] - 2021-06-10
 
 ### :warning: Major enhancements
 

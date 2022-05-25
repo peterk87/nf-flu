@@ -1,113 +1,117 @@
 // Import generic module functions
-include { getSoftwareName } from './functions';
+include { getSoftwareName; fluPrefix } from './functions';
 
 process BCF_CONSENSUS {
-    tag "$sample_name - Segment:$segment - Ref ID:$id"
-    label 'process_medium'
+  tag "$sample|$segment|$ref_id"
+  label 'process_medium'
 
-    conda (params.enable_conda ? 'bioconda::bcftools=1.15.1 conda-forge::gsl=2.7' : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container 'https://depot.galaxyproject.org/singularity/run https://depot.galaxyproject.org/singularity/bcftools:1.15--haf5b3da_0'
-    } else {
-        container 'quay.io/biocontainers/bcftools:1.15--haf5b3da_0'
-    }
+  conda (params.enable_conda ? 'bioconda::bcftools=1.15.1 conda-forge::gsl=2.7' : null)
+  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+    container 'https://depot.galaxyproject.org/singularity/bcftools:1.15.1--h0ea216a_0'
+  } else {
+    container 'quay.io/biocontainers/bcftools:1.15.1--h0ea216a_0'
+  }
 
-    input:
-    tuple val(sample_name), val(segment), val(id) , path(fasta), path(vcf), path(mosdepth_per_base)
-    val(low_coverage)
+  input:
+  tuple val(sample), val(segment), val(ref_id) , path(fasta), path(vcf), path(mosdepth_per_base)
+  val(low_coverage)
 
-    output:
-    tuple val(sample_name), path(consensus), emit: fasta
-    path "versions.yml" , emit: versions
+  output:
+  tuple val(sample), path(consensus), emit: fasta
+  path "versions.yml" , emit: versions
 
-    script:
-    consensus    = "${sample_name}.Segment_${segment}.${id}.bcftools.consensus.fasta"
-    sequenceID   = "${sample_name}_${segment}"
-    """
-    bgzip -c $vcf > ${vcf}.gz
-    tabix ${vcf}.gz
-    zcat $mosdepth_per_base | awk '\$4<${low_coverage}' > low_cov.bed
-    bcftools consensus \\
-        -f $fasta \\
-        -m low_cov.bed \\
-        ${vcf}.gz > $consensus
-    sed -i -E "s/^>(.*)/>$sequenceID/g" $consensus
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
-    END_VERSIONS
-    """
+  script:
+  def prefix = fluPrefix(sample, segment, ref_id)
+  consensus    = "${prefix}.bcftools.consensus.fasta"
+  sequenceID   = "${sample}_${segment}"
+  """
+  bgzip -c $vcf > ${vcf}.gz
+  tabix ${vcf}.gz
+
+  # get low coverage depth mask BED file by filtering for regions with less than ${low_coverage}X
+  zcat $mosdepth_per_base | awk '\$4<${low_coverage}' > low_cov.bed
+
+  bcftools consensus \\
+    -f $fasta \\
+    -m low_cov.bed \\
+    ${vcf}.gz > $consensus
+
+  sed -i -E "s/^>(.*)/>$sequenceID/g" $consensus
+
+  cat <<-END_VERSIONS > versions.yml
+  "${task.process}":
+      bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
+  END_VERSIONS
+  """
 }
 
 process BCF_FILTER {
-    tag "$sample_name - Segment:$segment - Ref ID:$id"
-    label 'process_low'
+  tag "$sample|$segment|$ref_id"
+  label 'process_low'
 
-    conda (params.enable_conda ? 'bioconda::bcftools=1.15.1 conda-forge::gsl=2.7' : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container 'https://depot.galaxyproject.org/singularity/run https://depot.galaxyproject.org/singularity/bcftools:1.15--haf5b3da_0'
-    } else {
-        container 'quay.io/biocontainers/bcftools:1.15--haf5b3da_0'
-    }
+  conda (params.enable_conda ? 'bioconda::bcftools=1.15.1 conda-forge::gsl=2.7' : null)
+  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+    container 'https://depot.galaxyproject.org/singularity/bcftools:1.15.1--h0ea216a_0'
+  } else {
+    container 'quay.io/biocontainers/bcftools:1.15.1--h0ea216a_0'
+  }
 
-    input:
-    tuple val(sample_name), val(segment), val(id), path(fasta), path(depths), path(vcf)
-    val (allele_fraction)
+  input:
+  tuple val(sample), val(segment), val(ref_id), path(fasta), path(vcf)
+  val(allele_fraction)
 
-    output:
-    tuple val(sample_name), val(segment), val(id), path(fasta),
-    path(depths), path(bcftools_filt_vcf), emit: vcf
-    path "versions.yml" , emit: versions
+  output:
+  tuple val(sample), val(segment), val(ref_id), path(fasta), path(bcftools_filt_vcf), emit: vcf
+  path "versions.yml" , emit: versions
 
-    script:
-    bcftools_filt_vcf = "${sample_name}.Segment_${segment}.${id}.bcftools_filt.vcf"
-    def exclude
-    if (params.variant_caller == 'medaka'){
-        exclude = "AF < $allele_fraction"
-    }else{
-        exclude = "%FILTER='RefCall' | AF < $allele_fraction"
-    }
-    """
-    bcftools norm \\
-        -Ov \\
-        -m- \\
-        -f $fasta \\
-        $vcf \\
-        > norm.vcf
-    # filter for major alleles
-    bcftools filter \\
-        -e "$exclude" \\
-        norm.vcf \\
-        -Ov \\
-        -o $bcftools_filt_vcf
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-      bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
-    END_VERSIONS
-    """
+  script:
+  def exclude = (params.variant_caller == 'medaka') ? "AF < $allele_fraction" : "%FILTER='RefCall' | AF < $allele_fraction"
+  def prefix = fluPrefix(sample, segment, ref_id)
+  bcftools_filt_vcf = "${prefix}.bcftools_filt.vcf"
+  """
+  bcftools norm \\
+    -Ov \\
+    -m- \\
+    -f $fasta \\
+    $vcf \\
+    > norm.vcf
+
+  # filter for major alleles
+  bcftools filter \\
+    -e "$exclude" \\
+    norm.vcf \\
+    -Ov \\
+    -o $bcftools_filt_vcf
+
+  cat <<-END_VERSIONS > versions.yml
+  "${task.process}":
+    bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
+  END_VERSIONS
+  """
 }
 
 process BCFTOOLS_STATS {
+  tag "$sample|$segment|$ref_id"
+  label 'process_low'
 
-    tag "$sample_name - Segment:$segment - Ref ID:$id"
-    label 'process_low'
-
-    conda (params.enable_conda ? 'bioconda::bcftools=1.15.1 conda-forge::gsl=2.7' : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container 'https://depot.galaxyproject.org/singularity/run https://depot.galaxyproject.org/singularity/bcftools:1.15--haf5b3da_0'
-    } else {
-        container 'quay.io/biocontainers/bcftools:1.15--haf5b3da_0'
-    }
+  conda (params.enable_conda ? 'bioconda::bcftools=1.15.1 conda-forge::gsl=2.7' : null)
+  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+    container 'https://depot.galaxyproject.org/singularity/bcftools:1.15.1--h0ea216a_0'
+  } else {
+    container 'quay.io/biocontainers/bcftools:1.15.1--h0ea216a_0'
+  }
   input:
-  tuple val(sample_name), val(segment), val(id), path(fasta), path(depths), path(vcf)
+  tuple val(sample), val(segment), val(ref_id), path(fasta), path(vcf)
 
   output:
   path("*.bcftools_stats.txt"), emit: stats
   path "versions.yml" , emit: versions
 
   script:
+  def prefix = fluPrefix(sample, segment, ref_id)
   """
-  bcftools stats -F $fasta $vcf > ${sample_name}.Segment_${segment}.${id}.bcftools_stats.txt
+  bcftools stats -F $fasta $vcf > ${prefix}.bcftools_stats.txt
+
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
     bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
