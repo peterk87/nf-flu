@@ -33,7 +33,6 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-
       - name: Run pipeline with test data
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_illumina,docker
@@ -73,22 +72,23 @@ jobs:
           make install
           which seqtk
       - uses: actions/cache@v3
-        id: cache-test-data
+        id: cache
         with:
           path: reads/
-          key: ERR6359501.fastq.gz
+          key: reads
       - name: Fetch test data
-        if: steps.cache-test-data.outputs.cache-hit != 'true'
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir reads
           echo "Downloading ERR6359501 from EBI ENA"
           curl -SLk --silent ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR635/001/ERR6359501/ERR6359501.fastq.gz > reads/ERR6359501.fastq.gz
       - name: Prepare samplesheet.csv
       - run: |
-          mkdir run{1,2}
           echo "Subsample reads from ERR6359501.fastq.gz with seqtk to mock different runs and ways of specifying input"
+          mkdir run1
           seqtk sample -s 1 reads/ERR6359501.fastq.gz 1000 > run1/s1.fq
           seqtk sample -s 11 reads/ERR6359501.fastq.gz 1000 | gzip -ck > run1/s11.fastq.gz
+          mkdir run2
           seqtk sample -s 2 reads/ERR6359501.fastq.gz 1000 > run2/s2.fastq
           seqtk sample -s 2 reads/ERR6359501.fastq.gz 1000 | gzip -ck > run2/s2.fq.gz
           echo "sample,reads" | tee -a samplesheet.csv
@@ -96,9 +96,6 @@ jobs:
           echo "ERR6359501,$(realpath run1)" | tee -a samplesheet.csv
           echo "ERR6359501,$(realpath run2)" | tee -a samplesheet.csv
       - name: Run pipeline with test data
-        # TODO You can customise CI pipeline run tests as required
-        # For example: adding multiple test runs with different parameters
-        # Remember that you can parallelise this by using strategy.matrix
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker --platform nanopore --input samplesheet.csv
       - name: Upload Artifact
