@@ -10,7 +10,7 @@ on:
 
 jobs:
   test_illumina:
-    name: Run workflow tests
+    name: Run Illumina test
     # Only run on push if this is the nf-flu dev branch (merged PRs)
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'CFIA-NCFAD/nf-flu') }}
     runs-on: ubuntu-latest
@@ -37,9 +37,15 @@ jobs:
         # Remember that you can parallelise this by using strategy.matrix
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_illumina,docker
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: illumina-test-results
+          path: results/pipeline_info
 
   test_nanopore:
-    name: Run workflow tests
+    name: Run Nanopore test
     # Only run on push if this is the nf-flu dev branch (merged PRs)
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'CFIA-NCFAD/nf-flu') }}
     runs-on: ubuntu-latest
@@ -59,14 +65,47 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Fetch and prepare test data
+      - name: Build and install seqtk
         run: |
-          mkdir barcode
-          cd barcode
-          wget https://nf-flu.s3.us-east-2.amazonaws.com/ERR6359501.fastq.gz
+          git clone --depth=1 https://github.com/lh3/seqtk.git
+          cd seqtk
+          make -j2
+          make install
+          which seqtk
+      - uses: actions/cache@v3
+        id: cache-test-data
+        with:
+          path: reads/
+          key: ERR6359501.fastq.gz
+      - name: Fetch test data
+        if: steps.cache-test-data.outputs.cache-hit != 'true'
+        run: |
+          mkdir reads
+          echo "Downloading ERR6359501 from EBI ENA"
+          curl -SLk --silent ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR635/001/ERR6359501/ERR6359501.fastq.gz > reads/ERR6359501.fastq.gz
+      - name: Prepare samplesheet.csv
+          mkdir run{1,2}
+          echo "Subsample reads from ERR6359501.fastq.gz with seqtk to mock different runs and ways of specifying input"
+          seqtk sample -s 1 reads/ERR6359501.fastq.gz 1000 > run1/s1.fq
+          seqtk sample -s 11 reads/ERR6359501.fastq.gz 1000 | gzip -ck > run1/s11.fastq.gz
+          seqtk sample -s 2 reads/ERR6359501.fastq.gz 1000 > run2/s2.fastq
+          seqtk sample -s 2 reads/ERR6359501.fastq.gz 1000 | gzip -ck > run2/s2.fq.gz
+          echo "sample,reads" | tee -a samplesheet.csv
+          echo "ERR6359501-full,$(realpath reads/ERR6359501.fastq.gz)" | tee -a samplesheet.csv
+          echo "ERR6359501,$(realpath run1)" | tee -a samplesheet.csv
+          echo "ERR6359501,$(realpath run2)" | tee -a samplesheet.csv
       - name: Run pipeline with test data
         # TODO You can customise CI pipeline run tests as required
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker --platform nanopore
+          nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker --platform nanopore --input samplesheet.csv
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: illumina-test-results
+          path: results/pipeline_info
+
+
+iav-subtyping-report.xlsx
