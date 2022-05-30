@@ -83,7 +83,7 @@ jobs:
           echo "Downloading ERR6359501 from EBI ENA"
           curl -SLk --silent ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR635/001/ERR6359501/ERR6359501.fastq.gz > reads/ERR6359501.fastq.gz
       - name: Prepare samplesheet.csv
-      - run: |
+        run: |
           echo "Subsample reads from ERR6359501.fastq.gz with seqtk to mock different runs and ways of specifying input"
           mkdir run1
           seqtk sample -s 1 reads/ERR6359501.fastq.gz 1000 > run1/s1.fq
