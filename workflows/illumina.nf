@@ -37,7 +37,7 @@ if (params.irma_module) {
 workflow ILLUMINA {
 
   GUNZIP_NCBI_FLU_FASTA(ch_influenza_db_fasta)
-  BLAST_MAKEBLASTDB(GUNZIP_NCBI_FLU_FASTA.out.gunzip)
+  BLAST_MAKEBLASTDB(GUNZIP_NCBI_FLU_FASTA.out.fna)
 
   CHECK_SAMPLE_SHEET(Channel.fromPath( params.input, checkIfExists: true))
     .splitCsv(header: ['sample', 'fastq1', 'fastq2', 'single_end'], sep: ',', skip: 1)
