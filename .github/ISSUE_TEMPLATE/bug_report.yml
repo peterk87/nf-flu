@@ -15,8 +15,8 @@ body:
       description: Please search to see if an issue already exists for the bug you encountered.
       options:
         - label: I have searched the existing issues
-      validations:
-        required: true
+    validations:
+      required: true
   - type: textarea
     attributes:
       label: Description of the Bug/Issue
@@ -105,9 +105,9 @@ body:
       description: Are you using a container engine or Conda?
       options:
         - Conda
-        - None
         - Docker
         - Singularity
+        - N/A (not using Conda or a container engine)
         - Charliecloud
         - Podman
         - Shifter
