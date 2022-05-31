@@ -27,15 +27,50 @@ jobs:
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
+      - name: Cache Nextflow binary
+        uses: actions/cache@v3
+        id: cache-nextflow
+        with:
+          path: /usr/local/bin/nextflow
+          key: nextflow-${{ matrix.nxf_ver }}
       - name: Install Nextflow
+        if: steps.cache-nextflow.outputs.cache-hit != 'true'
         env:
           CAPSULE_LOG: none
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
+      - name: Cache seqtk binary
+        uses: actions/cache@v3
+        id: cache-seqtk
+        with:
+          path: /usr/local/bin/seqtk
+          key: seqtk
+      - name: Build and install seqtk
+        if: steps.cache-seqtk.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth=1 https://github.com/lh3/seqtk.git
+          cd seqtk
+          make -j2
+          make install
+          which seqtk
+      - name: Cache subsampled influenza.fna.gz
+        uses: actions/cache@v3
+        id: cache-influenza-fna
+        with:
+          path: influenza-10k.fna.gz
+          key: influenza-fna
+      - name: Subsample NCBI influenza.fna
+        if: steps.cache-influenza-fna.outputs.cache-hit != 'true'
+        run: |
+          curl --silent -SLk https://ftp.ncbi.nih.gov/genomes/INFLUENZA/influenza.fna.gz > influenza.fna.gz
+          echo "Subsample 10k seqs from influenza.fna.gz with seqtk"
+          seqtk sample -s 789 influenza.fna.gz 10000 | gzip -ck > influenza-10k.fna.gz
       - name: Run pipeline with test data
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_illumina,docker
+          nextflow run ${GITHUB_WORKSPACE} \
+            -profile test_illumina,docker \
+            --ncbi_influenza_fasta influenza-10k.fna.gz
       - name: Upload Artifact
         if: success()
         uses: actions/upload-artifact@v1.0.0
@@ -63,26 +98,41 @@ jobs:
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
+      - name: Cache Nextflow binary
+        uses: actions/cache@v3
+        id: cache-nextflow
+        with:
+          path: /usr/local/bin/nextflow
+          key: nextflow-${{ matrix.nxf_ver }}
       - name: Install Nextflow
+        if: steps.cache-nextflow.outputs.cache-hit != 'true'
         env:
           CAPSULE_LOG: none
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
+      - name: Cache seqtk binary
+        uses: actions/cache@v3
+        id: cache-seqtk
+        with:
+          path: /usr/local/bin/seqtk
+          key: seqtk
       - name: Build and install seqtk
+        if: steps.cache-seqtk.outputs.cache-hit != 'true'
         run: |
           git clone --depth=1 https://github.com/lh3/seqtk.git
           cd seqtk
           make -j2
           make install
           which seqtk
-      - uses: actions/cache@v3
-        id: cache
+      - name: Cache test sample reads
+        uses: actions/cache@v3
+        id: cache-reads
         with:
           path: reads/
           key: reads
       - name: Fetch test data
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache-reads.outputs.cache-hit != 'true'
         run: |
           mkdir reads
           echo "Downloading ERR6359501 from EBI ENA"
@@ -96,13 +146,30 @@ jobs:
           mkdir run2
           seqtk sample -s 2 reads/ERR6359501.fastq.gz 1000 > run2/s2.fastq
           seqtk sample -s 2 reads/ERR6359501.fastq.gz 1000 | gzip -ck > run2/s2.fq.gz
+          seqtk sample -s 123 reads/ERR6359501.fastq.gz 10000 > reads/ERR6359501-10k.fastq
           echo "sample,reads" | tee -a samplesheet.csv
-          echo "ERR6359501-full,$(realpath reads/ERR6359501.fastq.gz)" | tee -a samplesheet.csv
+          echo "ERR6359501-10k,$(realpath reads/ERR6359501-10k.fastq)" | tee -a samplesheet.csv
           echo "ERR6359501,$(realpath run1)" | tee -a samplesheet.csv
           echo "ERR6359501,$(realpath run2)" | tee -a samplesheet.csv
+      - name: Cache subsampled influenza.fna.gz
+        uses: actions/cache@v3
+        id: cache-influenza-fna
+        with:
+          path: influenza-10k.fna.gz
+          key: influenza-fna
+      - name: Subsample NCBI influenza.fna
+        if: steps.cache-influenza-fna.outputs.cache-hit != 'true'
+        run: |
+          curl --silent -SLk https://ftp.ncbi.nih.gov/genomes/INFLUENZA/influenza.fna.gz > influenza.fna.gz
+          echo "Subsample 10k seqs from influenza.fna.gz with seqtk"
+          seqtk sample -s 789 influenza.fna.gz 10000 | gzip -ck > influenza-10k.fna.gz
       - name: Run pipeline with test data
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker --platform nanopore --input samplesheet.csv
+          nextflow run ${GITHUB_WORKSPACE} \
+            -profile test_nanopore,docker \
+            --platform nanopore \
+            --input samplesheet.csv \
+            --ncbi_influenza_fasta influenza-10k.fna.gz
       - name: Upload pipeline_info/
         if: success()
         uses: actions/upload-artifact@v1.0.0
