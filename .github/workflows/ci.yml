@@ -103,15 +103,24 @@ jobs:
       - name: Run pipeline with test data
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker --platform nanopore --input samplesheet.csv
-      - name: Upload Artifact
+      - name: Upload pipeline_info/
         if: success()
         uses: actions/upload-artifact@v1.0.0
         with:
-          name: nanopore-test-results-${{ matrix.nxf_ver }}
-          path: |
-            results/pipeline_info
-            results/MultiQC/multiqc_report.html
-            results/iav-subtyping-report.xlsx
+          name: nanopore-test-results-pipline_info-${{ matrix.nxf_ver }}
+          path: results/pipeline_info
+      - name: Upload iav-subtyping-report.xlsx
+        if: success()
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: nanopore-test-results-subtyping-report-${{ matrix.nxf_ver }}
+          path: results/iav-subtyping-report.xlsx
+      - name: Upload multiqc_report.html
+        if: success()
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: nanopore-test-results-multiqc-${{ matrix.nxf_ver }}
+          path: results/MultiQC/multiqc_report.html
       - name: Upload .nextflow.log
         uses: actions/upload-artifact@v1.0.0
         with:
