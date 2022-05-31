@@ -1,6 +1,6 @@
-# Influenza Genome Analysis Nextflow Workflow
+# CFIA-NCFAD/nf-flu - Influenza A Virus Genome Assembly Nextflow Workflow
 
-[![CI](https://github.com/peterk87/nf-iav-illumina/actions/workflows/ci.yml/badge.svg)](https://github.com/peterk87/nf-iav-illumina/actions/workflows/ci.yml)
+[![CI](https://github.com/CFIA-NCFAD/nf-flu/actions/workflows/ci.yml/badge.svg)](https://github.com/CFIA-NCFAD/nf-flu/actions/workflows/ci.yml)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.04.0-23aa62.svg?labelColor=000000)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
@@ -32,7 +32,7 @@ The pipeline is implemented in [Nextflow][]
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
     ```bash
-    nextflow run peterk87/nf-iav-illumina -profile test,<docker/singularity/podman/shifter/charliecloud/conda>
+    nextflow run CFIA-NCFAD/nf-flu -profile test,<docker/singularity/podman/shifter/charliecloud/conda>
     ```
 
     > * If you are using `singularity` then the pipeline will auto-detect this and attempt to download the Singularity images directly as opposed to performing a conversion from Docker images. If you are persistently observing issues downloading Singularity images directly due to timeout or network issues then please use the `--singularity_pull_docker_container` parameter to pull and convert the Docker image instead. Alternatively, it is highly recommended to use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to pre-download all of the required containers before running the pipeline and to set the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options to be able to store and re-use the images from a central location for future pipeline runs.
@@ -40,10 +40,10 @@ The pipeline is implemented in [Nextflow][]
 
 4. Run your own analysis
 
-    * [Optional] Generate an input samplesheet from a directory containing Illumina FASTQ files (e.g. `/path/to/illumina_run/Data/Intensities/Basecalls/`) with the included Python script [`fastq_dir_to_samplesheet.py`](https://github.com/peterk87/nf-iav-illumina/blob/master/bin/fastq_dir_to_samplesheet.py) **before** you run the pipeline (requires Python 3 installed locally) e.g.
+    * [Optional] Generate an input samplesheet from a directory containing Illumina FASTQ files (e.g. `/path/to/illumina_run/Data/Intensities/Basecalls/`) with the included Python script [`fastq_dir_to_samplesheet.py`](bin/fastq_dir_to_samplesheet.py) **before** you run the pipeline (requires Python 3 installed locally) e.g.
 
         ```bash
-        python ~/.nextflow/assets/peterk87/nf-iav-illumina/bin/fastq_dir_to_samplesheet.py \
+        python ~/.nextflow/assets/CFIA-NCFAD/nf-flu/bin/fastq_dir_to_samplesheet.py \
           -i /path/to/illumina_run/Data/Intensities/Basecalls/ \
           -o samplesheet.csv
         ```
@@ -51,7 +51,7 @@ The pipeline is implemented in [Nextflow][]
     * Typical command for Illumina Platform
 
         ```bash
-        nextflow run peterk87/nf-iav-illumina \
+        nextflow run CFIA-NCFAD/nf-flu \
           --input samplesheet.csv \
           --platform illumina \
           --profile <docker/singularity/podman/shifter/charliecloud/conda>
@@ -60,7 +60,7 @@ The pipeline is implemented in [Nextflow][]
     * Typical command for Nanopore Platform
 
       ```bash
-      nextflow run peterk87/nf-iav-illumina \
+      nextflow run CFIA-NCFAD/nf-flu \
         --input samplesheet.csv \
         --platform nanopore \
         --profile <docker/singularity/conda>
@@ -70,8 +70,8 @@ The pipeline is implemented in [Nextflow][]
 
 The nf-flu pipeline comes with:
 
-* [usage](docs/usage.md) and
-* [output](docs/output.md) documentation.
+* [Usage](docs/usage.md) and
+* [Output](docs/output.md) documentation.
 
 ## Resources
 
@@ -81,7 +81,7 @@ The nf-flu pipeline comes with:
 
 ## Credits
 
-The nf-flu pipeline was originally developed by [Peter Kruczkiewicz](https://github.com/peterk87) from [CFIA-NCFAD](https://github.com/CFIA-NCFAD), [Hai Nguyen](https://github.com/nhhaidee) extended the piepline for Nanopore data.
+The nf-flu pipeline was originally developed by [Peter Kruczkiewicz](https://github.com/peterk87) from [CFIA-NCFAD](https://github.com/CFIA-NCFAD), [Hai Nguyen](https://github.com/nhhaidee) extended the piepline for Nanopore data analysis.
 
 * [nf-core](https://nf-co.re) project for establishing Nextflow workflow development best-practices, [nf-core tools](https://nf-co.re/tools-docs/) and [nf-core modules](https://github.com/nf-core/modules)
 * [nf-core/viralrecon](https://github.com/nf-core/viralrecon) for inspiration and setting a high standard for viral sequence data analysis pipelines

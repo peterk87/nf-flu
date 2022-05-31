@@ -3,16 +3,19 @@ name: CI
 on:
   push:
     branches:
+      - master
       - dev
   pull_request:
+    branches:
+      - '*'
   release:
     types: [published]
 
 jobs:
   test_illumina:
-    name: Run workflow tests
-    # Only run on push if this is the nf-iav-illumina dev branch (merged PRs)
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'peterk87/nf-iav-illumina') }}
+    name: Run Illumina test
+    # Only run on push if this is the nf-flu dev branch (merged PRs)
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'peterk87/nf-flu') }}
     runs-on: ubuntu-latest
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
@@ -24,24 +27,66 @@ jobs:
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
+      - name: Cache Nextflow binary
+        uses: actions/cache@v3
+        id: cache-nextflow
+        with:
+          path: /usr/local/bin/nextflow
+          key: nextflow-${{ matrix.nxf_ver }}
       - name: Install Nextflow
+        if: steps.cache-nextflow.outputs.cache-hit != 'true'
         env:
           CAPSULE_LOG: none
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-
-      - name: Run pipeline with test data
-        # TODO You can customise CI pipeline run tests as required
-        # For example: adding multiple test runs with different parameters
-        # Remember that you can parallelise this by using strategy.matrix
+      - name: Cache seqtk binary
+        uses: actions/cache@v3
+        id: cache-seqtk
+        with:
+          path: /usr/local/bin/seqtk
+          key: seqtk
+      - name: Build and install seqtk
+        if: steps.cache-seqtk.outputs.cache-hit != 'true'
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_illumina,docker
+          git clone --depth=1 https://github.com/lh3/seqtk.git
+          cd seqtk
+          make -j2
+          make install
+          which seqtk
+      - name: Cache subsampled influenza.fna.gz
+        uses: actions/cache@v3
+        id: cache-influenza-fna
+        with:
+          path: influenza-10k.fna.gz
+          key: influenza-fna
+      - name: Subsample NCBI influenza.fna
+        if: steps.cache-influenza-fna.outputs.cache-hit != 'true'
+        run: |
+          curl --silent -SLk https://ftp.ncbi.nih.gov/genomes/INFLUENZA/influenza.fna.gz > influenza.fna.gz
+          echo "Subsample 10k seqs from influenza.fna.gz with seqtk"
+          seqtk sample -s 789 influenza.fna.gz 10000 | gzip -ck > influenza-10k.fna.gz
+      - name: Run pipeline with test data
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} \
+            -profile test_illumina,docker \
+            --ncbi_influenza_fasta influenza-10k.fna.gz
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: illumina-test-results-${{ matrix.nxf_ver }}
+          path: results/pipeline_info
+      - name: Upload .nextflow.log
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: nextflow-log-illumina-${{ matrix.nxf_ver }}
+          path: .nextflow.log
 
   test_nanopore:
-    name: Run workflow tests
-    # Only run on push if this is the nf-iav-illumina dev branch (merged PRs)
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'peterk87/nf-iav-illumina') }}
+    name: Run Nanopore test
+    # Only run on push if this is the nf-flu dev branch (merged PRs)
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'peterk87/nf-flu') }}
     runs-on: ubuntu-latest
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
@@ -53,20 +98,98 @@ jobs:
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
+      - name: Cache Nextflow binary
+        uses: actions/cache@v3
+        id: cache-nextflow
+        with:
+          path: /usr/local/bin/nextflow
+          key: nextflow-${{ matrix.nxf_ver }}
       - name: Install Nextflow
+        if: steps.cache-nextflow.outputs.cache-hit != 'true'
         env:
           CAPSULE_LOG: none
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Fetch and prepare test data
+      - name: Cache seqtk binary
+        uses: actions/cache@v3
+        id: cache-seqtk
+        with:
+          path: /usr/local/bin/seqtk
+          key: seqtk
+      - name: Build and install seqtk
+        if: steps.cache-seqtk.outputs.cache-hit != 'true'
         run: |
-          mkdir barcode
-          cd barcode
-          wget https://nf-flu.s3.us-east-2.amazonaws.com/ERR6359501.fastq.gz
+          git clone --depth=1 https://github.com/lh3/seqtk.git
+          cd seqtk
+          make -j2
+          make install
+          which seqtk
+      - name: Cache test sample reads
+        uses: actions/cache@v3
+        id: cache-reads
+        with:
+          path: reads/
+          key: reads
+      - name: Fetch test data
+        if: steps.cache-reads.outputs.cache-hit != 'true'
+        run: |
+          mkdir reads
+          echo "Downloading ERR6359501 from EBI ENA"
+          curl -SLk --silent ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR635/001/ERR6359501/ERR6359501.fastq.gz > reads/ERR6359501.fastq.gz
+      - name: Prepare samplesheet.csv
+        run: |
+          echo "Subsample reads from ERR6359501.fastq.gz with seqtk to mock different runs and ways of specifying input"
+          mkdir run1
+          seqtk sample -s 1 reads/ERR6359501.fastq.gz 1000 > run1/s1.fq
+          seqtk sample -s 11 reads/ERR6359501.fastq.gz 1000 | gzip -ck > run1/s11.fastq.gz
+          mkdir run2
+          seqtk sample -s 2 reads/ERR6359501.fastq.gz 1000 > run2/s2.fastq
+          seqtk sample -s 2 reads/ERR6359501.fastq.gz 1000 | gzip -ck > run2/s2.fq.gz
+          seqtk sample -s 123 reads/ERR6359501.fastq.gz 10000 > reads/ERR6359501-10k.fastq
+          echo "sample,reads" | tee -a samplesheet.csv
+          echo "ERR6359501-10k,$(realpath reads/ERR6359501-10k.fastq)" | tee -a samplesheet.csv
+          echo "ERR6359501,$(realpath run1)" | tee -a samplesheet.csv
+          echo "ERR6359501,$(realpath run2)" | tee -a samplesheet.csv
+      - name: Cache subsampled influenza.fna.gz
+        uses: actions/cache@v3
+        id: cache-influenza-fna
+        with:
+          path: influenza-10k.fna.gz
+          key: influenza-fna
+      - name: Subsample NCBI influenza.fna
+        if: steps.cache-influenza-fna.outputs.cache-hit != 'true'
+        run: |
+          curl --silent -SLk https://ftp.ncbi.nih.gov/genomes/INFLUENZA/influenza.fna.gz > influenza.fna.gz
+          echo "Subsample 10k seqs from influenza.fna.gz with seqtk"
+          seqtk sample -s 789 influenza.fna.gz 10000 | gzip -ck > influenza-10k.fna.gz
       - name: Run pipeline with test data
-        # TODO You can customise CI pipeline run tests as required
-        # For example: adding multiple test runs with different parameters
-        # Remember that you can parallelise this by using strategy.matrix
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker --platform nanopore
+          nextflow run ${GITHUB_WORKSPACE} \
+            -profile test_nanopore,docker \
+            --platform nanopore \
+            --input samplesheet.csv \
+            --ncbi_influenza_fasta influenza-10k.fna.gz
+      - name: Upload pipeline_info/
+        if: success()
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: nanopore-test-results-pipline_info-${{ matrix.nxf_ver }}
+          path: results/pipeline_info
+      - name: Upload iav-subtyping-report.xlsx
+        if: success()
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: nanopore-test-results-subtyping-report-${{ matrix.nxf_ver }}
+          path: results/iav-subtyping-report.xlsx
+      - name: Upload multiqc_report.html
+        if: success()
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: nanopore-test-results-multiqc-${{ matrix.nxf_ver }}
+          path: results/MultiQC/multiqc_report.html
+      - name: Upload .nextflow.log
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: nextflow-log-nanopore-${{ matrix.nxf_ver }}
+          path: .nextflow.log

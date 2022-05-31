@@ -2,19 +2,19 @@
 
 ## Introduction
 
-### Samplesheet format
+### `--input` samplesheet
 
-#### Illuminia Platform
-
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a tab-delimited (TSV) or comma-separated (CSV) file with 3 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a tab-delimited (TSV) or comma-separated (CSV) file with 2 or 3 columns, for Nanopore or Illumina sequence data, respectively, and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
 ```
 
+#### Illumina samplesheet
+
 The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once (e.g. to increase sequencing depth). The pipeline will concatenate the raw reads before performing any downstream analysis.
 
-A final samplesheet file may look something like the one below. `SAMPLE_1` was sequenced twice in Illumina PE format, `SAMPLE_2` was sequenced once in Illumina SE format.
+Example samplesheet where `SAMPLE_1` was sequenced twice with Illumina paired-end sequencing and `SAMPLE_2` was sequenced once with Illumina single-end sequencing.
 
 ```bash
 sample,fastq_1,fastq_2
@@ -31,41 +31,43 @@ SAMPLE_2,AEG588A2_S4_L003_R1_001.fastq.gz,
 
 #### Generate a samplesheet from a FASTQ directory
 
-You can generate an input samplesheet from a directory containing Illumina FASTQ files (e.g. `/path/to/illumina_run/Data/Intensities/Basecalls/`) with the included Python script [`fastq_dir_to_samplesheet.py`](https://github.com/peterk87/nf-iav-illumina/blob/master/bin/fastq_dir_to_samplesheet.py) **before** you run the pipeline (requires Python 3 installed locally) e.g.
+You can generate an input samplesheet from a directory containing Illumina FASTQ files (e.g. `/path/to/illumina_run/Data/Intensities/Basecalls/`) with the included Python script [`fastq_dir_to_samplesheet.py`](bin/fastq_dir_to_samplesheet.py) **before** you run the pipeline (requires Python 3 installed locally) e.g.
 
 ```bash
-python ~/.nextflow/assets/peterk87/nf-iav-illumina/bin/fastq_dir_to_samplesheet.py \
+~/.nextflow/assets/CFIA-NCFAD/nf-flu/bin/fastq_dir_to_samplesheet.py \
   -i /path/to/illumina_run/Data/Intensities/Basecalls/ \
   -o samplesheet.csv
 ```
 
-#### Nanopore Platform
+#### Nanopore samplesheet
 
-You have option to provide a samplesheet to the pipeline that maps sample ids to FASTQ file
+The samplesheet for Nanopore sequencing data analysis must be either a comma-separated (CSV) or tab-delimited (TSV) file with 2 columns and a header with column names (names don't matter).
 
-```bash
---input '[path to samplesheet file]'
-```
+The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once (e.g. to increase sequencing depth). The pipeline will concatenate the raw reads before performing any downstream analysis.
 
-It has to be a comma-separated file with 2 columns. A final samplesheet file may look something like the one below:
+Example Nanopore samplesheet:
 
 ```bash
-sample,barcode
+sample,reads
 SAMPLE_1,/path/to/run1/fastq_pass/barcode01
+SAMPLE_1,/path/to/ANOTHER_RUN/fastq_pass/barcode09
+SAMPLE_1,/path/to/sample1.fastq.gz
 SAMPLE_2,/path/to/run2/fastq_pass/barcode02
 ```
 
-| Column    | Description                                                                                                                              |
-|-----------|------------------------------------------------------------------------------------------------------------------------------------------|
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample.                            |
-| `barcode` | Full path to FASTQ file for each barcode. Files in the path could be gzipped or unzipped and have the extension ".fastq.gz" or ".fastq". |
+- **NOTE:** `SAMPLE_1` has 3 entries
+
+| Column    | Description                                                                                                                                       |
+|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample.                                     |
+| `reads`   | Full path to FASTQ file or directory containing basecalled reads in gzipped or unzipped FASTQ file format with extension ".fastq.gz" or ".fastq". |
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run peterk87/nf-iav-illumina --input samplesheet.csv -profile docker
+nextflow run CFIA-NCFAD/nf-flu --input samplesheet.csv -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -84,14 +86,14 @@ results         # Finished results (configurable, see below)
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
-nextflow pull peterk87/nf-iav-illumina
+nextflow pull CFIA-NCFAD/nf-flu
 ```
 
 ### Reproducibility
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [peterk87/nf-iav-illumina releases page](https://github.com/peterk87/nf-iav-illumina/releases) and find the latest version number - numeric only (eg. `2.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.0.0`.
+First, go to the [CFIA-NCFAD/nf-flu releases page](https://github.com/CFIA-NCFAD/nf-flu/releases) and find the latest version number - numeric only (eg. `2.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 2.0.0`.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
@@ -209,13 +211,13 @@ Low coverage depth threshold. Consensus sequence positions with less than this c
 
 ### Nanopore options
 
-#### `--min_barcode_reads`
+#### `--min_sample_reads`
 
 - Optional
 - Type: number
 - Default: `100`
 
-Minimum number of raw reads required per sample/barcode in order to be considered for the downstream processing steps
+Minimum number of raw reads required per sample in order to be considered for the downstream processing steps.
 
 ### Mismatch Report options
 

@@ -1,12 +1,9 @@
 {
-    "name": "peterk87/nf-iav-illumina",
-    "homePage": "https://github.com/peterk87/nf-iav-illumina",
+    "name": "CFIA-NCFAD/nf-flu",
+    "homePage": "https://github.com/CFIA-NCFAD/nf-flu",
     "repos": {
         "nf-core/modules": {
             "blast/blastn": {
-                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
-            },
-            "blast/makeblastdb": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
             "cat/fastq": {
