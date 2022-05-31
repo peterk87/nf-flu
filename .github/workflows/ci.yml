@@ -40,14 +40,13 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v1.0.0
         with:
-          name: illumina-test-results
+          name: illumina-test-results-${{ matrix.nxf_ver }}
           path: results/pipeline_info
       - name: Upload .nextflow.log
         uses: actions/upload-artifact@v1.0.0
         with:
-          name: nextflow-log
+          name: nextflow-log-illumina-${{ matrix.nxf_ver }}
           path: .nextflow.log
-
 
   test_nanopore:
     name: Run Nanopore test
@@ -108,10 +107,10 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v1.0.0
         with:
-          name: illumina-test-results
+          name: nanopore-test-results-${{ matrix.nxf_ver }}
           path: results/pipeline_info
       - name: Upload .nextflow.log
         uses: actions/upload-artifact@v1.0.0
         with:
-          name: nextflow-log
+          name: nextflow-log-nanopore-${{ matrix.nxf_ver }}
           path: .nextflow.log
