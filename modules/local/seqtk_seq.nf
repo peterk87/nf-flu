@@ -1,9 +1,9 @@
 // Import generic module functions
-include { getSoftwareName } from './functions'
+include { fluPrefix } from './functions'
 
 process SEQTK_SEQ{
-  tag "$sample_name|$segment|$id"
-  label 'process_low'
+  tag "$sample|$segment|$ref_id"
+  // use default process resources
 
   conda (params.enable_conda ? "bioconda::seqtk=1.3" : null)
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -13,19 +13,18 @@ process SEQTK_SEQ{
   }
 
   input:
-  tuple val(sample_name), val(segment), val(id), path(reads)
-  path (db)
+  tuple val(sample), val(segment), val(ref_id), path(reads)
+  path (fasta)
 
   output:
-  tuple val(sample_name), val(segment), val(id), path('*.fasta'), path(reads), emit: sample_info
+  tuple val(sample), val(segment), val(ref_id), path('*.fasta'), path(reads), emit: sample_info
   path "versions.yml", emit: versions
 
   script:
-  def software = getSoftwareName(task.process)
-  def prefix   = "${sample_name}.Segment_${segment}.${id}"
+  def prefix   = fluPrefix(sample, segment, ref_id)
   """
-  echo $id > ${prefix}.list
-  seqtk subseq $db ${prefix}.list > ${prefix}.reference.fasta
+  echo $ref_id | seqtk subseq $fasta - > ${prefix}.reference.fasta
+
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
       seqtk: \$(echo \$(seqtk 2>&1) | sed 's/^.*Version: //; s/ .*\$//')

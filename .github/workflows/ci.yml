@@ -108,7 +108,10 @@ jobs:
         uses: actions/upload-artifact@v1.0.0
         with:
           name: nanopore-test-results-${{ matrix.nxf_ver }}
-          path: results/pipeline_info
+          path: |
+            results/pipeline_info
+            results/MultiQC/multiqc_report.html
+            results/iav-subtyping-report.xlsx
       - name: Upload .nextflow.log
         uses: actions/upload-artifact@v1.0.0
         with:
