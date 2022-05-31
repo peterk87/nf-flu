@@ -43,6 +43,8 @@ You can generate an input samplesheet from a directory containing Illumina FASTQ
 
 The samplesheet for Nanopore sequencing data analysis must be either a comma-separated (CSV) or tab-delimited (TSV) file with 2 columns and a header with column names (names don't matter).
 
+The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once (e.g. to increase sequencing depth). The pipeline will concatenate the raw reads before performing any downstream analysis.
+
 Example Nanopore samplesheet:
 
 ```bash
@@ -53,10 +55,12 @@ SAMPLE_1,/path/to/sample1.fastq.gz
 SAMPLE_2,/path/to/run2/fastq_pass/barcode02
 ```
 
-| Column    | Description                                                                                                                              |
-|-----------|------------------------------------------------------------------------------------------------------------------------------------------|
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample.                            |
-| `reads`   | Full path to directory containing basecalled reads in gzipped or unzipped FASTQ file format with extension ".fastq.gz" or ".fastq".      |
+- **NOTE:** `SAMPLE_1` has 3 entries
+
+| Column    | Description                                                                                                                                       |
+|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample.                                     |
+| `reads`   | Full path to FASTQ file or directory containing basecalled reads in gzipped or unzipped FASTQ file format with extension ".fastq.gz" or ".fastq". |
 
 ## Running the pipeline
 
