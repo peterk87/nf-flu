@@ -227,7 +227,13 @@ Minimum number of raw reads required per sample in order to be considered for th
 - Type: integer
 - Default: `700`
 
-Minimum alignment length of nucleotide BLAST results to consider for getting mismatch report from BLAST result against reference database. We normally set this number around the smallest genome segment (Segment 8)
+#### `--max_mismatch_report`
+
+- Optional
+- Type: integer
+- Default: `700`
+
+Report Columns which have total mismatch < max_mismatch_report
 
 ### H/N subtyping options
 

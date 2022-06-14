@@ -51,7 +51,7 @@ REGEX_UNALLOWED_EXCEL_WS_CHARS = re.compile(r"[\\:/?*\[\]]+")
 @click.command()
 @click.option("-x", "--excel-report", default="report.xlsx", help="Excel report")
 @click.option('--min-aln-length', default=50, help="Min BLAST alignment length threshold")
-@click.option('--max-mismatch-report', default=80, help="Report Columns which have total mismatch < max-mismatch")
+@click.option('--max-mismatch-report', default=80, help="Report Columns which have total mismatch < max-mismatch-report")
 @click.option("-b", "--blast_results", default="", help="Blast Result.")
 def report(blast_results, excel_report, min_aln_length, max_mismatch_report):
     from rich.traceback import install
