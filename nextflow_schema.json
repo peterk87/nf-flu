@@ -180,6 +180,13 @@
                     "description": "Minimum alignment length of nucleotide BLAST results to consider for getting mismatch report from BLAST result against reference database. We normally set this number around the smallest genome segment (Segment 8).",
                     "fa_icon": "fas fa-balance-scale-right",
                     "minimum": 0
+                },
+                "max_mismatch_report": {
+                    "type": "integer",
+                    "default": 80,
+                    "description": "Report Columns which have total mismatch < max_mismatch_report",
+                    "fa_icon": "fas fa-balance-scale-right",
+                    "minimum": 0
                 }
             },
             "fa_icon": "fas fa-retweet"

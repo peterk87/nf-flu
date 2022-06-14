@@ -51,8 +51,9 @@ REGEX_UNALLOWED_EXCEL_WS_CHARS = re.compile(r"[\\:/?*\[\]]+")
 @click.command()
 @click.option("-x", "--excel-report", default="report.xlsx", help="Excel report")
 @click.option('--min-aln-length', default=50, help="Min BLAST alignment length threshold")
+@click.option('--max-mismatch-report', default=80, help="Report Columns which have total mismatch < max-mismatch")
 @click.option("-b", "--blast_results", default="", help="Blast Result.")
-def report(blast_results, excel_report, min_aln_length):
+def report(blast_results, excel_report, min_aln_length, max_mismatch_report):
     from rich.traceback import install
 
     install(show_locals=True, width=120, word_wrap=True)
@@ -99,10 +100,13 @@ def report(blast_results, excel_report, min_aln_length):
             if len(mismatch):
                 df_mismatch_report.loc[segment, ref_name] = mismatch[0]
             else:
-                df_mismatch_report.loc[segment, ref_name] = ''
+                df_mismatch_report.loc[segment, ref_name] = np.nan
     df_mismatch_report.insert(0, "Segment", segments)
     df_mismatch_report["Segment"] = df_mismatch_report["Segment"].apply(lambda x: influenza_segment[int(x)])
-    df_mismatch_report.loc["Total"] = pd.Series(df_mismatch_report[ref_names].sum())
+    df_mismatch_report.loc["Total"] = pd.Series(df_mismatch_report[ref_names].sum(axis=0, skipna=True))
+    df_mismatch_report_filter = df_mismatch_report[df_mismatch_report.columns[df_mismatch_report.loc["Total"]
+                                                                              <= max_mismatch_report]]
+    df_mismatch_report_filter.insert(0, "Segment", df_mismatch_report["Segment"])
     # Add segment name for more informative
     df_blast_result["segment_name"] = df_blast_result["segment_name"]. \
         apply(lambda x: influenza_segment[int(x)])
@@ -116,7 +120,7 @@ def report(blast_results, excel_report, min_aln_length):
                                "Sample Sequence Coverage of Reference Sequence"]
     write_excel(
         [
-            ("Mismatch_Report", df_mismatch_report),
+            ("Mismatch_Report", df_mismatch_report_filter),
             ("Blastn_Results", df_blast_result)
         ],
         output_dest=excel_report,

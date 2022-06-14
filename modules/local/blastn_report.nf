@@ -27,6 +27,7 @@ process BLASTN_REPORT {
   get_blastn_report.py \\
    -b $blastn_results \\
    --min-aln-length ${params.min_aln_length} \\
+   --max-mismatch-report ${params.max_mismatch_report} \\
    -x ${meta.id}-blastn-report.xlsx
   ln -s .command.log get_blastn_report.log
   cat <<-END_VERSIONS > versions.yml
