@@ -13,7 +13,7 @@ The directories listed below will be created in the results directory after the 
 - [Mismatch Report](#mismatch-report)
 - [Reference Sequences](#reference-sequences)
 - [Variant Calling](#variant-calling)
-- [H/N Subtyping](#h-n-subtyping)
+- [H/N Subtyping](#hn-subtyping)
 
 ### IRMA
 
@@ -56,9 +56,9 @@ The directories listed below will be created in the results directory after the 
 
 </details>
 
-IRMA output is described in the [official IRMA output documentation](https://wonder.cdc.gov/amd/flu/irma/output.html).
+[IRMA][] output is described in the [official IRMA output documentation](https://wonder.cdc.gov/amd/flu/irma/output.html).
 
-The primary output from IRMA are the consensus sequences for gene segments, which are used for H/N subtyping and performed blastn against influenza database to pull top match reference sequences for each segment of each sample.
+The primary output from [IRMA][] are the consensus sequences for gene segments, which are used for H/N subtyping and performed blastn against influenza database to pull top match reference sequences for each segment of each sample.
 
 ### BLAST analysis
 
@@ -78,7 +78,7 @@ The primary output from IRMA are the consensus sequences for gene segments, whic
 
 </details>
 
-[IRMA][] and final assembled gene segments are queried against the [NCBI Influenza DB][] and the reference database (if provided option `--ref_db`) using nucleotide [BLAST][] to determine the closest matching sequences in NCBI and the reference database for each segment of each sample for downstream analysis and to predict the H and N subtype of each sample if possible (i.e. if segments 4 (hemagglutinin) and/or 6 (neuraminidase) were assembled).
+Nucleotide [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi) (`blastn`) is used to query [IRMA][] assembled gene segment sequences against the [NCBI Influenza DB][] sequences (and optionally, against user-specified sequences (`--ref_db`) to predict the H and N subtype of each sample if possible (i.e. if segments 4 (hemagglutinin) and/or 6 (neuraminidase) were assembled) and to determine the closest matching reference sequence for each segment for reference mapped assembly.
 
 ### Coverage Plots
 
@@ -176,7 +176,7 @@ This sheet contains the H/N subtype prediction results for each sample along wit
 | Field | Description                                                                                                                                                                                                                                                                                               | Example |
 |-------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
 | Sample | Sample name                                                                                                                                                                                                                                                                                               | ERR3338653 |
-| Subtype Prediction | H/N subtype prediction based on BLAST+ against the Influenza DB. If a type could not be assigned to either H or N segment or both, then the subtype prediction will be missing the H or N value or if both the H and N cannot be assigned then the subtype prediction will be null or an empty cell value | H1N1 |
+| Subtype Prediction | H/N subtype prediction based on [BLAST][]+ against the Influenza DB. If a type could not be assigned to either H or N segment or both, then the subtype prediction will be missing the H or N value or if both the H and N cannot be assigned then the subtype prediction will be null or an empty cell value | H1N1 |
 | H: top match accession | NCBI accession of top matching Influenza sequence for the H segment                                                                                                                                                                                                                                       | CY147779 |
 | H: type prediction | H subtype prediction number. Value is a number.                                                                                                                                                                                                                                                           | 1 |
 | H: top match virus name | Top matching sequence virus name                                                                                                                                                                                                                                                                          | Influenza A virus (A/Mexico/24036/2009(H1N1)) |
@@ -262,5 +262,4 @@ Below are shown the fields for the "3_H Segment Results" sheet. The fields are n
 [Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
 
 [NCBI Influenza DB]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
-[BLAST]: https://blast.ncbi.nlm.nih.gov/Blast.cgi
 [IRMA]: https://wonder.cdc.gov/amd/flu/irma/
