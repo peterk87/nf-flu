@@ -13,7 +13,7 @@ The directories listed below will be created in the results directory after the 
 - [Mismatch Report](#mismatch-report)
 - [Reference Sequences](#reference-sequences)
 - [Variant Calling](#variant-calling)
-- [H/N Subtyping](#h-n-subtyping)
+- [H/N Subtyping](#hn-subtyping)
 
 ### IRMA
 
@@ -56,9 +56,9 @@ The directories listed below will be created in the results directory after the 
 
 </details>
 
-IRMA output is described in the [official IRMA output documentation](https://wonder.cdc.gov/amd/flu/irma/output.html).
+[IRMA][] output is described in the [official IRMA output documentation](https://wonder.cdc.gov/amd/flu/irma/output.html).
 
-The primary output from IRMA are the consensus sequences for gene segments, which are used for H/N subtyping and performed blastn against influenza database to pull top match reference sequences for each segment of each sample.
+The primary output from [IRMA][] are the consensus sequences for gene segments, which are used for H/N subtyping and performed blastn against influenza database to pull top match reference sequences for each segment of each sample.
 
 ### BLAST analysis
 
