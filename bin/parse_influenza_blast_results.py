@@ -222,11 +222,9 @@ def parse_blast_result(
         "category"
     )
     df_filtered["sample_segment"] = pd.Categorical(df_filtered["sample_segment"])
-    segments = df_filtered["sample_segment"].unique()
     df_filtered["subtype_from_match_title"] = (
         df_filtered["stitle"].str.extract(regex_subtype_pattern).astype("category")
     )
-    df_filtered["subtype_from_match_title"] = df_filtered["subtype_from_match_title"]
     logging.info(
         f"{sample_name} | Merging NCBI Influenza DB genome metadata with BLAST results on accession."
     )
@@ -293,7 +291,7 @@ def find_h_or_n_type(df_merge, seg):
     h_or_n = type_name[0]
     df_segment = df_merge.loc[seg, :]
     type_counts = df_segment.subtype.value_counts()
-    df_type_counts = type_counts.index.str.extract(h_or_n + r"(\d+)")
+    df_type_counts = type_counts.index.str.extract(h_or_n + r"(\d+)", flags=re.IGNORECASE)
     df_type_counts.columns = [type_name]
     df_type_counts["count"] = type_counts.values
     df_type_counts["subtype"] = type_counts.index
@@ -389,7 +387,6 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
         f"Parsed Influenza metadata file into DataFrame with n={df_md.shape[0]} rows and n={df_md.shape[1]} columns. There are {unique_subtypes.size} unique subtypes. "
     )
     regex_subtype_pattern = r"\((H\d+N\d+|" + "|".join(list(unique_subtypes)) + r")\)"
-
     if threads > 1:
         pool = Pool(processes=threads)
         logging.info(
