@@ -310,7 +310,7 @@ def find_h_or_n_type(df_merge, seg):
         f"{h_or_n}{top_type} n={top_type_count}/{total_count} ({top_type_count / total_count:.1%})"
     )
     type_mask = df_segment.subtype.str.match(
-        r".*" + h_or_n + top_type + r".*", na=False
+        r".*" + h_or_n + top_type + r".*", na=False, flags=re.IGNORECASE
     )
     type_mask[pd.isnull(type_mask)] = False
     df_seg_top_type = df_segment[type_mask]
