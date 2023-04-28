@@ -40,23 +40,21 @@ process CAT_NANOPORE_FASTQ {
 process CAT_DB {
     tag "$fasta1 - $fasta2"
 
-    conda (params.enable_conda ? "conda-forge::pigz=2.6" : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/mulled-v2-2b04072095278721dc9a5772e61e406f399b6030:7c7abf911e92d7fb831611ffb965f3cf7fe2c01d-0"
-    } else {
-        container "quay.io/biocontainers/mulled-v2-2b04072095278721dc9a5772e61e406f399b6030:7c7abf911e92d7fb831611ffb965f3cf7fe2c01d-0"
-    }
+    executor 'local'
+    memory 100.MB
 
     input:
     path(fasta1)
     path(fasta2)
 
     output:
-    path("*.fasta"), emit: fasta
+    path("influenza_db.fasta"), emit: fasta
 
     script:
     """
-    cat $fasta1 $fasta2 > influenza_db.fasta
+    cp $fasta1 influenza_db.fasta
+    echo >> influenza_db.fasta
+    cat $fasta2 >> influenza_db.fasta
     """
 }
 

@@ -134,8 +134,8 @@ workflow NANOPORE {
   ch_input_ref_db = GUNZIP_NCBI_FLU_FASTA.out.fna
 
   if (params.ref_db){
-    ref_fasta_file = file(params.ref_db, type: 'file')
-    CHECK_REF_FASTA(ref_fasta_file)
+    ch_ref_fasta = file(params.ref_db, type: 'file')
+    CHECK_REF_FASTA(ch_ref_fasta)
     ch_versions = ch_versions.mix(CHECK_REF_FASTA.out.versions)
     CAT_DB(GUNZIP_NCBI_FLU_FASTA.out.fna, CHECK_REF_FASTA.out.fasta)
     ch_input_ref_db = CAT_DB.out.fasta
