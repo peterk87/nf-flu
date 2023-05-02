@@ -12,16 +12,18 @@ from typing import Dict, List, Optional, Tuple
 import re
 import logging
 from collections import defaultdict
-from multiprocessing import Pool
+import multiprocessing
 
 import click
 import pandas as pd
 import numpy as np
-from rich.console import Console
+import polars as pl
 from rich.logging import RichHandler
 
 LOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s [in %(filename)s:%(lineno)d]"
 logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
+
+pl.enable_string_cache(True)
 
 influenza_segment = {
     1: "1_PB2",
@@ -36,21 +38,21 @@ influenza_segment = {
 
 # Column names/types/final report names
 blast_cols = [
-    ("qaccver", "category"),
+    ("qaccver", str),
     ("saccver", str),
     ("pident", float),
-    ("length", "uint16"),
-    ("mismatch", "uint16"),
-    ("gapopen", "uint16"),
-    ("qstart", "uint16"),
-    ("qend", "uint16"),
-    ("sstart", "uint16"),
-    ("send", "uint16"),
-    ("evalue", np.float16),
-    ("bitscore", np.float16),
-    ("qlen", "uint16"),
-    ("slen", "uint16"),
-    ("qcovs", np.float16),
+    ("length", pl.UInt16),
+    ("mismatch", pl.UInt16),
+    ("gapopen", pl.UInt16),
+    ("qstart", pl.UInt16),
+    ("qend", pl.UInt16),
+    ("sstart", pl.UInt16),
+    ("send", pl.UInt16),
+    ("evalue", pl.Float32),
+    ("bitscore", pl.Float32),
+    ("qlen", pl.UInt16),
+    ("slen", pl.UInt16),
+    ("qcovs", pl.Float32),
     ("stitle", str),
 ]
 
@@ -181,85 +183,83 @@ REGEX_UNALLOWED_EXCEL_WS_CHARS = re.compile(r"[\\:/?*\[\]]+")
 
 def parse_blast_result(
         blast_result: str,
-        df_metadata: pd.DataFrame,
+        df_metadata: pl.DataFrame,
         regex_subtype_pattern: str,
+        get_top_ref: bool,
         top: int = 3,
         pident_threshold: float = 0.85,
         min_aln_length: int = 50,
 ) -> Optional[
-    Tuple[pd.DataFrame, Optional[pd.DataFrame], Optional[pd.DataFrame], Dict]
+    Tuple[pl.DataFrame, Optional[pl.DataFrame], Optional[pl.DataFrame], Dict]
 ]:
     logging.info(f"Parsing BLAST results from {blast_result}")
 
-    df = pd.read_csv(
+    df_filtered = pl.scan_csv(
         blast_result,
-        sep="\t",
-        names=[name for name, coltype in blast_cols],
-        dtype={name: coltype for name, coltype in blast_cols},
-    )
-    if df.empty:
-        logging.error(f"No BLASTN results in {blast_result}!")
-        return
-    # Assuming that all BLAST result entries have the same sample name so
-    # extracting the sample name from the first entry qaccver field
-    sample_name: str = re.sub(r"^(.+)_\d$", r"\1", df["qaccver"][0])
-    logging.info(f"Parsed {df.shape[0]} BLAST results from {blast_result}")
-    logging.info(
-        f"{sample_name} | n={df.shape[0]} | Filtering for hits above {pident_threshold}% identity."
-    )
-    df_filtered = df[
-        (df["pident"] >= (pident_threshold * 100)) & (df["length"] >= min_aln_length)
-        ]
+        has_header=False,
+        separator="\t",
+        new_columns=[name for name, coltype in blast_cols],
+        dtypes={name: coltype for name, coltype in blast_cols},
+    ).filter((pl.col("pident") >= (pident_threshold * 100)) &
+             (pl.col("length") >= min_aln_length)).collect(streaming=True)
+
+    sample_name: str = re.sub(r"^(.+)_\d$", r"\1", df_filtered["qaccver"][0])
     logging.info(
         f"{sample_name} | n={df_filtered.shape[0]} | Filtered for hits above {pident_threshold}% identity."
+        f"and Min Alignment length > {min_aln_length}"
     )
-    # Sequences header has been corrected by GUNZIP Process
-    # zcat $archive | sed -E 's/^>gi\\|[0-9]+\\|gb\\|(\\w+)\\|(.*)/>\\1 \\2/' > influenza.fna
-    df_filtered["accession"] = df_filtered.saccver.str.strip()
-    df_filtered["sample"] = sample_name
-    df_filtered["sample"] = pd.Categorical(df_filtered["sample"])
-    df_filtered["sample_segment"] = df_filtered.qaccver.str.extract(r".+_(\d)$").astype(
-        "category"
-    )
-    df_filtered["sample_segment"] = pd.Categorical(df_filtered["sample_segment"])
-    df_filtered["subtype_from_match_title"] = (
-        df_filtered["stitle"].str.extract(regex_subtype_pattern).astype("category")
-    )
+    df_filtered = df_filtered.with_columns([
+        pl.col('saccver').str.strip().alias("accession"),
+        pl.lit(sample_name, dtype=pl.Categorical).alias("sample"),
+        pl.col('qaccver').str.extract(r".+_(\d)$").cast(pl.Categorical).alias("sample_segment"),
+        pl.col("stitle").str.extract(regex_subtype_pattern).alias("subtype_from_match_title").cast(pl.Categorical)
+    ])
     logging.info(
         f"{sample_name} | Merging NCBI Influenza DB genome metadata with BLAST results on accession."
     )
-    df_merge = pd.merge(df_filtered, df_metadata, on="accession", how="left")
+    df_merge = df_filtered.join(df_metadata, on="accession", how="left")
     del df_filtered
     del df_metadata
-    df_merge["subtype"] = df_merge["subtype"].combine_first(df_merge["subtype_from_match_title"])
-    df_merge = df_merge.sort_values(
-        by=["sample_segment", "bitscore"], ascending=[True, False]
-    ).set_index("sample_segment")
-    subtype_results_summary = {}
-    H_results = None
-    N_results = None
-    if "4" in df_merge.index:
-        H_results = find_h_or_n_type(df_merge, "4")
-        subtype_results_summary.update(H_results)
-    if "6" in df_merge.index:
-        N_results = find_h_or_n_type(df_merge, "6")
-        subtype_results_summary.update(N_results)
+    df_merge = df_merge.with_columns(
+        pl.when(pl.col("subtype").is_null())
+            .then(pl.col("subtype_from_match_title"))
+            .otherwise(pl.col("subtype"))
+            .alias("subtype")
+    )
+    df_merge = df_merge.sort(
+        by=["sample_segment", "bitscore"], descending=[False, True]
+    )
 
-    subtype_results_summary["sample"] = sample_name
-    subtype_results_summary["subtype"] = get_subtype_value(H_results, N_results)
+    segments = df_merge["sample_segment"].unique().sort()
     dfs = []
-    segments = df_merge.index.unique()
     for seg in segments:
-        dfs.append(df_merge.loc[seg, :].head(top).reset_index())
-    df_top_seg_matches = pd.concat(dfs)
-    cols = pd.Series([x for x, _ in blast_results_report_columns])
-    cols = cols[cols.isin(df_top_seg_matches.columns)]
-    df_top_seg_matches = df_top_seg_matches[cols]
+        dfs.append(df_merge.filter(pl.col("sample_segment") == seg).head(top))
+    df_top_seg_matches = pl.concat(dfs, how="vertical")
+    cols = pl.Series([x for x, _ in blast_results_report_columns])
+    df_top_seg_matches = df_top_seg_matches.select(pl.col(cols))
+    subtype_results_summary = {"sample": sample_name}
+    if not get_top_ref:
+        is_iav = True
+        if df_top_seg_matches.select(pl.col("subtype").is_null().all())[0, 0]:
+            is_iav = False
+        H_results = None
+        N_results = None
+        if "4" in segments:
+            H_results = find_h_or_n_type(df_merge, "4", is_iav)
+            subtype_results_summary.update(H_results)
+        if "6" in segments:
+            N_results = find_h_or_n_type(df_merge, "6", is_iav)
+            subtype_results_summary.update(N_results)
+        subtype_results_summary["subtype"] = get_subtype_value(H_results, N_results, is_iav)
+
     return df_top_seg_matches, subtype_results_summary
 
 
-def get_subtype_value(H_results: Optional[Dict], N_results: Optional[Dict]) -> str:
+def get_subtype_value(H_results: Optional[Dict], N_results: Optional[Dict], is_iav: bool) -> str:
     subtype = ""
+    if not is_iav:
+        subtype = "N/A"
+        return subtype
     if H_results is None and N_results is None:
         subtype = "-"
     elif H_results is not None and N_results is None:
@@ -282,41 +282,50 @@ def get_subtype_value(H_results: Optional[Dict], N_results: Optional[Dict]) -> s
     return subtype
 
 
-def find_h_or_n_type(df_merge, seg):
+def find_h_or_n_type(df_merge, seg, is_iav):
     assert seg in [
         "4",
         "6",
     ], "Can only determine H or N type from segments 4 or 6, respectively!"
     type_name = "H_type" if seg == "4" else "N_type"
     h_or_n = type_name[0]
-    df_segment = df_merge.loc[seg, :]
-    type_counts = df_segment.subtype.value_counts()
-    df_type_counts = type_counts.index.str.extract(h_or_n + r"(\d+)", flags=re.IGNORECASE)
-    df_type_counts.columns = [type_name]
-    df_type_counts["count"] = type_counts.values
-    df_type_counts["subtype"] = type_counts.index
-    df_type_counts = df_type_counts[~pd.isnull(df_type_counts[type_name])]
-    logging.debug(f"{df_type_counts}")
-    type_to_count = defaultdict(int)
-    for _, x in df_type_counts.iterrows():
-        if pd.isna(x[type_name]):
-            continue
-        type_to_count[x[type_name]] += x["count"]
-    type_to_count = [(h, c) for h, c in type_to_count.items()]
-    type_to_count.sort(key=lambda x: x[1], reverse=True)
-    top_type, top_type_count = type_to_count[0]
-    total_count = type_counts.sum()
-    logging.info(
-        f"{h_or_n}{top_type} n={top_type_count}/{total_count} ({top_type_count / total_count:.1%})"
-    )
-    type_mask = df_segment.subtype.str.match(
-        r".*" + h_or_n + top_type + r".*", na=False, flags=re.IGNORECASE
-    )
-    type_mask[pd.isnull(type_mask)] = False
-    df_seg_top_type = df_segment[type_mask]
-    top_result: pd.Series = [r for _, r in df_seg_top_type.head(1).iterrows()][0]
+    reg_h_or_n_type = ""
+    if h_or_n == "H":
+        reg_h_or_n_type = "[Hh]"
+    else:
+        reg_h_or_n_type = "[Nn]"
+    df_segment = df_merge.filter(pl.col("sample_segment") == seg)
+    if is_iav:
+        type_counts = df_segment["subtype"].value_counts(sort=True)
+        type_counts = type_counts.filter(~pl.col("subtype").is_null())
+        df_type_counts = type_counts.with_columns(pl.lit(type_counts["subtype"].str.extract(reg_h_or_n_type + r"(\d+)").
+                                                         alias(type_name)))
+        df_type_counts = df_type_counts.filter(~pl.col(type_name).is_null())
+        logging.debug(f"{df_type_counts}")
+        type_to_count = defaultdict(int)
+        for x in df_type_counts.iter_rows(named=True):
+            type_to_count[x[type_name]] += x["counts"]
+        type_to_count = [(h, c) for h, c in type_to_count.items()]
+        type_to_count.sort(key=lambda x: x[1], reverse=True)
+        top_type, top_type_count = type_to_count[0]
+        total_count = type_counts["counts"].sum()
+        logging.info(
+            f"{h_or_n}{top_type} n={top_type_count}/{total_count} ({top_type_count / total_count:.1%})"
+        )
+        df_segment = df_segment.with_columns(
+            pl.lit(df_segment["subtype"].str.contains(r".*" + reg_h_or_n_type + top_type + r".*")
+                   .fill_null(False)
+                   .alias("type_mask")))
+        df_seg_top_type = df_segment.filter(pl.col("type_mask") == True).drop("type_mask")
+        top_result: pl.Series = [r for r in df_seg_top_type.head(1).iter_rows(named=True)][0]
+    else:
+        top_type = "N/A"
+        top_type_count = "N/A"
+        total_count = "N/A"
+        top_result: pl.Series = [r for r in df_segment.head(1).iter_rows(named=True)][0]
+
     results_summary = {
-        f"{h_or_n}_type": top_type,
+        f"{h_or_n}_type": top_type if is_iav else "N/A",
         f"{h_or_n}_sample_segment_length": top_result["qlen"],
         f"{h_or_n}_top_pident": top_result["pident"],
         f"{h_or_n}_top_mismatch": top_result["mismatch"],
@@ -331,7 +340,7 @@ def find_h_or_n_type(df_merge, seg):
         f"{h_or_n}_virus_name": top_result["virus_name"],
         f"{h_or_n}_NCBI_Influenza_DB_subtype_matches": top_type_count,
         f"{h_or_n}_NCBI_Influenza_DB_total_matches": total_count,
-        f"{h_or_n}_NCBI_Influenza_DB_proportion_matches": top_type_count / total_count,
+        f"{h_or_n}_NCBI_Influenza_DB_proportion_matches": top_type_count / total_count if is_iav else "N/A",
     }
     logging.info(f"Seg {seg} results: {results_summary}")
     return results_summary
@@ -352,7 +361,6 @@ def find_h_or_n_type(df_merge, seg):
 def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
            min_aln_length, threads, get_top_ref, sample_name):
     from rich.traceback import install
-
     install(show_locals=True, width=120, word_wrap=True)
     logging.basicConfig(
         format="%(message)s",
@@ -364,77 +372,62 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
     logging.info(f'Parsing Influenza metadata file "{flu_metadata}"')
     md_cols = [
         ("accession", str),
-        ("host", "category"),
-        ("segment", "category"),
-        ("subtype", "str"),
-        ("country", "category"),
-        ("date", "category"),
-        ("seq_length", "uint16"),
-        ("virus_name", "category"),
-        ("age", "category"),
-        ("gender", "category"),
-        ("group_id", "category"),
+        ("host", pl.Categorical),
+        ("segment", pl.Categorical),
+        ("subtype", str),
+        ("country", pl.Categorical),
+        ("date", pl.Categorical),
+        ("seq_length", pl.UInt16),
+        ("virus_name", pl.Categorical),
+        ("age", pl.Categorical),
+        ("gender", pl.Categorical),
+        ("group_id", pl.Categorical),
     ]
-    df_md = pd.read_csv(
+    df_md = pl.read_csv(
         flu_metadata,
-        sep="\t",
-        names=[name for name, _ in md_cols],
-        dtype={name: t for name, t in md_cols},
+        has_header=False,
+        separator="\t",
+        new_columns=[name for name, _ in md_cols],
+        dtypes={name: t for name, t in md_cols},
     )
-    unique_subtypes = df_md.subtype.unique()
-    unique_subtypes = unique_subtypes[~pd.isna(unique_subtypes)]
+
+    unique_subtypes = df_md.select("subtype").unique()
+    unique_subtypes = unique_subtypes.filter(~pl.col("subtype").is_null())
     logging.info(
-        f"Parsed Influenza metadata file into DataFrame with n={df_md.shape[0]} rows and n={df_md.shape[1]} columns. There are {unique_subtypes.size} unique subtypes. "
+        f"Parsed Influenza metadata file into DataFrame with n={df_md.shape[0]} rows and n={df_md.shape[1]} columns. There are {len(unique_subtypes)} unique subtypes. "
     )
-    regex_subtype_pattern = r"\((H\d+N\d+|" + "|".join(list(unique_subtypes)) + r")\)"
-    if threads > 1:
-        pool = Pool(processes=threads)
-        logging.info(
-            f"Initialized multiprocessing pool with {threads} processes. Submitting async parsing jobs."
-        )
-        async_objects = [
-            pool.apply_async(
-                parse_blast_result,
-                (blast_result, df_md, regex_subtype_pattern),
-                dict(top=top, pident_threshold=pident_threshold),
-            )
-            for blast_result in blast_results
-        ]
-        logging.info(f"Getting async results...")
-        results = [x.get() for x in async_objects]
-        logging.info(
-            f'Got {len(results)} async parsing results. Merging into report "{excel_report}".'
-        )
-    else:
-        results = [
-            parse_blast_result(blast_result, df_md, regex_subtype_pattern, top=top, pident_threshold=pident_threshold,
-                               min_aln_length=min_aln_length) for blast_result in blast_results]
-    dfs_blast = []
-    all_subtype_results = {}
-    for parsed_result in results:
-        if parsed_result is None:
-            continue
-        df_blast, subtype_results_summary = parsed_result
-        if df_blast is not None:
-            dfs_blast.append(df_blast)
-        sample = subtype_results_summary["sample"]
-        all_subtype_results[sample] = subtype_results_summary
-    df_subtype_results = pd.DataFrame(all_subtype_results).transpose()
-    df_all_blast = pd.concat(dfs_blast).rename(
-        columns={k: v for k, v in blast_results_report_columns}
-    )
-    cols = pd.Series(subtype_results_summary_columns)
-    cols = cols[cols.isin(df_subtype_results.columns)]
-    df_subtype_predictions = df_subtype_results[cols].rename(
-        columns=subtype_results_summary_final_names
-    )
-    cols = pd.Series(columns_H_summary_results)
-    cols = cols[cols.isin(df_subtype_results.columns)]
-    df_H = df_subtype_results[cols].rename(columns=subtype_results_summary_final_names)
-    cols = pd.Series(columns_N_summary_results)
-    cols = cols[cols.isin(df_subtype_results.columns)]
-    df_N = df_subtype_results[cols].rename(columns=subtype_results_summary_final_names)
+    regex_subtype_pattern = r"\((H\d+N\d+|" + "|".join(list(unique_subtypes["subtype"])) + r")\)"
+    results = [
+        parse_blast_result(blast_result, df_md, regex_subtype_pattern, get_top_ref, top=top,
+                           pident_threshold=pident_threshold,
+                           min_aln_length=min_aln_length) for blast_result in blast_results]
+
     if not get_top_ref:
+        dfs_blast = []
+        all_subtype_results = {}
+        for parsed_result in results:
+            if parsed_result is None:
+                continue
+            df_blast, subtype_results_summary = parsed_result
+            if df_blast is not None:
+                dfs_blast.append(df_blast.to_pandas())
+            sample = subtype_results_summary["sample"]
+            all_subtype_results[sample] = subtype_results_summary
+        df_all_blast = pd.concat(dfs_blast).rename(
+            columns={k: v for k, v in blast_results_report_columns}
+        )
+        df_subtype_results = pd.DataFrame(all_subtype_results).transpose()
+        cols = pd.Series(subtype_results_summary_columns)
+        cols = cols[cols.isin(df_subtype_results.columns)]
+        df_subtype_predictions = df_subtype_results[cols].rename(
+            columns=subtype_results_summary_final_names
+        )
+        cols = pd.Series(columns_H_summary_results)
+        cols = cols[cols.isin(df_subtype_results.columns)]
+        df_H = df_subtype_results[cols].rename(columns=subtype_results_summary_final_names)
+        cols = pd.Series(columns_N_summary_results)
+        cols = cols[cols.isin(df_subtype_results.columns)]
+        df_N = df_subtype_results[cols].rename(columns=subtype_results_summary_final_names)
         # Add segment name for more informative
         df_all_blast["Sample Genome Segment Number"] = df_all_blast["Sample Genome Segment Number"]. \
             apply(lambda x: influenza_segment[int(x)])
@@ -448,16 +441,23 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
             output_dest=excel_report,
         )
     else:
-        df_ref_id = df_all_blast[
-            ['Sample', 'Sample Genome Segment Number', 'Reference NCBI Accession', 'BLASTN Bitscore',
-             'Reference Sequence ID']]
-        df_ref_id = df_ref_id.reset_index(drop=True)
-        df_ref_id.loc[df_ref_id['Reference NCBI Accession'].isna(), 'Reference NCBI Accession'] = df_ref_id[
-            'Reference Sequence ID']
-        df_ref_id['Reference NCBI Accession'] = df_ref_id['Reference NCBI Accession'].str.strip()
-        df_ref_id['Sample Genome Segment Number'] = df_ref_id['Sample Genome Segment Number']. \
-            apply(lambda x: influenza_segment[int(x)])
-        df_ref_id.to_csv(sample_name + ".topsegments.csv", header=True, index=False)
+        df_blast, subtype_results_summary = results[0]
+        df_blast = df_blast.rename(
+            mapping={k: v for k, v in blast_results_report_columns}
+        )
+        df_ref_id = df_blast.select(pl.col(['Sample', 'Sample Genome Segment Number',
+                                            'Reference NCBI Accession', 'BLASTN Bitscore', 'Reference Sequence ID']))
+        df_ref_id = df_ref_id.with_columns(
+            pl.when(pl.col("Reference NCBI Accession").is_null())
+                .then(pl.col("Reference Sequence ID"))
+                .otherwise(pl.col("Reference NCBI Accession"))
+                .str.strip()
+                .alias('Reference NCBI Accession')
+        )
+        df_ref_id = df_ref_id.with_columns(
+            pl.col("Sample Genome Segment Number").apply(lambda x: influenza_segment[int(x)])
+                .alias("Sample Genome Segment Number"))
+        df_ref_id.write_csv(sample_name + ".topsegments.csv", separator=",", has_header=True)
 
 
 def get_col_widths(df, index=False):
