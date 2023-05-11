@@ -183,7 +183,15 @@ Medaka model for initial SNP calling from mixed reads prior to phasing
 - Type: string
 - Default: `r941_prom_sup_g5014`
 
-Set Clair3 Variant model
+Set Clair3 Available Variant model
+
+#### `--clair3_user_variant_model`
+
+- Optional
+- Type: string
+- Default: ''
+
+Set Clair3 User specific Variant model
 
 #### `--minor_allele_fraction`
 

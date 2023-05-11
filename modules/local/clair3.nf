@@ -5,11 +5,11 @@ process CLAIR3 {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda (params.enable_conda ? 'bioconda::clair3==0.1.10' : null)
+  conda (params.enable_conda ? 'bioconda::clair3==1.0.1' : null)
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'hkubal/clair3:v0.1-r10'
+    container 'hkubal/clair3:v1.0.1'
   } else {
-    container 'hkubal/clair3:v0.1-r10'
+    container 'hkubal/clair3:v1.0.1'
   }
 
   input:
@@ -30,9 +30,11 @@ process CLAIR3 {
   model_suffix = "models/${params.clair3_variant_model}"
   """
   CLAIR_BIN_DIR=\$(dirname \$(which run_clair3.sh))
-  if [ ${params.enable_conda} = true ] ; then
+  if [ "${params.clair3_user_variant_model}" != "" ] ; then
+      MODEL_PATH=${params.clair3_user_variant_model}
+  elif [[ ( ${params.enable_conda} = true ) && ( "${params.clair3_user_variant_model}" = "" ) ]] ; then
       MODEL_PATH="\$CLAIR_BIN_DIR/${model_suffix}"
-  else
+  elif [[ ( ${params.enable_conda} = false ) && ( "${params.clair3_user_variant_model}" = "" ) ]] ; then
       MODEL_PATH="/opt/models/${params.clair3_variant_model}"
   fi
 
