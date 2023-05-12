@@ -25,8 +25,8 @@ process CLAIR3 {
   def software = getSoftwareName(task.process)
   def prefix   = fluPrefix(sample, segment, ref_id)
   vcf          = "${prefix}.clair3.vcf.gz"
-  clair3_dir   = "${prefix}.clair3/"
-  clair3_log   = "${clair3_dir}run_clair3.log"
+  clair3_dir   = "${prefix}.clair3"
+  clair3_log   = "${clair3_dir}/run_clair3.log"
   model_suffix = "models/${params.clair3_variant_model}"
   """
   CLAIR_BIN_DIR=\$(dirname \$(which run_clair3.sh))
