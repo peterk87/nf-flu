@@ -5,11 +5,11 @@ process CLAIR3 {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda (params.enable_conda ? 'bioconda::clair3==1.0.1' : null)
+  conda (params.enable_conda ? 'bioconda::clair3==0.1.10' : null)
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'hkubal/clair3:v1.0.1'
+    container 'hkubal/clair3:v0.1-r10'
   } else {
-    container 'hkubal/clair3:v1.0.1'
+    container 'hkubal/clair3:v0.1-r10'
   }
 
   input:
