@@ -5,7 +5,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [[3.1.4](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.1.4)] - 2023-05-12
 
-Update Clair3 to version 1.0.1, option `--clair3_user_variant_model` allow to provide variant model which is not included with Clair3
+Update Clair3 to version 1.0.1, option `--clair3_user_variant_model` allows to provide correct variant model which is not included with Clair3.
 
 ## [[3.1.3](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.1.3)] - 2023-04-28
 
