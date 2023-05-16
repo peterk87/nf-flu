@@ -30,12 +30,14 @@ process CLAIR3 {
   model_suffix = "models/${params.clair3_variant_model}"
   """
   CLAIR_BIN_DIR=\$(dirname \$(which run_clair3.sh))
-  if [ "${params.clair3_user_variant_model}" != "" ] ; then
+  if [[ "${params.clair3_user_variant_model}" != "" ]] ; then
       MODEL_PATH=${params.clair3_user_variant_model}
-  elif [[ ( ${params.enable_conda} = true ) && ( "${params.clair3_user_variant_model}" = "" ) ]] ; then
-      MODEL_PATH="\$CLAIR_BIN_DIR/${model_suffix}"
-  elif [[ ( ${params.enable_conda} = false ) && ( "${params.clair3_user_variant_model}" = "" ) ]] ; then
-      MODEL_PATH="/opt/models/${params.clair3_variant_model}"
+  else
+      if [[ ${params.enable_conda} = true ]] ; then
+          MODEL_PATH="\$CLAIR_BIN_DIR/${model_suffix}"
+      else [[ ${params.enable_conda} = false ]]
+          MODEL_PATH="/opt/models/${params.clair3_variant_model}"
+      fi
   fi
 
   samtools faidx $ref_fasta
