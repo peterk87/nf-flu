@@ -3,6 +3,10 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.1.4](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.1.4)] - 2023-05-17
+
+This release addresses issue [#11](https://github.com/CFIA-NCFAD/nf-flu/issues/11) adding a new option `--clair3_user_variant_model <PATH TO CLAIR3 MODEL>` to allow user to provide a Clair3 model not included with Clair3, e.g. a [Rerio](https://github.com/nanoporetech/rerio) Clair3 model for r10 flowcells.
+
 ## [[3.1.3](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.1.3)] - 2023-04-28
 
 Patch release to fix issue to handle lowercase subtypes (e.g. `h1n5`) from NCBI Influenza DB.
