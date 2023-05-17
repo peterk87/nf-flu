@@ -191,7 +191,7 @@ Set Clair3 Available Variant model
 - Type: string
 - Default: ''
 
-Set Clair3 User specific Variant model
+Specify custom Clair3 model, e.g. [Rerio](https://github.com/nanoporetech/rerio) Clair3 model for R10 flowcells (--clair3_user_variant_model /path/to/rerio-models/r1041_e82_400bps_sup_g615_model)
 
 #### `--minor_allele_fraction`
 
