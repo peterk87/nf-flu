@@ -5,15 +5,17 @@ process CLAIR3 {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda (params.enable_conda ? 'bioconda::clair3==0.1.10' : null)
+  conda (params.enable_conda ? 'bioconda::clair3==1.0.2' : null)
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'hkubal/clair3:v0.1-r10'
+    container 'hkubal/clair3:v1.0.2'
   } else {
-    container 'hkubal/clair3:v0.1-r10'
+    container 'hkubal/clair3:v1.0.2'
   }
 
   input:
   tuple val(sample), val(segment), val(ref_id), path(ref_fasta), path(bam)
+  // optional model_path
+  path model_path 
 
   output:
   tuple val(sample), val(segment), val(ref_id), path(ref_fasta), path(vcf), emit: vcf
@@ -31,7 +33,7 @@ process CLAIR3 {
   """
   CLAIR_BIN_DIR=\$(dirname \$(which run_clair3.sh))
   if [[ "${params.clair3_user_variant_model}" != "" ]] ; then
-      MODEL_PATH=${params.clair3_user_variant_model}
+      MODEL_PATH=${model_path}
   else
       if [[ ${params.enable_conda} = true ]] ; then
           MODEL_PATH="\$CLAIR_BIN_DIR/${model_suffix}"
