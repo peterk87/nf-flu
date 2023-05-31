@@ -1,0 +1,39 @@
+name: '❓ Question'
+description: Ask a question about nf-flu
+labels: [question]
+
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Have you searched the documentation for nf-flu?
+        Please see the following documentation:
+
+        * [nf-flu Usage](https://github.com/CFIA-NCFAD/nf-flu/blob/master/docs/usage.md)
+        * [nf-flu Output](https://github.com/CFIA-NCFAD/nf-flu/blob/master/docs/output.md)
+        * [nf-flu Quickstart guide](https://github.com/CFIA-NCFAD/nf-flu/blob/master/README.md#quick-start)
+
+        Has your question already been answered?
+        Check here:
+
+        * [previously asked questions](https://github.com/CFIA-NCFAD/nf-flu/issues?q=is%3Aissue+label%3Aquestion)
+        * [bug reports](https://github.com/CFIA-NCFAD/nf-flu/issues?q=is%3Aissue+label%3Abug)
+  - type: checkboxes
+    attributes:
+      label: Research
+      options:
+        - label: >
+            I have searched the documentation and previously asked questions.
+          required: true
+  - type: markdown
+    attributes:
+      value: ---
+  - type: textarea
+    id: question
+    attributes:
+      label: Question about nf-flu
+      description: >
+        Please provide a detailed description of your question.
+        Include any relevant code or command line output.
+      placeholder: |
+        Can nf-flu do X?
