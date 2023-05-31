@@ -3,8 +3,8 @@ description: Suggest a new feature or enhancement for nf-flu
 labels: [enhancement]
 
 body:
-    id: description
-  - type: textarea
+  - id: description
+    type: textarea
     attributes:
       label: Problem description
       description: >
