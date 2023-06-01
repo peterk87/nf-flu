@@ -10,13 +10,16 @@ body:
         Please see the following documentation:
 
         * [nf-flu Usage](https://github.com/CFIA-NCFAD/nf-flu/blob/master/docs/usage.md)
+        
         * [nf-flu Output](https://github.com/CFIA-NCFAD/nf-flu/blob/master/docs/output.md)
+        
         * [nf-flu Quickstart guide](https://github.com/CFIA-NCFAD/nf-flu/blob/master/README.md#quick-start)
 
         Has your question already been answered?
         Check here:
 
         * [previously asked questions](https://github.com/CFIA-NCFAD/nf-flu/issues?q=is%3Aissue+label%3Aquestion)
+        
         * [bug reports](https://github.com/CFIA-NCFAD/nf-flu/issues?q=is%3Aissue+label%3Abug)
   - type: checkboxes
     attributes:
