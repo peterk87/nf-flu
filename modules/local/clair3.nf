@@ -7,9 +7,9 @@ process CLAIR3 {
 
   conda (params.enable_conda ? 'bioconda::clair3==1.0.2' : null)
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'hkubal/clair3:v1.0.2'
+    container 'https://depot.galaxyproject.org/singularity/clair3:1.0.2--py39hb9dc472_0'
   } else {
-    container 'hkubal/clair3:v1.0.2'
+    container 'quay.io/biocontainers/clair3:1.0.2--py39hb9dc472_0'
   }
 
   input:
@@ -38,7 +38,7 @@ process CLAIR3 {
       if [[ ${params.enable_conda} = true ]] ; then
           MODEL_PATH="\$CLAIR_BIN_DIR/${model_suffix}"
       else [[ ${params.enable_conda} = false ]]
-          MODEL_PATH="/opt/models/${params.clair3_variant_model}"
+          MODEL_PATH="/usr/local/bin/models/${params.clair3_variant_model}"
       fi
   fi
 
