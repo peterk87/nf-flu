@@ -1,0 +1,15 @@
+name: '✨ Feature request'
+description: Suggest a new feature or enhancement for nf-flu
+labels: [enhancement]
+
+body:
+  - id: description
+    type: textarea
+    attributes:
+      label: Problem description
+      description: >
+        Please describe the feature or behavior you'd like to see in nf-flu and the motivation.
+      placeholder: >
+        I wish nf-flu could ...
+    validations:
+      required: true

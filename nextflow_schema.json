@@ -71,6 +71,12 @@
                     "default": "r941_prom_sup_g5014",
                     "fa_icon": "fas fa-dna"
                 },
+                "clair3_user_variant_model": {
+                    "type": "string",
+                    "description": "User specific model path",
+                    "default": "",
+                    "fa_icon": "fas fa-dna"
+                },
                 "minor_allele_fraction": {
                     "type": "number",
                     "minimum": 0,
@@ -269,6 +275,13 @@
                     "default": false,
                     "hidden": true,
                     "fa_icon": "fas fa-bacon"
+                },
+                "use_mamba": {
+                    "type": "boolean",
+                    "description": "Use Mamba in place of Conda for faster Conda env creation.",
+                    "default": false,
+                    "hidden": true,
+                    "fa_icon": "fas fa-speedometer"
                 },
                 "singularity_pull_docker_container": {
                     "type": "boolean",

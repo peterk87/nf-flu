@@ -5,15 +5,17 @@ process CLAIR3 {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda (params.enable_conda ? 'bioconda::clair3==0.1.10' : null)
+  conda (params.enable_conda ? 'bioconda::clair3==1.0.2' : null)
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'hkubal/clair3:v0.1-r10'
+    container 'https://depot.galaxyproject.org/singularity/clair3:1.0.2--py39hb9dc472_0'
   } else {
-    container 'hkubal/clair3:v0.1-r10'
+    container 'quay.io/biocontainers/clair3:1.0.2--py39hb9dc472_0'
   }
 
   input:
   tuple val(sample), val(segment), val(ref_id), path(ref_fasta), path(bam)
+  // optional model_path
+  path model_path 
 
   output:
   tuple val(sample), val(segment), val(ref_id), path(ref_fasta), path(vcf), emit: vcf
@@ -25,15 +27,19 @@ process CLAIR3 {
   def software = getSoftwareName(task.process)
   def prefix   = fluPrefix(sample, segment, ref_id)
   vcf          = "${prefix}.clair3.vcf.gz"
-  clair3_dir   = "${prefix}.clair3/"
-  clair3_log   = "${clair3_dir}run_clair3.log"
+  clair3_dir   = "${prefix}.clair3"
+  clair3_log   = "${clair3_dir}/run_clair3.log"
   model_suffix = "models/${params.clair3_variant_model}"
   """
   CLAIR_BIN_DIR=\$(dirname \$(which run_clair3.sh))
-  if [ ${params.enable_conda} = true ] ; then
-      MODEL_PATH="\$CLAIR_BIN_DIR/${model_suffix}"
+  if [[ "${params.clair3_user_variant_model}" != "" ]] ; then
+      MODEL_PATH=${model_path}
   else
-      MODEL_PATH="/opt/models/${params.clair3_variant_model}"
+      if [[ ${params.enable_conda} = true ]] ; then
+          MODEL_PATH="\$CLAIR_BIN_DIR/${model_suffix}"
+      else [[ ${params.enable_conda} = false ]]
+          MODEL_PATH="/usr/local/bin/models/${params.clair3_variant_model}"
+      fi
   fi
 
   samtools faidx $ref_fasta

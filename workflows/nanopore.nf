@@ -38,6 +38,9 @@ def pass_sample_reads = [:]
 def fail_sample_reads = [:]
 ch_influenza_db_fasta = file(params.ncbi_influenza_fasta)
 ch_influenza_metadata = file(params.ncbi_influenza_metadata)
+if (params.clair3_user_variant_model) {
+  ch_user_clair3_model = file(params.clair3_user_variant_model, checkIfExists: true)
+}
 def irma_module = 'FLU-minion'
 if (params.irma_module) {
     irma_module = params.irma_module
@@ -184,7 +187,15 @@ workflow NANOPORE {
 
   // Variants calling
   if (params.variant_caller == 'clair3'){
-    CLAIR3(MINIMAP2.out.alignment)
+    if (params.clair3_user_variant_model) {
+      CLAIR3(
+        MINIMAP2.out.alignment,
+        ch_user_clair3_model
+      )
+    } else {
+      CLAIR3(MINIMAP2.out.alignment, [])
+    }
+
     ch_versions = ch_versions.mix(CLAIR3.out.versions)
 
     BCF_FILTER_CLAIR3(CLAIR3.out.vcf, params.major_allele_fraction)

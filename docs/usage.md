@@ -183,7 +183,15 @@ Medaka model for initial SNP calling from mixed reads prior to phasing
 - Type: string
 - Default: `r941_prom_sup_g5014`
 
-Set Clair3 Variant model
+Specify built-in Clair3 variant calling model. See [Clair3 docs for options](https://github.com/HKU-BAL/Clair3#pre-trained-models)
+
+#### `--clair3_user_variant_model`
+
+- Optional
+- Type: string
+- Default: ''
+
+Specify custom Clair3 model, e.g. [Rerio](https://github.com/nanoporetech/rerio) Clair3 model for R10 flowcells (--clair3_user_variant_model /path/to/rerio-models/r1041_e82_400bps_sup_g615_model)
 
 #### `--minor_allele_fraction`
 
@@ -309,6 +317,13 @@ Directory to keep pipeline Nextflow logs and reports.
 - Type: boolean
 
 Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.
+
+#### `--use_mamba`
+
+- Optional
+- Type: boolean
+
+Use Mamba in place of Conda for faster Conda env creation.
 
 #### `--singularity_pull_docker_container`
 

@@ -3,6 +3,32 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.1.6](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.1.6)] - 2023-05-31
+
+This is a patch release for a minor change to use Biocontainers Docker and Singularity images for Clair3 to avoid hitting limits on pulls from Docker Hub and since Biocontainers images are half the size of [hkubal/clair3](https://hub.docker.com/r/hkubal/clair3/) images.
+
+Also, updated CI workflow and added issue template forms for feature request and questions.
+
+## [[3.1.5](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.1.5)] - 2023-05-30
+
+### Added
+
+* `--use_mamba` to enable using [Mamba](https://github.com/mamba-org/mamba/) in place of Conda when using `-profile conda` for faster creation of Conda environments
+
+### Updates
+
+* Clair3: 0.1.10 -> 1.0.2
+
+### Fixes
+
+* user-specified Clair3 models not being found ([#11](https://github.com/CFIA-NCFAD/nf-flu/issues/11))
+* Conda profile not enabling Conda ([#15](https://github.com/CFIA-NCFAD/nf-flu/issues/15))
+* IRMA wanting too much `/tmp` space; IRMA's tmp dir will be output to the current working directory of the process job ([#13](https://github.com/CFIA-NCFAD/nf-flu/issues/13)) (Thanks @Codes1985 for reporting and solving this issue!)
+
+## [[3.1.4](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.1.4)] - 2023-05-17
+
+This release addresses issue [#11](https://github.com/CFIA-NCFAD/nf-flu/issues/11) adding a new option `--clair3_user_variant_model <PATH TO CLAIR3 MODEL>` to allow user to provide a Clair3 model not included with Clair3, e.g. a [Rerio](https://github.com/nanoporetech/rerio) Clair3 model for r10 flowcells.
+
 ## [[3.1.3](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.1.3)] - 2023-04-28
 
 Patch release to fix issue to handle lowercase subtypes (e.g. `h1n5`) from NCBI Influenza DB.
