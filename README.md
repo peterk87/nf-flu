@@ -78,29 +78,29 @@ The nf-flu pipeline comes with:
 
 ### [BcfTools][] and [Samtools][]
 
-```
+```text
 Danecek, P., Bonfield, J.K., Liddle, J., Marshall, J., Ohan, V., Pollard, M.O., Whitwham, A., Keane, T., McCarthy, S.A., Davies, R.M., Li, H., 2021. Twelve years of SAMtools and BCFtools. Gigascience 10, giab008. https://doi.org/10.1093/gigascience/giab008
 ```
 
 ### [BLAST][] Basic Local Alignment Search Tool
 
-```
+```text
 Altschul, S.F., Gish, W., Miller, W., Myers, E.W., Lipman, D.J., 1990. Basic local alignment search tool. J. Mol. Biol. 215, 403–410. https://doi.org/10.1016/S0022-2836(05)80360-2
 ```
 
-```
+```text
 Camacho, C., Coulouris, G., Avagyan, V., Ma, N., Papadopoulos, J., Bealer, K., Madden, T.L., 2009. BLAST+: architecture and applications. BMC Bioinformatics 10, 421. https://doi.org/10.1186/1471-2105-10-421
 ```
 
 ### [Clair3][]
 
-```
+```text
 Zheng, Z., Li, S., Su, J., Leung, A.W.-S., Lam, T.-W., Luo, R., 2022. Symphonizing pileup and full-alignment for deep learning-based long-read variant calling. Nat Comput Sci 2, 797–803. https://doi.org/10.1038/s43588-022-00387-x
 ```
 
 ### [IRMA][] Iterative Refinement Meta-Assembler
 
-```
+```text
 Shepard, S.S., Meno, S., Bahl, J., Wilson, M.M., Barnes, J., Neuhaus, E., 2016. Viral deep sequencing needs an adaptive approach: IRMA, the iterative refinement meta-assembler. BMC Genomics 17, 708. https://doi.org/10.1186/s12864-016-3030-6
 ```
 
@@ -112,7 +112,7 @@ Shepard, S.S., Meno, S., Bahl, J., Wilson, M.M., Barnes, J., Neuhaus, E., 2016. 
 
 [Minimap2][] is used for rapid and accurate read alignment to reference sequences.
 
-```
+```text
 Li, H., 2018. Minimap2: pairwise alignment for nucleotide sequences. Bioinformatics 34, 3094–3100. https://doi.org/10.1093/bioinformatics/bty191
 ```
 
@@ -120,7 +120,7 @@ Li, H., 2018. Minimap2: pairwise alignment for nucleotide sequences. Bioinformat
 
 [Mosdepth][] is used for rapid sequencing coverage calculation and summary statistics.
 
-```
+```text
 Pedersen, B.S., Quinlan, A.R., 2017. Mosdepth: quick coverage calculation for genomes and exomes. Bioinformatics 34, 867–868. https://doi.org/10.1093/bioinformatics/btx699
 ```
 
@@ -128,7 +128,7 @@ Pedersen, B.S., Quinlan, A.R., 2017. Mosdepth: quick coverage calculation for ge
 
 [MultiQC][] is used for generation of a single report for multiple tools.
 
-```
+```text
 Ewels, P., Magnusson, M., Lundin, S., Käller, M., 2016. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics 32, 3047–3048. https://doi.org/10.1093/bioinformatics/btw354
 ```
 
@@ -138,13 +138,13 @@ Ewels, P., Magnusson, M., Lundin, S., Käller, M., 2016. MultiQC: summarize anal
 
 NCBI Influenza Virus Resource:
 
-```
+```text
 Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Zaslavsky, L., Tatusova, T., Ostell, J., Lipman, D., 2008. The influenza virus resource at the National Center for Biotechnology Information. J Virol 82, 596–601. https://doi.org/10.1128/JVI.02005-07
 ```
 
 NCBI Influenza Virus Sequence Annotation Tool:
 
-```
+```text
 Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Tatusova, T., 2007. FLAN: a web server for influenza virus genome annotation. Nucleic Acids Res 35, W280-284. https://doi.org/10.1093/nar/gkm354
 ```
 
@@ -152,7 +152,7 @@ Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Tatusova, T., 2007. FLAN: a we
 
 **nf-flu** is implemented in [Nextflow][].
 
-```
+```text
 Tommaso, P.D., Chatzou, M., Floden, E.W., Barja, P.P., Palumbo, E., Notredame, C., 2017. Nextflow enables reproducible computational workflows. Nat Biotechnol 35, 316–319. https://doi.org/10.1038/nbt.3820
 ```
 
@@ -160,14 +160,13 @@ Tommaso, P.D., Chatzou, M., Floden, E.W., Barja, P.P., Palumbo, E., Notredame, C
 
 [nf-core][] is a great resource for building robust and reproducible bioinformatics pipelines.
 
-```
+```text
 Ewels, P.A., Peltzer, A., Fillinger, S., Patel, H., Alneberg, J., Wilm, A., Garcia, M.U., Di Tommaso, P., Nahnsen, S., 2020. The nf-core framework for community-curated bioinformatics pipelines. Nat Biotechnol 38, 276–278. https://doi.org/10.1038/s41587-020-0439-x
 ```
 
 ### [seqtk][]
 
 [seqtk][] is used for rapid manipulation of FASTA/Q files. Available from GitHub at [lh3/seqtk](https://github.com/lh3/seqtk)
-
 
 ## Credits
 
