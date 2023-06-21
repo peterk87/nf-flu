@@ -18,8 +18,8 @@ include { CHECK_SAMPLE_SHEET } from '../modules/local/check_sample_sheet'
 include { SUBTYPING_REPORT } from '../modules/local/subtyping_report'
 include { GUNZIP_NCBI_FLU_FASTA } from '../modules/local/misc'
 include { BLAST_MAKEBLASTDB } from '../modules/local/blast_makeblastdb'
-include { BLAST_BLASTN } from '../modules/nf-core/modules/blast/blastn/main'
-include { CAT_FASTQ } from '../modules/nf-core/modules/cat/fastq/main'
+include { BLAST_BLASTN } from '../modules/local/blastn'
+include { CAT_ILLUMINA_FASTQ } from '../modules/local/cat_illumina_fastq'
 
 //=============================================================================
 // Workflow Params Setup
@@ -63,21 +63,16 @@ workflow ILLUMINA {
       [ meta, reads ]
     } 
     .groupTuple(by: [0]) \
-    .branch { meta, reads ->
-      single: reads.size() == 1
-        return [ meta, reads.flatten() ]
-      multiple: reads.size() > 1
-        return [ meta, reads.flatten() ]
+    .map { meta, reads ->
+      return [ meta, reads.flatten() ]
     }
     .set { ch_input }
 
   // Credit to nf-core/viralrecon. Source: https://github.com/nf-core/viralrecon/blob/a85d5969f9025409e3618d6c280ef15ce417df65/workflows/illumina.nf#L221
   // Concatenate FastQ files from same sample if required
-  CAT_FASTQ(ch_input.multiple)
-    .mix(ch_input.single)
-    .set { ch_cat_reads }
+  CAT_ILLUMINA_FASTQ(ch_input)
 
-  IRMA(ch_cat_reads, irma_module)
+  IRMA(CAT_ILLUMINA_FASTQ.out.reads, irma_module)
 
   BLAST_BLASTN(IRMA.out.consensus, BLAST_MAKEBLASTDB.out.db)
 
