@@ -1,4 +1,6 @@
-# CFIA-NCFAD/nf-flu - Influenza A Virus Genome Assembly Nextflow Workflow
+# CFIA-NCFAD/nf-flu - Influenza A and B Virus Genome Assembly Nextflow Workflow
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7011213.svg)](https://doi.org/10.5281/zenodo.7011213)
 
 [![CI](https://github.com/CFIA-NCFAD/nf-flu/actions/workflows/ci.yml/badge.svg)](https://github.com/CFIA-NCFAD/nf-flu/actions/workflows/ci.yml)
 
@@ -9,11 +11,10 @@
 
 ## Introduction
 
-**nf-flu** is a bioinformatics analysis pipeline for assembly and H/N subtyping of Influenza A virus. The pipeline supports both Illumina and Nanopore Platform.
-Since Influenza is a special virus with multiple gene segments (8 segments) and there might be a reference or multiple we would want to align against, the pipeline will automatically pull top match references for each segment.
-To achieve this task, the pipeline downloads Influenza database from NCBI and user could provide their own reference database. The pipline performs read mapping against each reference segment, variant calling and genome assembly.
-
-The pipeline is implemented in [Nextflow][]
+**nf-flu** is a [Nextflow][] bioinformatics analysis pipeline for assembly and H/N subtyping of Influenza A and B viruses from Illumina or Nanopore sequencing data.
+Since Influenza has a segmented genome consisting of 8 gene segments, the pipeline will automatically select the top matching reference sequence from NCBI for each gene segment based on [IRMA][] assembly and nucleotide [BLAST][] against all Influenza sequences from NCBI.
+Users can also provide their own reference sequences to include in the top reference sequence selection process.
+After reference sequence selection, the pipeline performs read mapping to each reference sequence, variant calling and depth-masked consensus sequence generation.
 
 ## Pipeline summary
 
@@ -21,7 +22,7 @@ The pipeline is implemented in [Nextflow][]
 2. Merge reads of re-sequenced samples ([`cat`](http://www.linfo.org/cat.html)) (if needed)
 3. Assembly of Influenza gene segments with [IRMA][] using the built-in FLU module
 4. Nucleotide [BLAST][] search against [NCBI Influenza DB][]
-5. Automatically pull top match references for segments
+5. Automatically select top match references for segments
 6. H/N subtype prediction and Excel XLSX report generation based on BLAST results
 7. Perform Variant calling and genome assembly for all segments.
 
@@ -73,11 +74,100 @@ The nf-flu pipeline comes with:
 * [Usage](docs/usage.md) and
 * [Output](docs/output.md) documentation.
 
-## Resources
+## Resources and References
 
-* [NCBI Influenza FTP site](https://ftp.ncbi.nih.gov/genomes/INFLUENZA/)
-* [IRMA][] Iterative Refinement Meta-Assembler
-  * [IRMA Publication](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3030-6)
+### [BcfTools][] and [Samtools][]
+
+```
+Danecek, P., Bonfield, J.K., Liddle, J., Marshall, J., Ohan, V., Pollard, M.O., Whitwham, A., Keane, T., McCarthy, S.A., Davies, R.M., Li, H., 2021. Twelve years of SAMtools and BCFtools. Gigascience 10, giab008. https://doi.org/10.1093/gigascience/giab008
+```
+
+### [BLAST][] Basic Local Alignment Search Tool
+
+```
+Altschul, S.F., Gish, W., Miller, W., Myers, E.W., Lipman, D.J., 1990. Basic local alignment search tool. J. Mol. Biol. 215, 403–410. https://doi.org/10.1016/S0022-2836(05)80360-2
+```
+
+```
+Camacho, C., Coulouris, G., Avagyan, V., Ma, N., Papadopoulos, J., Bealer, K., Madden, T.L., 2009. BLAST+: architecture and applications. BMC Bioinformatics 10, 421. https://doi.org/10.1186/1471-2105-10-421
+```
+
+### [Clair3][]
+
+```
+Zheng, Z., Li, S., Su, J., Leung, A.W.-S., Lam, T.-W., Luo, R., 2022. Symphonizing pileup and full-alignment for deep learning-based long-read variant calling. Nat Comput Sci 2, 797–803. https://doi.org/10.1038/s43588-022-00387-x
+```
+
+### [IRMA][] Iterative Refinement Meta-Assembler
+
+```
+Shepard, S.S., Meno, S., Bahl, J., Wilson, M.M., Barnes, J., Neuhaus, E., 2016. Viral deep sequencing needs an adaptive approach: IRMA, the iterative refinement meta-assembler. BMC Genomics 17, 708. https://doi.org/10.1186/s12864-016-3030-6
+```
+
+### [Medaka][]
+
+[Medaka][] is deprecated in favour of [Clair3][] for variant calling of Nanopore data.
+
+### [Minimap2][]
+
+[Minimap2][] is used for rapid and accurate read alignment to reference sequences.
+
+```
+Li, H., 2018. Minimap2: pairwise alignment for nucleotide sequences. Bioinformatics 34, 3094–3100. https://doi.org/10.1093/bioinformatics/bty191
+```
+
+### [Mosdepth][]
+
+[Mosdepth][] is used for rapid sequencing coverage calculation and summary statistics.
+
+```
+Pedersen, B.S., Quinlan, A.R., 2017. Mosdepth: quick coverage calculation for genomes and exomes. Bioinformatics 34, 867–868. https://doi.org/10.1093/bioinformatics/btx699
+```
+
+### [MultiQC][]
+
+[MultiQC][] is used for generation of a single report for multiple tools.
+
+```
+Ewels, P., Magnusson, M., Lundin, S., Käller, M., 2016. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics 32, 3047–3048. https://doi.org/10.1093/bioinformatics/btw354
+```
+
+### [NCBI Influenza Virus Resource][]
+
+**nf-flu** relies on publicly available Influenza sequence data from NCBI available at the [NCBI Influenza Virus Resource][], which is downloaded from the [FTP site](https://ftp.ncbi.nih.gov/genomes/INFLUENZA/).
+
+NCBI Influenza Virus Resource:
+
+```
+Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Zaslavsky, L., Tatusova, T., Ostell, J., Lipman, D., 2008. The influenza virus resource at the National Center for Biotechnology Information. J Virol 82, 596–601. https://doi.org/10.1128/JVI.02005-07
+```
+
+NCBI Influenza Virus Sequence Annotation Tool:
+
+```
+Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Tatusova, T., 2007. FLAN: a web server for influenza virus genome annotation. Nucleic Acids Res 35, W280-284. https://doi.org/10.1093/nar/gkm354
+```
+
+### [Nextflow][]
+
+**nf-flu** is implemented in [Nextflow][].
+
+```
+Tommaso, P.D., Chatzou, M., Floden, E.W., Barja, P.P., Palumbo, E., Notredame, C., 2017. Nextflow enables reproducible computational workflows. Nat Biotechnol 35, 316–319. https://doi.org/10.1038/nbt.3820
+```
+
+### [nf-core][]
+
+[nf-core][] is a great resource for building robust and reproducible bioinformatics pipelines.
+
+```
+Ewels, P.A., Peltzer, A., Fillinger, S., Patel, H., Alneberg, J., Wilm, A., Garcia, M.U., Di Tommaso, P., Nahnsen, S., 2020. The nf-core framework for community-curated bioinformatics pipelines. Nat Biotechnol 38, 276–278. https://doi.org/10.1038/s41587-020-0439-x
+```
+
+### [seqtk][]
+
+[seqtk][] is used for rapid manipulation of FASTA/Q files. Available from GitHub at [lh3/seqtk](https://github.com/lh3/seqtk)
+
 
 ## Credits
 
@@ -94,3 +184,13 @@ The nf-flu pipeline was originally developed by [Peter Kruczkiewicz](https://git
 [Nextflow]: https://www.nextflow.io/
 [Docker]: https://www.docker.com/
 [Singularity]: https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps
+[NCBI Influenza Virus Resource]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
+[BcfTools]: https://samtools.github.io/bcftools/
+[Samtools]: https://www.htslib.org/
+[nf-core]: https://nf-co.re/
+[Minimap2]: https://github.com/lh3/minimap2/
+[Clair3]: https://github.com/HKU-BAL/Clair3
+[Medaka]: https://github.com/nanoporetech/medaka
+[Mosdepth]: https://github.com/brentp/mosdepth
+[seqtk]: https://github.com/lh3/seqtk
+[MultiQC]: https://multiqc.info/
