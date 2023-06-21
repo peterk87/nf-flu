@@ -1,7 +1,6 @@
-// modified from nf-core/modules version to only mv BLAST DB files to blast_db dir
-process BLAST_MAKEBLASTDB {
-  tag "$fasta"
-  label 'process_low'
+process BLAST_BLASTN {
+  tag "$meta.id"
+  label 'process_high'
 
   conda (params.enable_conda ? 'bioconda::blast=2.14.0' : null)
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -11,23 +10,27 @@ process BLAST_MAKEBLASTDB {
   }
 
   input:
-  path fasta
+  tuple val(meta), path(fasta)
+  path  db
 
   output:
-  path 'blast_db'     , emit: db
-  path "versions.yml" , emit: versions
+  tuple val(meta), path('*.blastn.txt'), emit: txt
+  path "versions.yml"                  , emit: versions
 
   when:
   task.ext.when == null || task.ext.when
 
   script:
   def args = task.ext.args ?: ''
+  def prefix = task.ext.prefix ?: "${meta.id}"
   """
-  makeblastdb \\
-      -in $fasta \\
-      $args
-  mkdir blast_db
-  mv ${fasta}.* blast_db
+  DB=`find -L ./ -name "*.ndb" | sed 's/.ndb//'`
+  blastn \\
+      -num_threads $task.cpus \\
+      -db \$DB \\
+      -query $fasta \\
+      $args \\
+      -out ${prefix}.blastn.txt
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
       blast: \$(blastn -version 2>&1 | sed 's/^.*blastn: //; s/ .*\$//')
