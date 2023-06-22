@@ -28,9 +28,9 @@ include { CHECK_REF_FASTA                                     } from '../modules
 // using modified BLAST_MAKEBLASTDB from nf-core/modules to only move/publish BLAST DB files
 include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI         } from '../modules/local/blast_makeblastdb'
 include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_REFDB        } from '../modules/local/blast_makeblastdb'
-include { BLAST_BLASTN as BLAST_BLASTN_IRMA                   } from '../modules/nf-core/modules/blast/blastn/main'
-include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS              } from '../modules/nf-core/modules/blast/blastn/main'
-include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS_REF_DB       } from '../modules/nf-core/modules/blast/blastn/main'
+include { BLAST_BLASTN as BLAST_BLASTN_IRMA                   } from '../modules/local/blastn'
+include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS              } from '../modules/local/blastn'
+include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS_REF_DB       } from '../modules/local/blastn'
 include { CUSTOM_DUMPSOFTWAREVERSIONS  as SOFTWARE_VERSIONS   } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 include { MULTIQC                                             } from '../modules/local/multiqc'
 

@@ -3,12 +3,6 @@
     "homePage": "https://github.com/CFIA-NCFAD/nf-flu",
     "repos": {
         "nf-core/modules": {
-            "blast/blastn": {
-                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
-            },
-            "cat/fastq": {
-                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
-            },
             "custom/dumpsoftwareversions": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
