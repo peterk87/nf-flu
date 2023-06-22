@@ -3,6 +3,21 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.2.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.2.0)] - 2023-06-22
+
+### Added
+
+* Influenza B virus support (#14)
+* Polars for faster parsing of BLAST results (#14)
+
+### Fixes
+
+* Irregular Illumina paired-end FASTQ files not producing IRMA assemblies (#20)
+
+### Updates
+
+* Updated README.md to include references and citations
+
 ## [[3.1.6](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.1.6)] - 2023-05-31
 
 This is a patch release for a minor change to use Biocontainers Docker and Singularity images for Clair3 to avoid hitting limits on pulls from Docker Hub and since Biocontainers images are half the size of [hkubal/clair3](https://hub.docker.com/r/hkubal/clair3/) images.
