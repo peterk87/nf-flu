@@ -19,7 +19,6 @@ include { SUBTYPING_REPORT } from '../modules/local/subtyping_report'
 include { BLAST_MAKEBLASTDB } from '../modules/local/blast_makeblastdb'
 include { BLAST_BLASTN } from '../modules/local/blastn'
 include { CAT_ILLUMINA_FASTQ } from '../modules/local/cat_illumina_fastq'
-include { FETCH_INFLUENZA_REF_DB } from '../modules/local/fetch_influenza_ref_db'
 include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA; ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_CSV } from '../modules/local/zstd_decompress'
 
 //=============================================================================
