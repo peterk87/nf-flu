@@ -78,13 +78,13 @@ workflow ILLUMINA {
   // Credit to nf-core/viralrecon. Source: https://github.com/nf-core/viralrecon/blob/a85d5969f9025409e3618d6c280ef15ce417df65/workflows/illumina.nf#L221
   // Concatenate FastQ files from same sample if required
   CAT_ILLUMINA_FASTQ(ch_input)
-  ch_versions = ch_versions.mix(CAT_ILLUMINA_FASTQ.out.versions)
+  ch_versions = ch_versions.mix(CAT_ILLUMINA_FASTQ.out.versions.first().ifEmpty(null))
 
   IRMA(CAT_ILLUMINA_FASTQ.out.reads, irma_module)
-  ch_versions = ch_versions.mix(IRMA.out.versions)
+  ch_versions = ch_versions.mix(IRMA.out.versions.first().ifEmpty(null))
 
   BLAST_BLASTN(IRMA.out.consensus, BLAST_MAKEBLASTDB.out.db)
-  ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions)
+  ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first().ifEmpty(null))
 
   ch_blast = BLAST_BLASTN.out.txt.collect({ it[1] })
   SUBTYPING_REPORT(ZSTD_DECOMPRESS_CSV.out.file, ch_blast)
