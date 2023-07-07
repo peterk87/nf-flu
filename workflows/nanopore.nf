@@ -19,7 +19,7 @@ include { BCF_CONSENSUS; BCFTOOLS_STATS                       } from '../modules
 include { CLAIR3                                              } from '../modules/local/clair3'
 include { MOSDEPTH_GENOME                                     } from '../modules/local/mosdepth'
 include { CAT_NANOPORE_FASTQ                                  } from '../modules/local/misc'
-include { GUNZIP_NCBI_FLU_FASTA                               } from '../modules/local/misc'
+include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA; ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_CSV } from '../modules/local/zstd_decompress'
 include { CAT_DB                                              } from '../modules/local/misc'
 include { CAT_CONSENSUS                                       } from '../modules/local/misc'
 include { SEQTK_SEQ                                           } from '../modules/local/seqtk_seq'
@@ -131,10 +131,12 @@ workflow NANOPORE {
     .map { sample, fqgz, fq, count -> [ [id: sample], fqgz, fq ] }
     .set { ch_reads }
 
-  GUNZIP_NCBI_FLU_FASTA(ch_influenza_db_fasta)
-  ch_versions = ch_versions.mix(GUNZIP_NCBI_FLU_FASTA.out.versions)
+  ZSTD_DECOMPRESS_FASTA(ch_influenza_db_fasta, "influenza.fasta")
+  ch_versions = ch_versions.mix(ZSTD_DECOMPRESS_FASTA.out.versions)
+  ZSTD_DECOMPRESS_CSV(ch_influenza_metadata, "influenza.csv")
+  ch_versions = ch_versions.mix(ZSTD_DECOMPRESS_CSV.out.versions)
 
-  ch_input_ref_db = GUNZIP_NCBI_FLU_FASTA.out.fna
+  ch_input_ref_db = ZSTD_DECOMPRESS_FASTA.out.file
 
   if (params.ref_db){
     ch_ref_fasta = file(params.ref_db, type: 'file')
@@ -159,11 +161,11 @@ workflow NANOPORE {
   //Generate suptype prediction report
   if (!params.skip_irma_subtyping_report){
     ch_blast_irma = BLAST_BLASTN_IRMA.out.txt.collect({ it[1] })
-    SUBTYPING_REPORT_IRMA_CONSENSUS(ch_influenza_metadata, ch_blast_irma)
+    SUBTYPING_REPORT_IRMA_CONSENSUS(ZSTD_DECOMPRESS_CSV.out.file, ch_blast_irma)
   }
 
   // Prepare top ncbi accession id for each segment of each sample sample (id which has top bitscore)
-  PULL_TOP_REF_ID(BLAST_BLASTN_IRMA.out.txt, ch_influenza_metadata)
+  PULL_TOP_REF_ID(BLAST_BLASTN_IRMA.out.txt, ZSTD_DECOMPRESS_CSV.out.file)
   ch_versions = ch_versions.mix(PULL_TOP_REF_ID.out.versions)
 
   PULL_TOP_REF_ID.out.accession_id
@@ -242,7 +244,7 @@ workflow NANOPORE {
   ch_versions = ch_versions.mix(BLAST_BLASTN_CONSENSUS.out.versions)
 
   ch_blastn_consensus = BLAST_BLASTN_CONSENSUS.out.txt.collect({ it[1] })
-  SUBTYPING_REPORT_BCF_CONSENSUS(ch_influenza_metadata, ch_blastn_consensus)
+  SUBTYPING_REPORT_BCF_CONSENSUS(ZSTD_DECOMPRESS_CSV.out.file, ch_blastn_consensus)
   ch_versions = ch_versions.mix(SUBTYPING_REPORT_BCF_CONSENSUS.out.versions)
 
   if (params.ref_db){

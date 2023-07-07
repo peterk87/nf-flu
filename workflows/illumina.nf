@@ -20,6 +20,8 @@ include { GUNZIP_NCBI_FLU_FASTA } from '../modules/local/misc'
 include { BLAST_MAKEBLASTDB } from '../modules/local/blast_makeblastdb'
 include { BLAST_BLASTN } from '../modules/local/blastn'
 include { CAT_ILLUMINA_FASTQ } from '../modules/local/cat_illumina_fastq'
+include { FETCH_INFLUENZA_REF_DB } from '../modules/local/fetch_influenza_ref_db'
+include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA; ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_CSV } from '../modules/local/zstd_decompress'
 
 //=============================================================================
 // Workflow Params Setup
@@ -35,9 +37,14 @@ if (params.irma_module) {
 //=============================================================================
 
 workflow ILLUMINA {
-
-  GUNZIP_NCBI_FLU_FASTA(ch_influenza_db_fasta)
-  BLAST_MAKEBLASTDB(GUNZIP_NCBI_FLU_FASTA.out.fna)
+  ch_versions = Channel.empty()
+  // Decompress reference data
+  ZSTD_DECOMPRESS_FASTA(ch_influenza_db_fasta, "influenza.fasta")
+  ch_versions = ch_versions.mix(ZSTD_DECOMPRESS_FASTA.out.versions)
+  ZSTD_DECOMPRESS_CSV(ch_influenza_metadata, "influenza.csv")
+  ch_versions = ch_versions.mix(ZSTD_DECOMPRESS_CSV.out.versions)
+  BLAST_MAKEBLASTDB(ZSTD_DECOMPRESS_FASTA.out.file)
+  ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
   CHECK_SAMPLE_SHEET(Channel.fromPath( params.input, checkIfExists: true))
     .splitCsv(header: ['sample', 'fastq1', 'fastq2', 'single_end'], sep: ',', skip: 1)
@@ -71,11 +78,17 @@ workflow ILLUMINA {
   // Credit to nf-core/viralrecon. Source: https://github.com/nf-core/viralrecon/blob/a85d5969f9025409e3618d6c280ef15ce417df65/workflows/illumina.nf#L221
   // Concatenate FastQ files from same sample if required
   CAT_ILLUMINA_FASTQ(ch_input)
+  ch_versions = ch_versions.mix(CAT_ILLUMINA_FASTQ.out.versions)
 
   IRMA(CAT_ILLUMINA_FASTQ.out.reads, irma_module)
+  ch_versions = ch_versions.mix(IRMA.out.versions)
 
   BLAST_BLASTN(IRMA.out.consensus, BLAST_MAKEBLASTDB.out.db)
+  ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions)
 
   ch_blast = BLAST_BLASTN.out.txt.collect({ it[1] })
-  SUBTYPING_REPORT(ch_influenza_metadata, ch_blast)
+  SUBTYPING_REPORT(ZSTD_DECOMPRESS_CSV.out, ch_blast)
+  ch_versions = ch_versions.mix(SUBTYPING_REPORT.out.versions)
+
+  SOFTWARE_VERSIONS(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
 }

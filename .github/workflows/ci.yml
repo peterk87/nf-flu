@@ -10,6 +10,10 @@ on:
 
 env:
   NXF_ANSI_LOG: false
+  # URLs to Influenza ref data should be updated in step with nextflow.config
+  # default ncbi_influenza_fasta and ncbi_influenza_metadata params
+  FASTA_ZST_URL: https://api.figshare.com/v2/file/download/41415330
+  CSV_ZST_URL: https://api.figshare.com/v2/file/download/41415333
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
@@ -58,23 +62,32 @@ jobs:
           make -j2
           make install
           which seqtk
-      - name: Cache subsampled influenza.fna.gz
+      - name: Cache subsampled influenza.fna
         uses: actions/cache@v3
         id: cache-influenza-fna
         with:
-          path: influenza-10k.fna.gz
+          path: influenza-10k.fna.zst
           key: influenza-fna
       - name: Subsample NCBI influenza.fna
         if: steps.cache-influenza-fna.outputs.cache-hit != 'true'
         run: |
-          curl --silent -SLk https://ftp.ncbi.nih.gov/genomes/INFLUENZA/influenza.fna.gz > influenza.fna.gz
-          echo "Subsample 10k seqs from influenza.fna.gz with seqtk"
-          seqtk sample -s 789 influenza.fna.gz 10000 | gzip -ck > influenza-10k.fna.gz
+          curl --silent -SLk ${FASTA_ZST_URL} | zstdcat | seqtk sample -s 789 - 10000 | zstd -ck > influenza-10k.fna.zst
+      - name: Cache influenza.csv
+        uses: actions/cache@v3
+        id: cache-influenza-csv
+        with:
+          path: influenza.csv.zst
+          key: influenza-csv
+      - name: Download influenza.csv
+        if: steps.cache-influenza-csv.outputs.cache-hit != 'true'
+        run: |
+          curl --silent -SLk ${CSV_ZST_URL} > influenza.csv.zst
       - name: Run pipeline with test data
         run: |
           nextflow run ${GITHUB_WORKSPACE} \
             -profile test_illumina,docker \
-            --ncbi_influenza_fasta influenza-10k.fna.gz
+            --ncbi_influenza_fasta influenza-10k.fna.zst \
+            --ncbi_influenza_metadata influenza.csv.zst
       - name: Upload Artifact
         if: success()
         uses: actions/upload-artifact@v1.0.0
@@ -155,25 +168,34 @@ jobs:
           echo "ERR6359501-10k,$(realpath reads/ERR6359501-10k.fastq)" | tee -a samplesheet.csv
           echo "ERR6359501,$(realpath run1)" | tee -a samplesheet.csv
           echo "ERR6359501,$(realpath run2)" | tee -a samplesheet.csv
-      - name: Cache subsampled influenza.fna.gz
+      - name: Cache subsampled influenza.fna
         uses: actions/cache@v3
         id: cache-influenza-fna
         with:
-          path: influenza-10k.fna.gz
+          path: influenza-10k.fna.zst
           key: influenza-fna
       - name: Subsample NCBI influenza.fna
         if: steps.cache-influenza-fna.outputs.cache-hit != 'true'
         run: |
-          curl --silent -SLk https://ftp.ncbi.nih.gov/genomes/INFLUENZA/influenza.fna.gz > influenza.fna.gz
-          echo "Subsample 10k seqs from influenza.fna.gz with seqtk"
-          seqtk sample -s 789 influenza.fna.gz 10000 | gzip -ck > influenza-10k.fna.gz
+          curl --silent -SLk ${FASTA_ZST_URL} | zstdcat | seqtk sample -s 789 - 10000 | zstd -ck > influenza-10k.fna.zst
+      - name: Cache influenza.csv
+        uses: actions/cache@v3
+        id: cache-influenza-csv
+        with:
+          path: influenza.csv.zst
+          key: influenza-csv
+      - name: Download influenza.csv
+        if: steps.cache-influenza-csv.outputs.cache-hit != 'true'
+        run: |
+          curl --silent -SLk ${CSV_ZST_URL} > influenza.csv.zst
       - name: Run pipeline with test data
         run: |
           nextflow run ${GITHUB_WORKSPACE} \
             -profile test_nanopore,docker \
             --platform nanopore \
             --input samplesheet.csv \
-            --ncbi_influenza_fasta influenza-10k.fna.gz
+            --ncbi_influenza_fasta influenza-10k.fna.zst \
+            --ncbi_influenza_metadata influenza.csv.zst
       - name: Upload pipeline_info/
         if: success()
         uses: actions/upload-artifact@v1.0.0
