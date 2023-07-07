@@ -16,7 +16,6 @@ ch_influenza_metadata = file(params.ncbi_influenza_metadata)
 include { IRMA } from '../modules/local/irma'
 include { CHECK_SAMPLE_SHEET } from '../modules/local/check_sample_sheet'
 include { SUBTYPING_REPORT } from '../modules/local/subtyping_report'
-include { GUNZIP_NCBI_FLU_FASTA } from '../modules/local/misc'
 include { BLAST_MAKEBLASTDB } from '../modules/local/blast_makeblastdb'
 include { BLAST_BLASTN } from '../modules/local/blastn'
 include { CAT_ILLUMINA_FASTQ } from '../modules/local/cat_illumina_fastq'
