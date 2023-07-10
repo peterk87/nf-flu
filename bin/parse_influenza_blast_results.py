@@ -8,15 +8,14 @@ Segment 4 - hemagglutinin (HA) gene
 Segment 6 - neuraminidase (NA) gene
 """
 
-from typing import Dict, List, Optional, Tuple
-import re
 import logging
+import re
 from collections import defaultdict
-import multiprocessing
+from typing import Dict, List, Optional, Tuple
 
 import click
-import pandas as pd
 import numpy as np
+import pandas as pd
 import polars as pl
 from rich.logging import RichHandler
 
@@ -230,9 +229,9 @@ def parse_blast_result(
     del df_metadata
     df_merge = df_merge.with_columns(
         pl.when(pl.col("subtype").is_null())
-            .then(pl.col("subtype_from_match_title"))
-            .otherwise(pl.col("subtype"))
-            .alias("subtype")
+        .then(pl.col("subtype_from_match_title"))
+        .otherwise(pl.col("subtype"))
+        .alias("subtype")
     )
     df_merge = df_merge.sort(
         by=["sample_segment", "bitscore"], descending=[False, True]
@@ -453,14 +452,14 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
                                             'Reference NCBI Accession', 'BLASTN Bitscore', 'Reference Sequence ID']))
         df_ref_id = df_ref_id.with_columns(
             pl.when(pl.col("Reference NCBI Accession").is_null())
-                .then(pl.col("Reference Sequence ID"))
-                .otherwise(pl.col("Reference NCBI Accession"))
-                .str.strip()
-                .alias('Reference NCBI Accession')
+            .then(pl.col("Reference Sequence ID"))
+            .otherwise(pl.col("Reference NCBI Accession"))
+            .str.strip()
+            .alias('Reference NCBI Accession')
         )
         df_ref_id = df_ref_id.with_columns(
             pl.col("Sample Genome Segment Number").apply(lambda x: influenza_segment[int(x)])
-                .alias("Sample Genome Segment Number"))
+            .alias("Sample Genome Segment Number"))
         df_ref_id.write_csv(sample_name + ".topsegments.csv", separator=",", has_header=True)
 
 
