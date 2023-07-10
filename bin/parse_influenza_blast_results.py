@@ -389,7 +389,6 @@ def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
     df_md = pl.read_csv(
         flu_metadata,
         has_header=True,
-        has_header=False,
         dtypes=dict(md_cols),
     )
 
