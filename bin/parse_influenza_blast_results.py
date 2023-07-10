@@ -296,6 +296,7 @@ def find_h_or_n_type(df_merge, seg, is_iav):
     if is_iav:
         type_counts = df_segment["Genotype"].value_counts(sort=True)
         type_counts = type_counts.filter(~pl.col("Genotype").is_null())
+        reg_h_or_n_type = "[Hh]" if h_or_n == "H" else "[Nn]"
         df_type_counts = type_counts.with_columns(pl.lit(type_counts["Genotype"].str.extract(reg_h_or_n_type + r"(\d+)").alias(type_name)))
         df_type_counts = df_type_counts.filter(~pl.col(type_name).is_null())
         logging.debug(f"{df_type_counts}")
@@ -355,12 +356,19 @@ def find_h_or_n_type(df_merge, seg, is_iav):
     "--pident-threshold", default=0.85, help="BLAST percent identity threshold"
 )
 @click.option('--min-aln-length', default=50, help="Min BLAST alignment length threshold")
-@click.option("--threads", default=4, help="Number of BLAST result parsing threads.")
 @click.option("--get-top-ref", default=False, help="Get top ref accession id from ncbi database.")
 @click.option("--sample-name", default="", help="Sample Name.")
 @click.argument("blast_results", nargs=-1)
-def report(flu_metadata, blast_results, excel_report, top, pident_threshold,
-           min_aln_length, threads, get_top_ref, sample_name):
+def report(
+        flu_metadata,
+        blast_results,
+        excel_report,
+        top,
+        pident_threshold,
+        min_aln_length,
+        get_top_ref,
+        sample_name
+):
     from rich.traceback import install
     install(show_locals=True, width=120, word_wrap=True)
     logging.basicConfig(
