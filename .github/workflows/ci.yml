@@ -202,12 +202,12 @@ jobs:
         with:
           name: nanopore-test-results-pipline_info-${{ matrix.nxf_ver }}
           path: results/pipeline_info
-      - name: Upload iav-subtyping-report.xlsx
+      - name: Upload nf-flu-subtyping-report.xlsx
         if: success()
         uses: actions/upload-artifact@v1.0.0
         with:
           name: nanopore-test-results-subtyping-report-${{ matrix.nxf_ver }}
-          path: results/iav-subtyping-report.xlsx
+          path: results/nf-flu-subtyping-report.xlsx
       - name: Upload multiqc_report.html
         if: success()
         uses: actions/upload-artifact@v1.0.0
