@@ -261,17 +261,17 @@ Maximum of top blastn result reported
 
 - Optional
 - Type: string
-- Default: `https://ftp.ncbi.nih.gov/genomes/INFLUENZA/influenza.fna.gz`
+- Default: `https://api.figshare.com/v2/file/download/41415330`
 
-Path/URL to NCBI Influenza DB sequences FASTA file.
+Path/URL to Zstandard compressed NCBI Influenza virus sequences FASTA file.
 
 #### `--ncbi_influenza_metadata`
 
 - Optional
 - Type: string
-- Default: `https://ftp.ncbi.nih.gov/genomes/INFLUENZA/genomeset.dat.gz`
+- Default: `https://api.figshare.com/v2/file/download/41415333`
 
-Path/URL to NCBI Influenza DB metadata file.
+Path/URL to Zstandard compressed NCBI Influenza virus sequences metadata CSV file.
 
 ### Generic options
 

@@ -78,7 +78,7 @@ The primary output from [IRMA][] are the consensus sequences for gene segments, 
 
 </details>
 
-Nucleotide [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi) (`blastn`) is used to query [IRMA][] assembled gene segment sequences against the [NCBI Influenza DB][] sequences (and optionally, against user-specified sequences (`--ref_db`) to predict the H and N subtype of each sample if possible (i.e. if segments 4 (hemagglutinin) and/or 6 (neuraminidase) were assembled) and to determine the closest matching reference sequence for each segment for reference mapped assembly.
+Nucleotide [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi) (`blastn`) is used to query [IRMA][] assembled gene segment sequences against [Influenza sequences from NCBI](https://ftp.ncbi.nlm.nih.gov/genomes/Viruses/AllNucleotide/) (and optionally, against user-specified sequences (`--ref_db`) to predict the H and N subtype of each sample if possible (i.e. if segments 4 (hemagglutinin) and/or 6 (neuraminidase) were assembled) and to determine the closest matching reference sequence for each segment for reference mapped assembly.
 
 ### Coverage Plots
 
