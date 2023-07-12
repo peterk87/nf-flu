@@ -5,7 +5,7 @@ process CLAIR3 {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda (params.enable_conda ? 'bioconda::clair3==1.0.2' : null)
+  conda 'bioconda::clair3==1.0.2'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
     container 'https://depot.galaxyproject.org/singularity/clair3:1.0.2--py39hb9dc472_0'
   } else {
@@ -30,14 +30,15 @@ process CLAIR3 {
   clair3_dir   = "${prefix}.clair3"
   clair3_log   = "${clair3_dir}/run_clair3.log"
   model_suffix = "models/${params.clair3_variant_model}"
+  using_conda = (workflow.containerEngine == null || workflow.containerEngine == '')
   """
   CLAIR_BIN_DIR=\$(dirname \$(which run_clair3.sh))
   if [[ "${params.clair3_user_variant_model}" != "" ]] ; then
       MODEL_PATH=${model_path}
   else
-      if [[ ${params.enable_conda} = true ]] ; then
+      if [[ ${using_conda} = true ]] ; then
           MODEL_PATH="\$CLAIR_BIN_DIR/${model_suffix}"
-      else [[ ${params.enable_conda} = false ]]
+      else [[ ${using_conda} = false ]]
           MODEL_PATH="/usr/local/bin/models/${params.clair3_variant_model}"
       fi
   fi

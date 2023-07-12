@@ -34,6 +34,12 @@ module_order:
         info: 'This section of the report shows Bcftools calculated statistics after variant calling using Clair3/Medaka and filter frameshift'
         path_filters:
             - './bcftools/*'
+    - snpeff:
+        name: 'SnpEff'
+        anchor: 'snpeff'
+        info: SnpEff variant effect analysis results summary
+        path_filters:
+            - './snpeff/*'
 
 extra_fn_clean_exts:
     - type: remove
@@ -59,6 +65,7 @@ run_modules:
     - samtools
     - mosdepth
     - bcftools
+    - snpeff
 
 sp:
     mosdepth/global_dist:

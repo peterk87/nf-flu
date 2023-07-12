@@ -5,7 +5,7 @@ process SEQTK_SEQ{
   tag "$sample|$segment|$ref_id"
   // use default process resources
 
-  conda (params.enable_conda ? "bioconda::seqtk=1.3" : null)
+  conda "bioconda::seqtk=1.3"
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
     container 'https://depot.galaxyproject.org/singularity/seqtk:1.3--h5bf99c6_3'
   } else {

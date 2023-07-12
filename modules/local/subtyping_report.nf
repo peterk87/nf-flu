@@ -1,9 +1,3 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process SUBTYPING_REPORT {
   memory { 
     // Dynamically determine how much memory is required for this task based on 
@@ -21,7 +15,7 @@ process SUBTYPING_REPORT {
       "2 GB"
     }
   }
-  conda (params.enable_conda ? 'conda-forge::python=3.10 conda-forge::biopython=1.80 conda-forge::openpyxl=3.1.0 conda-forge::pandas=1.5.3 conda-forge::rich=12.6.0 conda-forge::typer=0.7.0 conda-forge::xlsxwriter=3.0.8 conda-forge::polars=0.17.9 conda-forge::pyarrow=11.0.0' : null)
+  conda 'conda-forge::python=3.10 conda-forge::biopython=1.80 conda-forge::openpyxl=3.1.0 conda-forge::pandas=1.5.3 conda-forge::rich=12.6.0 conda-forge::typer=0.7.0 conda-forge::xlsxwriter=3.0.8 conda-forge::polars=0.17.9 conda-forge::pyarrow=11.0.0'
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container 'https://depot.galaxyproject.org/singularity/mulled-v2-cfa20dfeb068db79c8620a11753add64c23d013a:019cd79f70be602ca625a1a0a4eabab462611a3a-0'
     } else {
@@ -46,7 +40,9 @@ process SUBTYPING_REPORT {
    --excel-report iav-subtyping-report.xlsx \\
    --pident-threshold $params.pident_threshold \\
    $blastn_results
+
   ln -s .command.log parse_influenza_blast_results.log
+
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
      python: \$(python --version | sed 's/Python //g')

@@ -1,6 +1,6 @@
 process CHECK_REF_FASTA {
   tag "$fasta"
-  conda (params.enable_conda ? 'bioconda::shiptv=0.4.0' : null)
+  conda 'bioconda::shiptv=0.4.0'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
     container 'https://depot.galaxyproject.org/singularity/shiptv:0.4.0--pyh5e36f6f_0'
   } else {
