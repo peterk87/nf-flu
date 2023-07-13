@@ -213,14 +213,14 @@
                 },
                 "ncbi_influenza_fasta": {
                     "type": "string",
-                    "default": "https://ftp.ncbi.nih.gov/genomes/INFLUENZA/influenza.fna.gz",
-                    "description": "Path/URL to NCBI Influenza DB sequences FASTA file.",
+                    "default": "https://api.figshare.com/v2/file/download/41415330",
+                    "description": "Path/URL to Zstandard compressed NCBI Influenza virus sequences FASTA file.",
                     "fa_icon": "fas fa-file-alt"
                 },
                 "ncbi_influenza_metadata": {
                     "type": "string",
-                    "default": "https://ftp.ncbi.nih.gov/genomes/INFLUENZA/genomeset.dat.gz",
-                    "description": "Path/URL to NCBI Influenza DB metadata file.",
+                    "default": "https://api.figshare.com/v2/file/download/41415333",
+                    "description": "Path/URL to Zstandard compressed NCBI Influenza virus sequences metadata CSV file.",
                     "fa_icon": "fas fa-file-csv"
                 }
             },

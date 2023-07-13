@@ -17,13 +17,14 @@ After reference sequence selection, the pipeline performs read mapping to each r
 
 ## Pipeline summary
 
-1. Download latest [NCBI Influenza DB][] sequences and metadata (or use user-specified files)
-2. Merge reads of re-sequenced samples ([`cat`](http://www.linfo.org/cat.html)) (if needed)
+1. Download latest [NCBI Orthomyxoviridae sequences](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Undef&id=11308&lvl=3&keep=1&srchmode=1&unlock) and metadata (parsed from [NCBI Viruses FTP data](https://ftp.ncbi.nlm.nih.gov/genomes/Viruses/AllNucleotide/)).
+2. Merge reads of re-sequenced samples ([`cat`](http://www.linfo.org/cat.html)) (if needed).
 3. Assembly of Influenza gene segments with [IRMA][] using the built-in FLU module
-4. Nucleotide [BLAST][] search against [NCBI Influenza DB][]
-5. Automatically select top match references for segments
-6. H/N subtype prediction and Excel XLSX report generation based on BLAST results
-7. Perform Variant calling and genome assembly for all segments.
+4. Nucleotide [BLAST][] search against [NCBI Influenza DB][] sequences
+5. H/N subtype prediction and Excel XLSX report generation based on BLAST results.
+6. Automatically select top match reference sequences for segments
+7. Read mapping, variant calling and consensus sequence generation for each segment against top reference sequence based on BLAST results.
+8. MultiQC report generation.
 
 ## Quick Start
 
