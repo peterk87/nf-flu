@@ -1,6 +1,6 @@
 process PULL_TOP_REF_ID {
   tag "$meta.id"
-  label 'process_medium'
+  label 'process_low'
 
   conda (params.enable_conda ? 'conda-forge::python=3.10 conda-forge::biopython=1.80 conda-forge::openpyxl=3.1.0 conda-forge::pandas=1.5.3 conda-forge::rich=12.6.0 conda-forge::typer=0.7.0 conda-forge::xlsxwriter=3.0.8 conda-forge::polars=0.17.9 conda-forge::pyarrow=11.0.0' : null)
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -20,7 +20,6 @@ process PULL_TOP_REF_ID {
   script:
   """
   parse_influenza_blast_results.py \\
-    --threads ${task.cpus} \\
     --flu-metadata $genomeset \\
     --get-top-ref True \\
     --top 1 \\

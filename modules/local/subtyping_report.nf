@@ -1,9 +1,3 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process SUBTYPING_REPORT {
   memory { 
     // Dynamically determine how much memory is required for this task based on 
@@ -33,17 +27,16 @@ process SUBTYPING_REPORT {
   path(blastn_results)
 
   output:
-  path('iav-subtyping-report.xlsx'), emit: report
+  path('nf-flu-subtyping-report.xlsx'), emit: report
   path('parse_influenza_blast_results.log'), emit: log
   path "versions.yml", emit: versions
 
   script:
   """
   parse_influenza_blast_results.py \\
-   --threads ${task.cpus} \\
    --flu-metadata $genomeset \\
    --top ${params.max_top_blastn} \\
-   --excel-report iav-subtyping-report.xlsx \\
+   --excel-report nf-flu-subtyping-report.xlsx \\
    --pident-threshold $params.pident_threshold \\
    $blastn_results
   ln -s .command.log parse_influenza_blast_results.log
