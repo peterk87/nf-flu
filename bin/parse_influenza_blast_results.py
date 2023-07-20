@@ -243,15 +243,12 @@ def parse_blast_result(
     df_top_seg_matches = pl.concat(dfs, how="vertical")
     cols = pl.Series([x for x, _ in blast_results_report_columns])
     df_top_seg_matches = df_top_seg_matches.select(pl.col(cols))
-    df_top_seg_matches = df_top_seg_matches.with_columns(
-        pl.when(~pl.col("GenBank_Title").str.contains(r"^Influenza.[^BCD]*A"))
-        .then(pl.lit(None))
-        .otherwise(pl.col("Genotype"))
-        .alias("Genotype")
-    )
     subtype_results_summary = {"sample": sample_name}
     if not get_top_ref:
-        is_iav = not df_top_seg_matches.select(pl.col("Genotype").is_null().all())[0, 0]
+        is_iav = False
+        if not df_top_seg_matches.select(pl.col("Genotype").is_null().all())[0, 0] \
+            and df_top_seg_matches.select(pl.col("GenBank_Title").str.contains(r"^Influenza.[^BCD]*A").any())[0, 0]:
+            is_iav = True
         H_results = None
         N_results = None
         if "4" in segments:
