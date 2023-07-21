@@ -60,6 +60,7 @@ blast_results_report_columns = [
     ("sample_segment", "Sample Genome Segment Number"),
     ("#Accession", "Reference NCBI Accession"),
     ("Genotype", "Reference Subtype"),
+    ("Genus", "Genus"),
     ("pident", "BLASTN Percent Identity"),
     ("length", "BLASTN Alignment Length"),
     ("mismatch", "BLASTN Mismatches"),
@@ -245,10 +246,14 @@ def parse_blast_result(
     df_top_seg_matches = df_top_seg_matches.select(pl.col(cols))
     subtype_results_summary = {"sample": sample_name}
     if not get_top_ref:
-        is_iav = False
-        if not df_top_seg_matches.select(pl.col("Genotype").is_null().all())[0, 0] \
-            and df_top_seg_matches.select(pl.col("GenBank_Title").str.contains(r"^Influenza.[^BCD]*A").any())[0, 0]:
-            is_iav = True
+        df_genotype_genus = df_top_seg_matches.select(pl.col(["Genotype", "Genus"]))
+        df_genotype_genus = df_genotype_genus.with_columns(
+            pl.when(pl.col("Genus") == "Alphainfluenzavirus")
+            .then(pl.col("Genotype"))
+            .otherwise(pl.lit(None)) #Genotype is null for non-IAV
+            .alias("Genotype")
+        )
+        is_iav = not df_genotype_genus.select(pl.col("Genotype").is_null().all())[0, 0]
         H_results = None
         N_results = None
         if "4" in segments:
