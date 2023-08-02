@@ -23,9 +23,6 @@ include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA; ZSTD_DECOMPRESS as ZSTD_DECO
 include { CAT_DB                                              } from '../modules/local/misc'
 include { CAT_CONSENSUS                                       } from '../modules/local/misc'
 include { SEQTK_SEQ                                           } from '../modules/local/seqtk_seq'
-include { GFFLU                                               } from '../modules/local/gfflu'
-include { SNPEFF_BUILD } from '../modules/local/snpeff_build'
-include { SNPEFF_ANN } from '../modules/local/snpeff_ann'
 include { CHECK_SAMPLE_SHEET                                  } from '../modules/local/check_sample_sheet'
 include { CHECK_REF_FASTA                                     } from '../modules/local/check_ref_fasta'
 // using modified BLAST_MAKEBLASTDB from nf-core/modules to only move/publish BLAST DB files
@@ -215,25 +212,6 @@ workflow NANOPORE {
     ch_vcf_filter = BCF_FILTER_MEDAKA.out.vcf
   }
 
-  ch_refseqs = SEQTK_SEQ.out.sample_info.map { [it[2], it[3]] }
-  GFFLU(ch_refseqs)
-
-  SNPEFF_BUILD(GFFLU.out.gff)
-  ch_snpeff_ann_input = SEQTK_SEQ.out.sample_info
-    .map { sample, segment, ref_id, fasta, reads ->
-      return [ref_id, fasta, sample, segment]
-    }
-    .combine(SNPEFF_BUILD.out.db, by: 0) // seqid, ref_fasta, sample, segment, db, config
-    .map { ref_id, fasta, sample, segment, _, db, config ->
-      return [sample, segment, ref_id, fasta, db, config]
-    }
-    .combine(ch_vcf_filter, by: [0, 1, 2]) // sample, segment, ref_id, ref_fasta, vcf
-    .map { sample, segment, ref_id, fasta, db, config, _, vcf ->
-      return [sample, segment, vcf, ref_id, fasta, db, config]
-    }
-
-  SNPEFF_ANN(ch_snpeff_ann_input)
-
   VCF_FILTER_FRAMESHIFT(ch_vcf_filter)
   ch_versions = ch_versions.mix(VCF_FILTER_FRAMESHIFT.out.versions)
 
@@ -291,7 +269,6 @@ workflow NANOPORE {
       MINIMAP2.out.stats.collect().ifEmpty([]),
       MOSDEPTH_GENOME.out.mqc.collect().ifEmpty([]),
       BCFTOOLS_STATS.out.stats.collect().ifEmpty([]),
-      SNPEFF_ANN.out.csv.collect{it[4]}.ifEmpty([]),
       SOFTWARE_VERSIONS.out.mqc_yml.collect(),
       ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
   )

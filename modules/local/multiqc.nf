@@ -13,7 +13,6 @@ process MULTIQC {
   path('samtools/*')
   path('mosdepth/*')
   path('bcftools/*')
-  path('snpeff/*')
   path('software_versions/*')
   path(workflow_summary)
 
