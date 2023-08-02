@@ -4,7 +4,7 @@ process COVERAGE_PLOT{
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda (params.enable_conda ? 'python=3.9 conda-forge::typer=0.3.2 conda-forge::rich=10.6.0 conda-forge::seaborn=0.11.0 conda-forge::pandas=1.3.0 bioconda::bcbio-gff=0.6.6 bioconda::dna_features_viewer=3.0.3' : null)
+  conda 'python=3.9 conda-forge::typer=0.3.2 conda-forge::rich=10.6.0 conda-forge::seaborn=0.11.0 conda-forge::pandas=1.3.0 bioconda::bcbio-gff=0.6.6 bioconda::dna_features_viewer=3.0.3'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
     container 'https://depot.galaxyproject.org/singularity/mulled-v2-596f42d854e849eb773ecd1b48f2b698c2d09c9f:400d0a2593841aa0bfa3402fe85debd55a29cf37-0'
   } else {
