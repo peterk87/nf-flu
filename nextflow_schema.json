@@ -269,20 +269,6 @@
                     "fa_icon": "fas fa-cogs",
                     "hidden": true
                 },
-                "enable_conda": {
-                    "type": "boolean",
-                    "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
-                    "default": false,
-                    "hidden": true,
-                    "fa_icon": "fas fa-bacon"
-                },
-                "use_mamba": {
-                    "type": "boolean",
-                    "description": "Use Mamba in place of Conda for faster Conda env creation.",
-                    "default": false,
-                    "hidden": true,
-                    "fa_icon": "fas fa-speedometer"
-                },
                 "singularity_pull_docker_container": {
                     "type": "boolean",
                     "description": "Instead of directly downloading Singularity images for use with Singularity, force the workflow to pull and convert Docker containers instead.",
