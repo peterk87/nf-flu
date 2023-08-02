@@ -27,17 +27,16 @@ process SUBTYPING_REPORT {
   path(blastn_results)
 
   output:
-  path('iav-subtyping-report.xlsx'), emit: report
+  path('nf-flu-subtyping-report.xlsx'), emit: report
   path('parse_influenza_blast_results.log'), emit: log
   path "versions.yml", emit: versions
 
   script:
   """
   parse_influenza_blast_results.py \\
-   --threads ${task.cpus} \\
    --flu-metadata $genomeset \\
    --top ${params.max_top_blastn} \\
-   --excel-report iav-subtyping-report.xlsx \\
+   --excel-report nf-flu-subtyping-report.xlsx \\
    --pident-threshold $params.pident_threshold \\
    $blastn_results
 

@@ -58,40 +58,6 @@ process CAT_DB {
     """
 }
 
-process GUNZIP_NCBI_FLU_FASTA {
-    tag "$archive"
-    label 'process_low'
-
-    conda "conda-forge::sed=4.7"
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://containers.biocontainers.pro/s3/SingImgsRepo/biocontainers/v1.2.0_cv1/biocontainers_v1.2.0_cv1.img"
-    } else {
-        container "biocontainers/biocontainers:v1.2.0_cv1"
-    }
-
-    input:
-    path archive
-
-    output:
-    path "*.fna", emit: fna
-    path "versions.yml" , emit: versions
-
-    script:
-    def software = getSoftwareName(task.process)
-    // replace FASTA headers
-    // >gi|{gi}|gb|{accession}|{description}
-    // with
-    // >{accession} {description}
-    // for easier parsing and processing
-    """
-    zcat $archive | sed -E 's/^>gi\\|[0-9]+\\|gb\\|(\\w+)\\|(.*)/>\\1 \\2/' > influenza.fna
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        zcat: \$(echo \$(zcat --version 2>&1) | sed 's/^.*(gzip) //; s/ Copyright.*\$//')
-    END_VERSIONS
-    """
-}
-
 process CAT_CONSENSUS {
   tag "$sample"
   conda 'bioconda::shiptv=0.4.0'

@@ -39,20 +39,21 @@ process CAT_ILLUMINA_FASTQ {
   }
   if (meta.single_end) {
     if (fqList.size >= 1 || fqgzList.size >= 1) {
-      """
-      touch ${prefix}.merged.fastq.gz
-      if [[ ${fqList.size} > 0 ]]; then
-        cat ${readList.join(' ')} | gzip -ck >> ${prefix}.merged.fastq.gz
-      fi
-      if [[ ${fqgzList.size} > 0 ]]; then
-        cat ${readList.join(' ')} >> ${prefix}.merged.fastq.gz
-      fi
+  """
+  touch ${prefix}.merged.fastq.gz
+  if [[ ${fqList.size} > 0 ]]; then
+    cat ${readList.join(' ')} | gzip -ck >> ${prefix}.merged.fastq.gz
+  fi
+  if [[ ${fqgzList.size} > 0 ]]; then
+    cat ${readList.join(' ')} >> ${prefix}.merged.fastq.gz
+  fi
 
-      cat <<-END_VERSIONS > versions.yml
-      "${task.process}":
-        cat: \$(echo \$(cat --version 2>&1) | sed 's/^.*coreutils) //; s/ .*\$//')
-      END_VERSIONS
-      """
+  cat <<-END_VERSIONS > versions.yml
+  "${task.process}":
+    cat: \$(echo \$(cat --help 2>&1) | sed 's/ (.*//')
+    gzip: \$(echo \$(gzip --help 2>&1) | sed 's/ (.*//')
+  END_VERSIONS
+  """
     }
   } else {
     if (readList.size >= 2) {
@@ -60,43 +61,49 @@ process CAT_ILLUMINA_FASTQ {
       def read1gz = []
       def read2 = []
       def read2gz = []
-      fqList.eachWithIndex{ v, ix -> ( ix & 1 ? read2 : read1 ) << v }
-      fqgzList.eachWithIndex{ v, ix -> ( ix & 1 ? read2gz : read1gz ) << v }
-      """
-      # append 1:N:0:. or 2:N:0:. to forward and reverse reads if "[12]:N:.*"
-      # not present in the FASTQ header for compatability with IRMA assembly
-      touch ${prefix}_1.merged.fastq.gz
-      touch ${prefix}_2.merged.fastq.gz
-      if [[ ${read1.size} > 0 ]]; then
-        cat ${read1.join(' ')} \\
-        | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
-        | gzip -ck \\
-        >> ${prefix}_1.merged.fastq.gz
-      fi
-      if [[ ${read1gz.size} > 0 ]]; then
-        zcat ${read1gz.join(' ')} \\
-        | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
-        | gzip -ck \\
-        >> ${prefix}_1.merged.fastq.gz
-      fi
-      if [[ ${read2.size} > 0 ]]; then
-        cat ${read2.join(' ')} \\
-        | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
-        | gzip -ck \\
-        >> ${prefix}_2.merged.fastq.gz
-      fi
-      if [[ ${read2gz.size} > 0 ]]; then
-        zcat ${read2gz.join(' ')} \\
-        | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
-        | gzip -ck \\
-        >> ${prefix}_2.merged.fastq.gz
-      fi
+      fqList.eachWithIndex { v, ix -> ( ix & 1 ? read2 : read1 ) << v }
+      fqgzList.eachWithIndex { v, ix -> ( ix & 1 ? read2gz : read1gz ) << v }
+      // append 1:N:0:. or 2:N:0:. to forward and reverse reads if "[12]:N:.*"
+      // not present in the FASTQ header for compatability with IRMA assembly
+"""
+touch ${prefix}_1.merged.fastq.gz
 
-      cat <<-END_VERSIONS > versions.yml
-      "${task.process}":
-        cat: \$(echo \$(cat --version 2>&1) | sed 's/^.*coreutils) //; s/ .*\$//')
-      END_VERSIONS
-      """
+touch ${prefix}_2.merged.fastq.gz
+
+if [[ ${read1.size} > 0 ]]; then
+  cat ${read1.join(' ')} \\
+  | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
+  | gzip -ck \\
+  >> ${prefix}_1.merged.fastq.gz
+fi
+
+if [[ ${read1gz.size} > 0 ]]; then
+  zcat ${read1gz.join(' ')} \\
+  | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
+  | gzip -ck \\
+  >> ${prefix}_1.merged.fastq.gz
+fi
+
+if [[ ${read2.size} > 0 ]]; then
+  cat ${read2.join(' ')} \\
+  | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
+  | gzip -ck \\
+  >> ${prefix}_2.merged.fastq.gz
+fi
+
+if [[ ${read2gz.size} > 0 ]]; then
+  zcat ${read2gz.join(' ')} \\
+  | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
+  | gzip -ck \\
+  >> ${prefix}_2.merged.fastq.gz
+fi
+
+cat <<-END_VERSIONS > versions.yml
+"${task.process}":
+  cat: \$(echo \$(cat --help 2>&1) | sed 's/ (.*//')
+  gzip: \$(echo \$(gzip --help 2>&1) | sed 's/ (.*//')
+END_VERSIONS
+"""
     }
   }
 }
