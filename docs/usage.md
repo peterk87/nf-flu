@@ -311,20 +311,6 @@ Do not use coloured log outputs.
 
 Directory to keep pipeline Nextflow logs and reports.
 
-#### `--enable_conda`
-
-- Optional
-- Type: boolean
-
-Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.
-
-#### `--use_mamba`
-
-- Optional
-- Type: boolean
-
-Use Mamba in place of Conda for faster Conda env creation.
-
 #### `--singularity_pull_docker_container`
 
 - Optional

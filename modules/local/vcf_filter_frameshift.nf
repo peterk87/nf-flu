@@ -2,7 +2,7 @@ process VCF_FILTER_FRAMESHIFT {
   tag "$sample|$segment|$ref_id"
   // use default process resources
 
-  conda (params.enable_conda ? 'conda-forge::python=3.9 conda-forge::pandas=1.3.5 conda-forge::typer=0.4.1' : null)
+  conda 'conda-forge::python=3.9 conda-forge::pandas=1.3.5 conda-forge::typer=0.4.1'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
     container 'https://depot.galaxyproject.org/singularity/mulled-v2-80c23cbcd32e2891421c54d1899665046feb07ef:77a31e289d22068839533bf21f8c4248ad274b60-0'
   } else {

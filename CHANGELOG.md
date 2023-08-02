@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.3.1](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.1)] - 2023-08-02
+
+### Fixes
+
+* Conda/Mamba env creation when using `conda`/`mamba` profile (#35)
+
 ## [[3.3.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.0)] - 2023-07-11
 
 This release migrates to more recently updated Influenza virus sequences since the last update for the [NCBI Influenza DB FTP data](https://ftp.ncbi.nih.gov/genomes/INFLUENZA/) was in 2020-10-13. By default, all Orthomyxoviridae virus sequences were parsed from the daily updated NCBI Viruses [`AllNucleotide.fa`](https://ftp.ncbi.nlm.nih.gov/genomes/Viruses/AllNucleotide/) and [`AllNuclMetadata.csv.gz`](https://ftp.ncbi.nlm.nih.gov/genomes/Viruses/AllNuclMetadata/AllNuclMetadata.csv.gz) and uploaded to [Figshare](https://figshare.com/articles/dataset/2023-06-14_-_NCBI_Viruses_-_Orthomyxoviridae/23608782) as Zstd compressed files. nf-flu no longer uses the [influenza.fna.gz](https://ftp.ncbi.nih.gov/genomes/INFLUENZA/influenza.fna.gz) and [genomeset.dat.gz](https://ftp.ncbi.nih.gov/genomes/INFLUENZA/genomeset.dat.gz) files for Influenza sequences and metadata, respectively.

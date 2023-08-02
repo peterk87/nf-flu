@@ -4,7 +4,7 @@ process MOSDEPTH_GENOME {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda (params.enable_conda ? 'bioconda::mosdepth=0.3.3' : null)
+  conda 'bioconda::mosdepth=0.3.3'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
       container "https://depot.galaxyproject.org/singularity/mosdepth:0.3.3--h37c5b7d_2"
   } else {

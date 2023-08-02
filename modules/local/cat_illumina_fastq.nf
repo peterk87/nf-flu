@@ -5,7 +5,7 @@ process CAT_ILLUMINA_FASTQ {
   tag "$meta.id"
   label 'process_single'
 
-  conda (params.enable_conda ? "conda-forge::perl" : null)
+  conda "conda-forge::perl"
   // use BLAST container here since it has Perl and is required by other
   // processes in the pipeline
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

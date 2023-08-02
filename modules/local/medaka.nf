@@ -5,7 +5,7 @@ process MEDAKA {
   tag "$sample|$segment|$id"
   label 'process_low'
 
-  conda (params.enable_conda ? 'bioconda::medaka=1.4.4' : null)
+  conda 'bioconda::medaka=1.4.4'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
     container 'https://depot.galaxyproject.org/singularity/medaka:1.4.4--py38h130def0_0'
   } else {
