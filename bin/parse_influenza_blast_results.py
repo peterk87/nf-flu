@@ -247,13 +247,17 @@ def parse_blast_result(
     subtype_results_summary = {"sample": sample_name}
     if not get_top_ref:
         df_genotype_genus = df_top_seg_matches.select(pl.col(["Genotype", "Genus"]))
+        # where the genus is not IAV, set the genotype to "Not IAV"
         df_genotype_genus = df_genotype_genus.with_columns(
             pl.when(pl.col("Genus") == "Alphainfluenzavirus")
             .then(pl.col("Genotype"))
-            .otherwise(pl.lit(None)) #Genotype is null for non-IAV
+            .otherwise(pl.lit("Not IAV"))
             .alias("Genotype")
         )
-        is_iav = not df_genotype_genus.select(pl.col("Genotype").is_null().all())[0, 0]
+        genotypes = df_genotype_genus["Genotype"]
+        genotype_counts = genotypes.value_counts(sort=True)
+        # if the top genotype is "Not IAV", then the sample is not IAV
+        is_iav = genotype_counts['Genotype'][0] != "Not IAV"
         H_results = None
         N_results = None
         if "4" in segments:
@@ -298,8 +302,7 @@ def find_h_or_n_type(df_merge, seg, is_iav):
         "4",
         "6",
     ], "Can only determine H or N type from segments 4 or 6, respectively!"
-    type_name = "H_type" if seg == "4" else "N_type"
-    h_or_n = type_name[0]
+    h_or_n, type_name = ("H", "H_type") if seg == "4" else ("N", "N_type")
     df_segment = df_merge.filter(pl.col("sample_segment") == seg)
     if is_iav:
         type_counts = df_segment["Genotype"].value_counts(sort=True)
