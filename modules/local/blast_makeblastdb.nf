@@ -3,7 +3,7 @@ process BLAST_MAKEBLASTDB {
   tag "$fasta"
   label 'process_low'
 
-  conda (params.enable_conda ? 'bioconda::blast=2.14.0' : null)
+  conda 'bioconda::blast=2.14.0'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
     container 'https://depot.galaxyproject.org/singularity/blast:2.14.0--h7d5a4b4_1'
   } else {

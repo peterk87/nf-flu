@@ -1,7 +1,7 @@
 process MULTIQC {
   label 'process_low'
 
-  conda (params.enable_conda ? "bioconda::multiqc=1.12" : null)
+  conda "bioconda::multiqc=1.12"
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
     container 'https://depot.galaxyproject.org/singularity/multiqc:1.12--pyhdfd78af_0'
   } else {

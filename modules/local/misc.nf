@@ -4,7 +4,7 @@ process CAT_NANOPORE_FASTQ {
   tag "${meta.id}"
   label 'process_low'
 
-  conda (params.enable_conda ? "conda-forge::pigz=2.6" : null)
+  conda "conda-forge::pigz=2.6"
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
       container "https://depot.galaxyproject.org/singularity/mulled-v2-2b04072095278721dc9a5772e61e406f399b6030:7c7abf911e92d7fb831611ffb965f3cf7fe2c01d-0"
   } else {
@@ -60,7 +60,7 @@ process CAT_DB {
 
 process CAT_CONSENSUS {
   tag "$sample"
-  conda (params.enable_conda ? 'bioconda::shiptv=0.4.0' : null)
+  conda 'bioconda::shiptv=0.4.0'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
     container 'https://depot.galaxyproject.org/singularity/shiptv:0.4.0--pyh5e36f6f_0'
   } else {
