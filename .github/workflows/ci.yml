@@ -157,6 +157,11 @@ jobs:
       - name: Fetch IBV test seq
         run: |
           curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/blob/nf-flu/nanopore/fastq/SRR24826962.sampled.fastq.gz > reads/SRR24826962.fastq.gz
+      - name: Check IBV data
+        run: |
+          file reads/SRR24826962.fastq.gz
+          md5sum reads/SRR24826962.fastq.gz
+          sha256sum reads/SRR24826962.fastq.gz
       - name: Prepare samplesheet.csv
         run: |
           echo "Subsample reads from ERR6359501.fastq.gz with seqtk to mock different runs and ways of specifying input"
