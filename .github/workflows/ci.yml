@@ -156,7 +156,7 @@ jobs:
           curl -SLk --silent ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR635/001/ERR6359501/ERR6359501.fastq.gz > reads/ERR6359501.fastq.gz
       - name: Fetch IBV test seq
         run: |
-          curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/blob/nf-flu/nanopore/fastq/SRR24826962.sampled.fastq.gz > reads/SRR24826962.fastq.gz
+          curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/SRR24826962.sampled.fastq.gz > reads/SRR24826962.fastq.gz
       - name: Check IBV data
         run: |
           file reads/SRR24826962.fastq.gz
