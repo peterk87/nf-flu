@@ -12,6 +12,8 @@ This release fixes issues with subtype report generation script (`parse_influenz
 * subtype prediction based off majority H/N prediction of all BLAST hits instead of just the top X matches (#40)
 * the top hit for H/N can also be a user-specified sequence without subtype information
 * top segment matches are now sorted by sample name, segment name and BLAST bitscore
+* output concatenated Nanopore FASTQ to `${outdir}/fastq` by default (#43)
+* Handle ambiguous bases in reference sequences by having Clair3 not convert those positions to N and Bcftools produce a warning instead of an error (#42)
 
 ## [[3.3.2](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.2)] - 2023-08-03
 
