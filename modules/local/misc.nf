@@ -1,5 +1,3 @@
-include { getSoftwareName; fluPrefix } from './functions'
-
 process CAT_NANOPORE_FASTQ {
   tag "${meta.id}"
   label 'process_low'
