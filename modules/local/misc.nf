@@ -87,6 +87,3 @@ process CAT_CONSENSUS {
   END_VERSIONS
   """
 }
-
-
-

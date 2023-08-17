@@ -10,14 +10,16 @@ Segment 6 - neuraminidase (NA) gene
 
 import logging
 import re
+import sys
 from collections import defaultdict
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 import click
 import numpy as np
 import pandas as pd
 import polars as pl
 from rich.logging import RichHandler
-from typing import Dict, List, Optional, Tuple
 
 LOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s [in %(filename)s:%(lineno)d]"
 logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
@@ -375,6 +377,7 @@ def find_h_or_n_type(df_merge, seg, is_iav):
 @click.option('--min-aln-length', default=50, help="Min BLAST alignment length threshold")
 @click.option("--get-top-ref", default=False, help="Get top ref accession id from ncbi database.")
 @click.option("--sample-name", default="", help="Sample Name.")
+@click.option("--samplesheet", default="", help="samplesheet.csv to get order of samples.")
 @click.argument("blast_results", nargs=-1)
 def report(
         flu_metadata,
@@ -384,9 +387,20 @@ def report(
         pident_threshold,
         min_aln_length,
         get_top_ref,
-        sample_name
+        sample_name,
+        samplesheet,
 ):
     init_logging()
+    if not blast_results:
+        logging.error("No BLAST results files specified!")
+        sys.exit(1)
+
+    ordered_samples: Optional[List[str]] = None
+    if samplesheet:
+        samplesheet_path = Path(samplesheet)
+        if samplesheet_path.resolve().exists():
+            ordered_samples = pl.read_csv(samplesheet_path)['sample'].to_list()
+            logging.info(f"Using samplesheet to order samples: {ordered_samples}")
 
     logging.info(f'Parsing Influenza metadata file "{flu_metadata}"')
 
@@ -412,7 +426,10 @@ def report(
         for blast_result in blast_results
     ]
 
-    if not get_top_ref:
+    if get_top_ref:
+        df_top_seg_matches, subtype_results_summary = results[0]
+        write_top_segment_matches(df_top_seg_matches, subtype_results_summary, sample_name)
+    else:
         dfs_blast = []
         all_subtype_results = {}
         for parsed_result in results:
@@ -420,64 +437,93 @@ def report(
                 continue
             df_blast, subtype_results_summary = parsed_result
             if df_blast is not None:
-                dfs_blast.append(df_blast.to_pandas())
+                dfs_blast.append(df_blast)
             sample = subtype_results_summary["sample"]
             all_subtype_results[sample] = subtype_results_summary
-        df_all_blast = pd.concat(dfs_blast).rename(
-            columns=dict(BLAST_RESULTS_REPORT_COLUMNS)
-        )
+        df_all_blast = pl.concat(dfs_blast, how='vertical')
         df_subtype_results = pd.DataFrame(all_subtype_results).transpose()
+        ordered_sample_to_idx = {sample: idx for idx, sample in enumerate(ordered_samples)} if ordered_samples else None
+
         cols = pd.Series(SUBTYPE_RESULTS_SUMMARY_COLUMNS)
         cols = cols[cols.isin(df_subtype_results.columns)]
+        df_subtype_results = df_subtype_results[cols]
+
+        if ordered_samples and ordered_sample_to_idx:
+            df_subtype_results = df_subtype_results.sort_values(
+                'sample',
+                ascending=True,
+                key=lambda x: x.map(ordered_sample_to_idx)
+            )
+        else:
+            df_subtype_results = df_subtype_results.sort_values('sample', ascending=True)
+        cols = pd.Series(H_COLUMNS)
+        cols = cols[cols.isin(df_subtype_results.columns)]
+        df_H = df_subtype_results[cols]
+        cols = pd.Series(N_COLUMNS)
+        cols = cols[cols.isin(df_subtype_results.columns)]
+        df_N = df_subtype_results[cols]
+
+        # cast all categorical columns to string so that they can be sorted/ordered in a sensible way
+        df_all_blast = df_all_blast.with_columns(
+            pl.col(pl.Categorical).cast(pl.Utf8),
+        )
+        # apply custom sort order to sample column if samplesheet is provided
+        sample_col = pl.col('sample').map_dict(
+            ordered_sample_to_idx) if ordered_samples and ordered_sample_to_idx else pl.col('sample')
+        # Sort by sample names, segment numbers and bitscore
+        df_all_blast = df_all_blast.sort(
+            sample_col,
+            pl.col('sample_segment'),
+            pl.col('bitscore'),
+            descending=[False, False, True]
+        )
+        df_all_blast_pandas: pd.DataFrame = df_all_blast.to_pandas()
+        # Convert segment number to segment name (1 -> "1_PB2")
+        df_all_blast_pandas["sample_segment"] = df_all_blast_pandas["sample_segment"]. \
+            apply(lambda x: SEGMENT_NAMES[int(x)])
+        # Rename columns to more human-readable names
+        df_all_blast_pandas.rename(
+            columns=dict(BLAST_RESULTS_REPORT_COLUMNS)
+        )
         df_subtype_predictions = df_subtype_results[cols].rename(
             columns=SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES
         )
-        cols = pd.Series(H_COLUMNS)
-        cols = cols[cols.isin(df_subtype_results.columns)]
-        df_H = df_subtype_results[cols].rename(columns=SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES)
-        cols = pd.Series(N_COLUMNS)
-        cols = cols[cols.isin(df_subtype_results.columns)]
-        df_N = df_subtype_results[cols].rename(columns=SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES)
-        # Convert segment number to segment name (1 -> "1_PB2")
-        df_all_blast["Sample Genome Segment Number"] = df_all_blast["Sample Genome Segment Number"]. \
-            apply(lambda x: SEGMENT_NAMES[int(x)])
-        # Sort by sample names, segment numbers and bitscore
-        df_all_blast = df_all_blast.sort_values(
-            ["Sample", "Sample Genome Segment Number", "BLASTN Bitscore"],
-            ascending=[True, True, False]
-        )
+        df_H = df_H.rename(columns=SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES)
+        df_N = df_N.rename(columns=SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES)
+        # Write each dataframe to a separate sheet in the excel report
         write_excel(
             [
                 ("Subtype Predictions", df_subtype_predictions),
-                ("Top Segment Matches", df_all_blast),
+                ("Top Segment Matches", df_all_blast_pandas),
                 ("H Segment Results", df_H),
                 ("N Segment Results", df_N),
             ],
             output_dest=excel_report,
         )
-    else:
-        df_blast, subtype_results_summary = results[0]
-        df_blast = df_blast.rename(mapping=dict(BLAST_RESULTS_REPORT_COLUMNS))
-        df_ref_id = df_blast.select(
-            pl.col([
-                'Sample',
-                'Sample Genome Segment Number',
-                'Reference NCBI Accession',
-                'BLASTN Bitscore',
-                'Reference Sequence ID'
-            ])
-        )
-        df_ref_id = df_ref_id.with_columns(
-            pl.when(pl.col("Reference NCBI Accession").is_null())
-            .then(pl.col("Reference Sequence ID"))
-            .otherwise(pl.col("Reference NCBI Accession"))
-            .str.strip()
-            .alias('Reference NCBI Accession')
-        )
-        df_ref_id = df_ref_id.with_columns(
-            pl.col("Sample Genome Segment Number").apply(lambda x: SEGMENT_NAMES[int(x)])
-            .alias("Sample Genome Segment Number"))
-        df_ref_id.write_csv(sample_name + ".topsegments.csv", separator=",", has_header=True)
+
+
+def write_top_segment_matches(df_top_seg_matches, subtype_results_summary, sample_name):
+    df_blast = df_top_seg_matches.rename(mapping=dict(BLAST_RESULTS_REPORT_COLUMNS))
+    df_ref_id = df_blast.select(
+        pl.col([
+            'Sample',
+            'Sample Genome Segment Number',
+            'Reference NCBI Accession',
+            'BLASTN Bitscore',
+            'Reference Sequence ID'
+        ])
+    )
+    df_ref_id = df_ref_id.with_columns(
+        pl.when(pl.col("Reference NCBI Accession").is_null())
+        .then(pl.col("Reference Sequence ID"))
+        .otherwise(pl.col("Reference NCBI Accession"))
+        .str.strip()
+        .alias('Reference NCBI Accession')
+    )
+    df_ref_id = df_ref_id.with_columns(
+        pl.col("Sample Genome Segment Number").apply(lambda x: SEGMENT_NAMES[int(x)])
+        .alias("Sample Genome Segment Number"))
+    df_ref_id.write_csv(sample_name + ".topsegments.csv", separator=",", has_header=True)
 
 
 def read_refseq_metadata(flu_metadata):

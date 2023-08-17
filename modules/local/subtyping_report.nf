@@ -25,6 +25,7 @@ process SUBTYPING_REPORT {
   input:
   path(genomeset)
   path(blastn_results)
+  path(samplesheet)
 
   output:
   path('nf-flu-subtyping-report.xlsx'), emit: report
@@ -38,6 +39,7 @@ process SUBTYPING_REPORT {
    --top ${params.max_top_blastn} \\
    --excel-report nf-flu-subtyping-report.xlsx \\
    --pident-threshold $params.pident_threshold \\
+   --samplesheet $samplesheet \\
    $blastn_results
 
   ln -s .command.log parse_influenza_blast_results.log
