@@ -87,7 +87,11 @@ workflow ILLUMINA {
   ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first().ifEmpty(null))
 
   ch_blast = BLAST_BLASTN.out.txt.collect({ it[1] })
-  SUBTYPING_REPORT(ZSTD_DECOMPRESS_CSV.out.file, ch_blast)
+  SUBTYPING_REPORT(
+    ZSTD_DECOMPRESS_CSV.out.file,
+    ch_blast,
+    CHECK_SAMPLE_SHEET.out
+  )
   ch_versions = ch_versions.mix(SUBTYPING_REPORT.out.versions)
 
   SOFTWARE_VERSIONS(ch_versions.unique().collectFile(name: 'collated_versions.yml'))

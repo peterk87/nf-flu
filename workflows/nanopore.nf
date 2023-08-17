@@ -161,7 +161,11 @@ workflow NANOPORE {
   //Generate suptype prediction report
   if (!params.skip_irma_subtyping_report){
     ch_blast_irma = BLAST_BLASTN_IRMA.out.txt.collect({ it[1] })
-    SUBTYPING_REPORT_IRMA_CONSENSUS(ZSTD_DECOMPRESS_CSV.out.file, ch_blast_irma)
+    SUBTYPING_REPORT_IRMA_CONSENSUS(
+      ZSTD_DECOMPRESS_CSV.out.file,
+      ch_blast_irma,
+      CHECK_SAMPLE_SHEET.out
+    )
   }
 
   // Prepare top ncbi accession id for each segment of each sample sample (id which has top bitscore)
@@ -244,7 +248,11 @@ workflow NANOPORE {
   ch_versions = ch_versions.mix(BLAST_BLASTN_CONSENSUS.out.versions)
 
   ch_blastn_consensus = BLAST_BLASTN_CONSENSUS.out.txt.collect({ it[1] })
-  SUBTYPING_REPORT_BCF_CONSENSUS(ZSTD_DECOMPRESS_CSV.out.file, ch_blastn_consensus)
+  SUBTYPING_REPORT_BCF_CONSENSUS(
+    ZSTD_DECOMPRESS_CSV.out.file, 
+    ch_blastn_consensus,
+    CHECK_SAMPLE_SHEET.out
+  )
   ch_versions = ch_versions.mix(SUBTYPING_REPORT_BCF_CONSENSUS.out.versions)
 
   if (params.ref_db){
