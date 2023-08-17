@@ -70,6 +70,7 @@ process BCF_FILTER {
   bcftools_filt_vcf = "${prefix}.bcftools_filt.vcf"
   """
   bcftools norm \\
+    --check-ref w \\
     -Ov \\
     -m- \\
     -f $fasta \\

@@ -54,6 +54,7 @@ process CLAIR3 {
       --output=${clair3_dir} \\
       --haploid_sensitive \\
       --enable_long_indel \\
+      --keep_iupac_bases \\
       --fast_mode \\
       --include_all_ctgs
 
