@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.3.4](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.4)] - 2023-08-18
+
+### Fixes
+
+* Subtyping report summary sheet "1_Subtype Predictions" shows only N subtype results
+
 ## [[3.3.3](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.3)] - 2023-08-16
 
 This release fixes issues with subtype report generation script (`parse_influenza_blast_results.py`), primarily subtype predictions being `N/A` for samples where the top BLAST hits are user-specified sequences for the HA and NA segments.
