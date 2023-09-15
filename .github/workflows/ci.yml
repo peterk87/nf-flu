@@ -157,6 +157,11 @@ jobs:
       - name: Fetch IBV test seq
         run: |
           curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/SRR24826962.sampled.fastq.gz > reads/SRR24826962.fastq.gz
+      - name: Fetch negative control seq data
+      - run: |
+          curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/ntc-bc15.fastq.gz > reads/ntc-bc15.fastq.gz
+          curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/ntc-bc31.fastq.gz > reads/ntc-bc31.fastq.gz
+          curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/ntc-bc47.fastq.gz > reads/ntc-bc47.fastq.gz
       - name: Check IBV data
         run: |
           file reads/SRR24826962.fastq.gz
@@ -177,6 +182,9 @@ jobs:
           echo "ERR6359501,$(realpath run1)" | tee -a samplesheet.csv
           echo "ERR6359501,$(realpath run2)" | tee -a samplesheet.csv
           echo "SRR24826962,$(realpath reads/SRR24826962.fastq.gz)" | tee -a samplesheet.csv
+          echo "ntc-bc15,$(realpath reads/ntc-bc15.fastq.gz)" | tee -a samplesheet.csv
+          echo "ntc-bc31,$(realpath reads/ntc-bc31.fastq.gz)" | tee -a samplesheet.csv
+          echo "ntc-bc47,$(realpath reads/ntc-bc47.fastq.gz)" | tee -a samplesheet.csv
       - name: Cache subsampled influenza.fna
         uses: actions/cache@v3
         id: cache-influenza-fna
@@ -205,6 +213,13 @@ jobs:
             --input samplesheet.csv \
             --ncbi_influenza_fasta influenza-10k.fna.zst \
             --ncbi_influenza_metadata influenza.csv.zst
+      - name: Tree of results
+        run: tree -h results/
+      - name: Upload .nextflow.log
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: nextflow-log-nanopore-${{ matrix.nxf_ver }}
+          path: .nextflow.log
       - name: Upload pipeline_info/
         if: success()
         uses: actions/upload-artifact@v1.0.0
@@ -223,8 +238,3 @@ jobs:
         with:
           name: nanopore-test-results-multiqc-${{ matrix.nxf_ver }}
           path: results/MultiQC/multiqc_report.html
-      - name: Upload .nextflow.log
-        uses: actions/upload-artifact@v1.0.0
-        with:
-          name: nextflow-log-nanopore-${{ matrix.nxf_ver }}
-          path: .nextflow.log
