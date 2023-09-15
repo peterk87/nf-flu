@@ -148,39 +148,30 @@ jobs:
         with:
           path: reads/
           key: reads
-      - name: Fetch test data
+      - name: Fetch IAV and IBV test seq
         if: steps.cache-reads.outputs.cache-hit != 'true'
         run: |
-          mkdir reads
-          echo "Downloading ERR6359501 from EBI ENA"
-          curl -SLk --silent ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR635/001/ERR6359501/ERR6359501.fastq.gz > reads/ERR6359501.fastq.gz
-      - name: Fetch IBV test seq
-        run: |
+          mkdir -p reads/{run1,run2}
+          # IBV test data
           curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/SRR24826962.sampled.fastq.gz > reads/SRR24826962.fastq.gz
-      - name: Fetch negative control seq data
-        run: |
+          # IAV test data
+          curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/ERR6359501-10k.fastq.gz > reads/ERR6359501-10k.fastq.gz
+          curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/run1-s11-ERR6359501.fastq.gz > reads/run1/s11-ERR6359501.fastq.gz
+          curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/run1-s1-ERR6359501.fastq.gz > reads/run1/s1-ERR6359501.fastq.gz
+          # uncompressed FASTQ should work too
+          gunzip reads/run1/s1-ERR6359501.fastq.gz
+          curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/run2-s22-ERR6359501.fastq.gz > reads/run2/s22-ERR6359501.fastq.gz
+          curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/run2-s2-ERR6359501.fastq.gz > reads/run2/s2-ERR6359501.fastq.gz
+          # neg ctrl 
           curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/ntc-bc15.fastq.gz > reads/ntc-bc15.fastq.gz
           curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/ntc-bc31.fastq.gz > reads/ntc-bc31.fastq.gz
           curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/ntc-bc47.fastq.gz > reads/ntc-bc47.fastq.gz
-      - name: Check IBV data
-        run: |
-          file reads/SRR24826962.fastq.gz
-          md5sum reads/SRR24826962.fastq.gz
-          sha256sum reads/SRR24826962.fastq.gz
       - name: Prepare samplesheet.csv
         run: |
-          echo "Subsample reads from ERR6359501.fastq.gz with seqtk to mock different runs and ways of specifying input"
-          mkdir run1
-          seqtk sample -s 1 reads/ERR6359501.fastq.gz 1000 > run1/s1.fq
-          seqtk sample -s 11 reads/ERR6359501.fastq.gz 1000 | gzip -ck > run1/s11.fastq.gz
-          mkdir run2
-          seqtk sample -s 2 reads/ERR6359501.fastq.gz 1000 > run2/s2.fastq
-          seqtk sample -s 2 reads/ERR6359501.fastq.gz 1000 | gzip -ck > run2/s2.fq.gz
-          seqtk sample -s 123 reads/ERR6359501.fastq.gz 10000 > reads/ERR6359501-10k.fastq
           echo "sample,reads" | tee -a samplesheet.csv
-          echo "ERR6359501-10k,$(realpath reads/ERR6359501-10k.fastq)" | tee -a samplesheet.csv
-          echo "ERR6359501,$(realpath run1)" | tee -a samplesheet.csv
-          echo "ERR6359501,$(realpath run2)" | tee -a samplesheet.csv
+          echo "ERR6359501-10k,$(realpath reads/ERR6359501-10k.fastq.gz)" | tee -a samplesheet.csv
+          echo "ERR6359501,$(realpath reads/run1)" | tee -a samplesheet.csv
+          echo "ERR6359501,$(realpath reads/run2)" | tee -a samplesheet.csv
           echo "SRR24826962,$(realpath reads/SRR24826962.fastq.gz)" | tee -a samplesheet.csv
           echo "ntc-bc15,$(realpath reads/ntc-bc15.fastq.gz)" | tee -a samplesheet.csv
           echo "ntc-bc31,$(realpath reads/ntc-bc31.fastq.gz)" | tee -a samplesheet.csv
