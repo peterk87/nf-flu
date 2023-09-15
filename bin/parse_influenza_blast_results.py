@@ -482,7 +482,7 @@ def report(
         df_all_blast_pandas["sample_segment"] = df_all_blast_pandas["sample_segment"]. \
             apply(lambda x: SEGMENT_NAMES[int(x)])
         # Rename columns to more human-readable names
-        df_all_blast_pandas.rename(
+        df_all_blast_pandas = df_all_blast_pandas.rename(
             columns=dict(BLAST_RESULTS_REPORT_COLUMNS)
         )
         df_subtype_predictions = df_subtype_results[SUBTYPE_RESULTS_SUMMARY_COLUMNS].rename(
