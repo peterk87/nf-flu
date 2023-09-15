@@ -37,7 +37,7 @@ process IRMA {
 
   IRMA $irma_module $reads $meta.id
 
-  if [ -d "${meta.id}/amended_consensus/" ]; then
+  if ls ${meta.id}/amended_consensus/*.fa > /dev/null 2>&1; then
     cat ${meta.id}/amended_consensus/*.fa > ${meta.id}.irma.consensus.fasta
   fi
   ln -s .command.log $irma_log

@@ -66,19 +66,19 @@ The primary output from [IRMA][] are the consensus sequences for gene segments, 
 <summary>Output files</summary>
 
 - `blast/ncbi/blast_db/`
-  - Nucleotide BLAST database of [NCBI Influenza DB][] and reference database (if provided option `--ref_db`): `influenza_db.*`
+  - Nucleotide [BLAST] database of [NCBI Influenza DB][] and reference database (if provided option `--ref_db`): `influenza_db.*`
 - `blast/ref_db/blast_db/`
-  - Nucleotide BLAST database of the reference database (if provided option `--ref_db`) ref_fasta.fixed.*`
+  - Nucleotide [BLAST] database of the reference database (if provided option `--ref_db`) ref_fasta.fixed.*`
 - `blast/blastn/irma`
-  - Nucleotide BLAST tabular output files (`-outfmt "6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qcovs stitle"`) of sample IRMA assembled gene segments against the [NCBI Influenza DB][] and the reference database (if provided option `--ref_db`)
+  - Nucleotide [BLAST] tabular output files (`-outfmt "6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qcovs stitle"`) of sample IRMA assembled gene segments against the [NCBI Influenza DB][] and the reference database (if provided option `--ref_db`)
 - `blast/blastn/consensus`
-  - Nucleotide BLAST tabular output files (`-outfmt "6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qcovs stitle"`) of sample final consensus assembled gene segments against the [NCBI Influenza DB][] and the reference database (if provided option `--ref_db`)
+  - Nucleotide [BLAST] tabular output files (`-outfmt "6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qcovs stitle"`) of sample final consensus assembled gene segments against the [NCBI Influenza DB][] and the reference database (if provided option `--ref_db`)
 - `blast/blastn/against_ref_db`
   - Nucleotide BLAST tabular output files (`-outfmt "6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qcovs stitle"`) of sample final consensus assembled gene segments against the reference database only (if provided option `--ref_db`)
 
 </details>
 
-Nucleotide [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi) (`blastn`) is used to query [IRMA][] assembled gene segment sequences against [Influenza sequences from NCBI](https://ftp.ncbi.nlm.nih.gov/genomes/Viruses/AllNucleotide/) (and optionally, against user-specified sequences (`--ref_db`) to predict the H and N subtype of each sample if possible (i.e. if segments 4 (hemagglutinin) and/or 6 (neuraminidase) were assembled) and to determine the closest matching reference sequence for each segment for reference mapped assembly.
+Nucleotide [BLAST][] (`blastn`) is used to query [IRMA][] assembled gene segment sequences against [Influenza sequences from NCBI](https://ftp.ncbi.nlm.nih.gov/genomes/Viruses/AllNucleotide/) (and optionally, against user-specified sequences (`--ref_db`) to predict the H and N subtype of each sample if possible (i.e. if segments 4 (hemagglutinin) and/or 6 (neuraminidase) were assembled) and to determine the closest matching reference sequence for each segment for reference mapped assembly.
 
 ### Coverage Plots
 
