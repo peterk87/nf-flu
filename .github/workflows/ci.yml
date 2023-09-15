@@ -158,7 +158,7 @@ jobs:
         run: |
           curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/SRR24826962.sampled.fastq.gz > reads/SRR24826962.fastq.gz
       - name: Fetch negative control seq data
-      - run: |
+        run: |
           curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/ntc-bc15.fastq.gz > reads/ntc-bc15.fastq.gz
           curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/ntc-bc31.fastq.gz > reads/ntc-bc31.fastq.gz
           curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/nf-flu/nanopore/fastq/ntc-bc47.fastq.gz > reads/ntc-bc47.fastq.gz
