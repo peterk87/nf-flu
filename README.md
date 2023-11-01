@@ -33,12 +33,14 @@ After reference sequence selection, the pipeline performs read mapping to each r
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
     For Illumina workflow test:
+    
     ```bash
     nextflow run CFIA-NCFAD/nf-flu -profile test_illumina,<docker/singularity/podman/shifter/charliecloud/conda> \
       --max_cpus $(nproc) # use all available CPUs; default is 2
     ```
 
     For Nanopore workflow test:
+
     ```bash
     nextflow run CFIA-NCFAD/nf-flu -profile test_nanopore,<docker/singularity/podman/shifter/charliecloud/conda> \
       --max_cpus $(nproc) # use all available CPUs; default is 2
