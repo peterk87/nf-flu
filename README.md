@@ -32,8 +32,18 @@ After reference sequence selection, the pipeline performs read mapping to each r
 2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort)_
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
+    For Illumina workflow test:
+
     ```bash
-    nextflow run CFIA-NCFAD/nf-flu -profile test,<docker/singularity/podman/shifter/charliecloud/conda>
+    nextflow run CFIA-NCFAD/nf-flu -profile test_illumina,<docker/singularity/podman/shifter/charliecloud/conda> \
+      --max_cpus $(nproc) # use all available CPUs; default is 2
+    ```
+
+    For Nanopore workflow test:
+
+    ```bash
+    nextflow run CFIA-NCFAD/nf-flu -profile test_nanopore,<docker/singularity/podman/shifter/charliecloud/conda> \
+      --max_cpus $(nproc) # use all available CPUs; default is 2
     ```
 
     > * If you are using `singularity` then the pipeline will auto-detect this and attempt to download the Singularity images directly as opposed to performing a conversion from Docker images. If you are persistently observing issues downloading Singularity images directly due to timeout or network issues then please use the `--singularity_pull_docker_container` parameter to pull and convert the Docker image instead. Alternatively, it is highly recommended to use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to pre-download all of the required containers before running the pipeline and to set the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options to be able to store and re-use the images from a central location for future pipeline runs.

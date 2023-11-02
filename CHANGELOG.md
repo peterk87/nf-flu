@@ -3,6 +3,15 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.3.6](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.6)] - 2023-11-01
+
+### Fixes
+
+* docs updated to show proper profile to run test profiles for Illumina and Nanopore locally (#52)
+* `test_nanopore` profile has been updated to run locally with [the test samplesheet.csv updated with URLs to FASTQ files at CFIA-NCFAD/nf-test-datasets](https://github.com/CFIA-NCFAD/nf-test-datasets/blob/nf-flu/samplesheet/samplesheet_test_nanopore_influenza.csv)
+* read samplesheet CSV in `parse_influenza_blast_results.py` with all columns read as string rather than inferred (#54)
+* handle cloud storage paths and non-HTTP/FTP URLs in user samplesheets (#55)
+
 ## [[3.3.5](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.5)] - 2023-09-15
 
 ### Fixes
