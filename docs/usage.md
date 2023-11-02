@@ -417,8 +417,8 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   - A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
 - `conda`
   - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
-- `test`
-  - A profile with a complete configuration for automated testing
+- `test_illumina` and `test_nanopore`
+  - Profiles for testing the Illumina and Nanopore workflows, respectively, with complete configuration for automated testing
   - Includes links to test data so needs no other parameters
 
 ### `-resume`
