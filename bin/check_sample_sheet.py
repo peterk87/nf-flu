@@ -6,6 +6,10 @@ import pandas as pd
 import typer
 from rich.logging import RichHandler
 import logging
+import re
+
+
+URL_REGEX = re.compile(r'^\w+://.+$')
 
 
 def check_sample_names(df: pd.DataFrame) -> None:
@@ -27,7 +31,7 @@ def adjust_reads_path(p: str) -> str:
             or p.endswith(".fq")
             or p.endswith(".fq.gz")
     ), 'FASTQ file "{p}" does not have expected extension: ".fastq", ".fastq.gz", ".fq", ".fq.gz"'
-    if p.startswith("http") or p.startswith("ftp"):
+    if URL_REGEX.match(p):
         return p
     else:
         path = Path(p)
