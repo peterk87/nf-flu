@@ -399,7 +399,8 @@ def report(
     if samplesheet:
         samplesheet_path = Path(samplesheet)
         if samplesheet_path.resolve().exists():
-            ordered_samples = pl.read_csv(samplesheet_path)['sample'].to_list()
+            # force reading of samplesheet.csv columns as string data type
+            ordered_samples = pl.read_csv(samplesheet_path, dtypes=[pl.Utf8, pl.Utf8])['sample'].to_list()
             logging.info(f"Using samplesheet to order samples: {ordered_samples}")
 
     logging.info(f'Parsing Influenza metadata file "{flu_metadata}"')
