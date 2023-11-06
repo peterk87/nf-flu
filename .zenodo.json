@@ -1,0 +1,19 @@
+{
+    "creators": [
+        {
+            "orcid": "0000-0002-0044-9460",
+            "affiliation": "Canadian Food Inspection Agency",
+            "name": "Kruczkiewicz, Peter"
+        },
+        {
+            "orcid": "0000-0002-5858-9466",
+            "affiliation": "Canadian Food Inspection Agency",
+            "name": "Nguyen, Hoang Hai"
+        },
+        {
+            "affiliation": "Canadian Food Inspection Agency",
+            "name": "Lung, Oliver"
+        }
+    ],
+    "license": "MIT",
+}
