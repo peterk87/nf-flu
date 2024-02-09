@@ -13,17 +13,6 @@ from rich.logging import RichHandler
 LOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s [in %(filename)s:%(lineno)d]"
 logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
 
-influenza_segment = {
-    1: "1_PB2",
-    2: "2_PB1",
-    3: "3_PA",
-    4: "4_HA",
-    5: "5_NP",
-    6: "6_NA",
-    7: "7_M",
-    8: "8_NS",
-}
-
 # Column names/types/final report names
 blast_cols = [
     ("qaccver", "category"),
@@ -101,11 +90,7 @@ def report(blast_results, excel_report, min_aln_length):
             else:
                 df_mismatch_report.loc[segment, ref_name] = ''
     df_mismatch_report.insert(0, "Segment", segments)
-    df_mismatch_report["Segment"] = df_mismatch_report["Segment"].apply(lambda x: influenza_segment[int(x)])
     df_mismatch_report.loc["Total"] = pd.Series(df_mismatch_report[ref_names].sum())
-    # Add segment name for more informative
-    df_blast_result["segment_name"] = df_blast_result["segment_name"]. \
-        apply(lambda x: influenza_segment[int(x)])
     df_blast_result.columns = ["Sample", "Sample Genome Segment Number", "Reference Virus Name",
                                "BLASTN Percent Identity",
                                "BLASTN Alignment Length", "BLASTN Mismatches", "BLASTN Gaps",

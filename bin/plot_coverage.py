@@ -16,20 +16,9 @@ NT_COLOURS = {
     "C": "#d3341f",
 }
 
-SEGMENT_NAMES = {
-    "1": "PB2",
-    "2": "PB1",
-    "3": "PA",
-    "4": "HA",
-    "5": "NP",
-    "6": "NA",
-    "7": "M",
-    "8": "NS",
-}
-
 
 def parse_vcf(vcf_path: Path) -> pd.DataFrame:
-    df = pd.read_table(
+    return pd.read_table(
         vcf_path,
         comment="#",
         header=None,
@@ -46,7 +35,6 @@ def parse_vcf(vcf_path: Path) -> pd.DataFrame:
             "sample",
         ],
     )
-    return df
 
 
 def parse_depths(path: Path) -> pd.DataFrame:
@@ -113,7 +101,7 @@ def depth_plot(
     zero_depth = df0.depth == 0
     df0.loc[zero_depth, "depth"] = df.depth.max()
     ax.set_title(
-        f"Sample {sample_name} - Segment {segment} ({SEGMENT_NAMES[segment]})\nReference Sequence ID: {ref_id}"
+        f"Sample {sample_name} - Segment {segment}\nReference Sequence ID: {ref_id}"
     )
     ax.set_ylabel("Depth")
     ax.set_xlabel(f"Position in {ref_id}")
