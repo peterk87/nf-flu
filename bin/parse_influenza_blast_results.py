@@ -13,7 +13,7 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union, Any
 
 import click
 import numpy as np
@@ -26,9 +26,20 @@ logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
 
 pl.enable_string_cache(True)
 
-SEGMENT_NAMES = {
+IAV_SEGMENT_NAMES = {
     1: "1_PB2",
     2: "2_PB1",
+    3: "3_PA",
+    4: "4_HA",
+    5: "5_NP",
+    6: "6_NA",
+    7: "7_M",
+    8: "8_NS",
+}
+
+IBV_SEGMENT_NAMES = {
+    1: "1_PB1",
+    2: "2_PB2",
     3: "3_PA",
     4: "4_HA",
     5: "5_NP",
@@ -204,7 +215,7 @@ def parse_blast_result(
         top: int = 3,
         pident_threshold: float = 0.85,
         min_aln_length: int = 50,
-) -> Optional[Tuple[pl.DataFrame, Dict]]:
+) -> Optional[Tuple[pl.DataFrame, Dict, str]]:
     logging.info(f"Parsing BLAST results from {blast_result}")
 
     try:
@@ -262,19 +273,9 @@ def parse_blast_result(
     cols = pl.Series([x for x, _ in BLAST_RESULTS_REPORT_COLUMNS])
     df_top_seg_matches = df_top_seg_matches.select(pl.col(cols))
     subtype_results_summary = {"sample": sample_name}
+    genus = top_genus(df_merge)
     if not get_top_ref:
-        df_genotype_genus = df_merge.select(pl.col(["Genotype", "Genus"]))
-        # where the genus is not IAV, set the genotype to "Not IAV"
-        df_genotype_genus = df_genotype_genus.with_columns(
-            pl.when(pl.col("Genus") == "Alphainfluenzavirus")
-            .then(pl.col("Genotype"))
-            .otherwise(pl.lit("Not IAV"))
-            .alias("Genotype")
-        )
-        genotypes = df_genotype_genus["Genotype"]
-        genotype_counts = genotypes.value_counts(sort=True)
-        # if the top genotype is "Not IAV", then the sample is not IAV
-        is_iav = genotype_counts['Genotype'][0] != "Not IAV"
+        is_iav = genus == 'Alphainfluenzavirus'
         H_results = None
         N_results = None
         if "4" in segments:
@@ -285,7 +286,12 @@ def parse_blast_result(
             subtype_results_summary.update(N_results)
         subtype_results_summary["Genotype"] = get_subtype_value(H_results, N_results, is_iav)
 
-    return df_top_seg_matches, subtype_results_summary
+    return df_top_seg_matches, subtype_results_summary, genus
+
+
+def top_genus(df: pl.DataFrame) -> str:
+    genus: pl.Series = df['Genus']
+    return genus.value_counts(sort=True)['Genus'][0]
 
 
 def get_subtype_value(H_results: Optional[Dict], N_results: Optional[Dict], is_iav: bool) -> str:
@@ -314,11 +320,11 @@ def get_subtype_value(H_results: Optional[Dict], N_results: Optional[Dict], is_i
     return subtype
 
 
-def find_h_or_n_type(df_merge, seg, is_iav):
-    assert seg in [
+def find_h_or_n_type(df_merge: pl.DataFrame, seg: str, is_iav: bool) -> Dict[str, Union[str, int, float]]:
+    assert seg in {
         "4",
         "6",
-    ], "Can only determine H or N type from segments 4 or 6, respectively!"
+    }, "Can only determine H or N type from segments 4 or 6, respectively!"
     h_or_n, type_name = ("H", "H_type") if seg == "4" else ("N", "N_type")
     df_segment = df_merge.filter(pl.col("sample_segment") == seg)
     if is_iav:
@@ -344,7 +350,7 @@ def find_h_or_n_type(df_merge, seg, is_iav):
         top_type_count = "N/A"
         total_count = "N/A"
 
-    top_result: pl.Series = list(df_segment.head(1).iter_rows(named=True))[0]
+    top_result: Dict[str, Any] = list(df_segment.head(1).iter_rows(named=True))[0]
     results_summary = {
         f"{h_or_n}_type": top_type if is_iav else "N/A",
         f"{h_or_n}_sample_segment_length": top_result["qlen"],
@@ -428,16 +434,20 @@ def report(
     ]
 
     if get_top_ref:
-        df_top_seg_matches, subtype_results_summary = results[0]
-        write_top_segment_matches(df_top_seg_matches, subtype_results_summary, sample_name)
+        df_top_seg_matches, _, genus = results[0]
+        write_top_segment_matches(df_top_seg_matches, sample_name, genus)
     else:
         dfs_blast = []
         all_subtype_results = {}
         for parsed_result in results:
             if parsed_result is None:
                 continue
-            df_blast, subtype_results_summary = parsed_result
+            df_blast, subtype_results_summary, genus = parsed_result
             if df_blast is not None:
+                # Replace segment number with segment name, i.e. 1 with "1_PB2" for IAV, 1 with "1_PB1" for IBV.
+                # No replacement for all other genera.
+                segment_names = get_segment_names(genus)
+                df_blast = df_blast.with_columns(pl.col("sample_segment").apply(lambda x: segment_names.get(int(x), x)))
                 dfs_blast.append(df_blast)
             sample = subtype_results_summary["sample"]
             all_subtype_results[sample] = subtype_results_summary
@@ -479,9 +489,6 @@ def report(
             descending=[False, False, True]
         )
         df_all_blast_pandas: pd.DataFrame = df_all_blast.to_pandas()
-        # Convert segment number to segment name (1 -> "1_PB2")
-        df_all_blast_pandas["sample_segment"] = df_all_blast_pandas["sample_segment"]. \
-            apply(lambda x: SEGMENT_NAMES[int(x)])
         # Rename columns to more human-readable names
         df_all_blast_pandas = df_all_blast_pandas.rename(
             columns=dict(BLAST_RESULTS_REPORT_COLUMNS)
@@ -503,7 +510,11 @@ def report(
         )
 
 
-def write_top_segment_matches(df_top_seg_matches, subtype_results_summary, sample_name):
+def write_top_segment_matches(
+        df_top_seg_matches: pl.DataFrame,
+        sample_name: str,
+        genus: str
+):
     df_blast = df_top_seg_matches.rename(mapping=dict(BLAST_RESULTS_REPORT_COLUMNS))
     df_ref_id = df_blast.select(
         pl.col([
@@ -521,10 +532,22 @@ def write_top_segment_matches(df_top_seg_matches, subtype_results_summary, sampl
         .str.strip()
         .alias('Reference NCBI Accession')
     )
+    segment_names = get_segment_names(genus)
     df_ref_id = df_ref_id.with_columns(
-        pl.col("Sample Genome Segment Number").apply(lambda x: SEGMENT_NAMES[int(x)])
-        .alias("Sample Genome Segment Number"))
-    df_ref_id.write_csv(sample_name + ".topsegments.csv", separator=",", has_header=True)
+        pl.col("Sample Genome Segment Number").apply(lambda x: segment_names.get(int(x), x))
+    )
+    df_ref_id.write_csv(
+        f"{sample_name}.topsegments.csv", separator=",", has_header=True
+    )
+
+
+def get_segment_names(genus: str) -> Dict[int, str]:
+    segment_names = {}
+    if genus == 'Alphainfluenzavirus':
+        segment_names = IAV_SEGMENT_NAMES
+    elif genus == 'Betainfluenzavirus':
+        segment_names = IBV_SEGMENT_NAMES
+    return segment_names
 
 
 def read_refseq_metadata(flu_metadata):
