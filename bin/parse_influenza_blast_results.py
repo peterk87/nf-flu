@@ -237,7 +237,10 @@ def parse_blast_result(
         logging.warning(f"No BLAST results found in {blast_result}")
         return None
 
-    sample_name: str = re.sub(r"^(.+)_\d$", r"\1", df_filtered["qaccver"][0])
+    first_qaccver = df_filtered["qaccver"][0]
+    sample_name: str = re.sub(r"^([\w\-]+)_\d$", r"\1", first_qaccver)
+    if first_qaccver == sample_name:
+        sample_name = re.sub(r"^(.+)_[1-8]_\w{1,3}$", r"\1", first_qaccver)
     logging.info(
         f"{sample_name} | n={df_filtered.shape[0]} | Filtered for hits above {pident_threshold}% identity."
         f"and Min Alignment length > {min_aln_length}"
@@ -245,7 +248,7 @@ def parse_blast_result(
     df_filtered = df_filtered.with_columns([
         pl.col('saccver').str.strip().alias("#Accession"),
         pl.lit(sample_name, dtype=pl.Categorical).alias("sample"),
-        pl.col('qaccver').str.extract(r".+_(\d)$").cast(pl.Categorical).alias("sample_segment"),
+        pl.col('qaccver').str.extract(f"{sample_name}_([1-8]).*").cast(pl.Categorical).alias("sample_segment"),
         pl.col("stitle").str.extract(regex_subtype_pattern).alias("subtype_from_match_title").cast(pl.Categorical)
     ])
     logging.info(
@@ -265,6 +268,7 @@ def parse_blast_result(
     )
 
     segments = df_merge["sample_segment"].unique().sort()
+    logging.info(f"{segments=}")
     dfs = [
         df_merge.filter(pl.col("sample_segment") == seg).head(top)
         for seg in segments
@@ -565,7 +569,7 @@ def init_logging():
         format="%(message)s",
         datefmt="[%Y-%m-%d %X]",
         level=logging.DEBUG,
-        handlers=[RichHandler(rich_tracebacks=True, tracebacks_show_locals=True)],
+        handlers=[RichHandler(rich_tracebacks=True, tracebacks_show_locals=False)],
     )
 
 

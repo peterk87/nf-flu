@@ -155,10 +155,10 @@ workflow NANOPORE {
   IRMA(CAT_NANOPORE_FASTQ.out.reads, irma_module)
   ch_versions = ch_versions.mix(IRMA.out.versions)
   // Find the top map sequences against ncbi database
-  BLAST_BLASTN_IRMA(IRMA.out.consensus, BLAST_MAKEBLASTDB_NCBI.out.db)
+  BLAST_BLASTN_IRMA(IRMA.out.majority_consensus, BLAST_MAKEBLASTDB_NCBI.out.db)
   ch_versions = ch_versions.mix(BLAST_BLASTN_IRMA.out.versions)
 
-  //Generate suptype prediction report
+  // Generate suptype prediction report from IRMA results
   if (!params.skip_irma_subtyping_report){
     ch_blast_irma = BLAST_BLASTN_IRMA.out.txt.collect({ it[1] })
     SUBTYPING_REPORT_IRMA_CONSENSUS(
