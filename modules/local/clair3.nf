@@ -39,7 +39,7 @@ process CLAIR3 {
       if [[ ${using_conda} = true ]] ; then
           MODEL_PATH="\$CLAIR_BIN_DIR/${model_suffix}"
       else [[ ${using_conda} = false ]]
-          MODEL_PATH="/usr/local/bin/models/${params.clair3_variant_model}"
+          MODEL_PATH="/opt/models/${params.clair3_variant_model}"
       fi
   fi
 
