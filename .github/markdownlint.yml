@@ -1,7 +1,7 @@
 # Markdownlint configuration file
 default: true
 line-length: false
-no-duplicate-header:
+no-duplicate-heading:
     siblings_only: true
 no-inline-html:
     allowed_elements:
@@ -10,3 +10,4 @@ no-inline-html:
         - kbd
         - details
         - summary
+MD056: false
