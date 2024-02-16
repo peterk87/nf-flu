@@ -5,12 +5,12 @@ process CLAIR3 {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda 'bioconda::clair3==1.0.2'
-  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/clair3:1.0.2--py39hb9dc472_0'
-  } else {
-    container 'quay.io/biocontainers/clair3:1.0.2--py39hb9dc472_0'
-  }
+  conda 'bioconda::clair3==1.0.5'
+  // use official images to avoid issues with full alignment failing. See issues:
+  // https://github.com/HKU-BAL/Clair3/issues/98
+  // https://github.com/HKU-BAL/Clair3/issues/181
+  // Biocontainers image fails for some reason.
+  container 'hkubal/clair3:v1.0.5'
 
   input:
   tuple val(sample), val(segment), val(ref_id), path(ref_fasta), path(bam)
@@ -55,7 +55,6 @@ process CLAIR3 {
       --haploid_sensitive \\
       --enable_long_indel \\
       --keep_iupac_bases \\
-      --fast_mode \\
       --include_all_ctgs
 
   ln -s ${clair3_dir}/merge_output.vcf.gz ${vcf}

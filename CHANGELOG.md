@@ -6,7 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [[3.3.8](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.8)] - 2024-02-16
 
 This bugfix patch release fixes an issue where a large number of ambiguous bases in the IRMA consensus can hinder
-reference selection (#67).
+reference selection (#67). This release also addresses an issue with using the Clair3 Biocontainers image resulting in
+incomplete variant calling results, affecting nf-flu executions with the `docker` or `singularity` profiles. The
+official Clair3 image is used instead. nf-flu executions using Conda and Mamba are unaffected.
 
 ### Changes
 
@@ -18,6 +20,7 @@ reference selection (#67).
   longer more contiguous matches are possible to aid in top reference sequence selection in some cases.
 * Updated parse_influenza_blast_results.py to better handle extraction of sample name and segment number from BLASTN
   query accession/version (qaccver).
+* Using official Clair3 Docker image and updating Clair3 to v1.0.5
 
 ## [[3.3.7](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.7)] - 2024-02-09
 
