@@ -3,6 +3,25 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.3.8](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.8)] - 2024-02-16
+
+This bugfix patch release fixes an issue where a large number of ambiguous bases in the IRMA consensus can hinder
+reference selection (#67). This release also addresses an issue with using the Clair3 Biocontainers image resulting in
+incomplete variant calling results, affecting nf-flu executions with the `docker` or `singularity` profiles. The
+official Clair3 image is used instead. nf-flu executions using Conda and Mamba are unaffected.
+
+### Changes
+
+* Create majority consensus from IRMA `allAlleles.txt` files for BLASTN search
+* Add `irma-alleles2fasta.v`, statically compiled binary (`irma-alleles2fasta`) and Bash build script for parsing IRMA
+  `allAlleles.txt` to output naive majority consensus (i.e. whatever the top non-dash allele is at each position) so
+  that the sequence used for BLASTN search does not contain any ambiguous bases.
+* Updated nanopore.nf subworkflow to use IRMA majority consensus with no ambiguous bases for BLASTN search so that
+  longer more contiguous matches are possible to aid in top reference sequence selection in some cases.
+* Updated parse_influenza_blast_results.py to better handle extraction of sample name and segment number from BLASTN
+  query accession/version (qaccver).
+* Using official Clair3 Docker image and updating Clair3 to v1.0.5
+
 ## [[3.3.7](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.7)] - 2024-02-09
 
 This bugfix patch release fixes an issue with mislabeling of PB1 and PB2 segments for Influenza B virus results (#65).

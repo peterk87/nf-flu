@@ -16,6 +16,7 @@ process IRMA {
   output:
   tuple val(meta), path("${meta.id}/"), emit: irma
   tuple val(meta), path("${meta.id}.irma.consensus.fasta"), optional: true, emit: consensus
+  tuple val(meta), path("${meta.id}.irma.majority_consensus.fasta"), optional: true, emit: majority_consensus
   path "*.irma.log", emit: log
   path "versions.yml", emit: versions
 
@@ -40,6 +41,14 @@ process IRMA {
   if ls ${meta.id}/amended_consensus/*.fa > /dev/null 2>&1; then
     cat ${meta.id}/amended_consensus/*.fa > ${meta.id}.irma.consensus.fasta
   fi
+
+  if ls ${meta.id}/tables/*-allAlleles.txt > /dev/null 2>&1; then
+    irma-alleles2fasta -n "${meta.id}" -i "${meta.id}/tables" -o majority-consensus
+    if ls majority-consensus/*.fasta > /dev/null 2>&1; then
+      cat majority-consensus/*.fasta > ${meta.id}.irma.majority_consensus.fasta
+    fi
+  fi
+
   ln -s .command.log $irma_log
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
