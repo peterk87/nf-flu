@@ -3,6 +3,20 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.3.9](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.9)] - 2024-05-30
+
+Long overdue software updates release.
+
+### Software Updates
+
+* bcftools: `1.15.1` -> `1.20`
+* blast: `2.14.0` -> `2.15.0`
+* clair3: `1.0.5` -> `1.0.9`
+* minimap2: `2.24` -> `2.28`
+* mosdepth: `0.3.3` -> `0.3.8`
+* multiqc: `1.12` -> `1.21`
+* seqtk: `1.3` -> `1.4`
+
 ## [[3.3.8](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.8)] - 2024-02-16
 
 This bugfix patch release fixes an issue where a large number of ambiguous bases in the IRMA consensus can hinder
