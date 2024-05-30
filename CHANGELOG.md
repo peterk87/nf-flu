@@ -17,6 +17,10 @@ Long overdue software updates release.
 * multiqc: `1.12` -> `1.21`
 * seqtk: `1.3` -> `1.4`
 
+### Changes
+
+* dev: update GitHub Actions versions for CI and linting workflows
+
 ## [[3.3.8](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.8)] - 2024-02-16
 
 This bugfix patch release fixes an issue where a large number of ambiguous bases in the IRMA consensus can hinder
