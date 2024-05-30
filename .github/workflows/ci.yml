@@ -31,12 +31,12 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['22.10.1', '23.04.1']
+        nxf_ver: ['22.10.1', '24.04.2']
     steps:
       - name: Check out pipeline code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Cache Nextflow binary
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-nextflow
         with:
           path: /usr/local/bin/nextflow
@@ -49,7 +49,7 @@ jobs:
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
       - name: Cache seqtk binary
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-seqtk
         with:
           path: /usr/local/bin/seqtk
@@ -63,7 +63,7 @@ jobs:
           make install
           which seqtk
       - name: Cache subsampled influenza.fna
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-influenza-fna
         with:
           path: influenza-10k.fna.zst
@@ -73,7 +73,7 @@ jobs:
         run: |
           curl --silent -SLk ${FASTA_ZST_URL} | zstdcat | seqtk sample -s 789 - 10000 | zstd -ck > influenza-10k.fna.zst
       - name: Cache influenza.csv
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-influenza-csv
         with:
           path: influenza.csv.zst
@@ -90,12 +90,12 @@ jobs:
             --ncbi_influenza_metadata influenza.csv.zst
       - name: Upload Artifact
         if: success()
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: illumina-test-results-${{ matrix.nxf_ver }}
           path: results/pipeline_info
       - name: Upload .nextflow.log
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: nextflow-log-illumina-${{ matrix.nxf_ver }}
           path: .nextflow.log
@@ -111,12 +111,12 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['22.10.1', '23.04.1']
+        nxf_ver: ['22.10.1', '24.04.2']
     steps:
       - name: Check out pipeline code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Cache Nextflow binary
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-nextflow
         with:
           path: /usr/local/bin/nextflow
@@ -129,7 +129,7 @@ jobs:
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
       - name: Cache seqtk binary
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-seqtk
         with:
           path: /usr/local/bin/seqtk
@@ -143,7 +143,7 @@ jobs:
           make install
           which seqtk
       - name: Cache test sample reads
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-reads
         with:
           path: reads/
@@ -177,7 +177,7 @@ jobs:
           echo "ntc-bc31,$(realpath reads/ntc-bc31.fastq.gz)" | tee -a samplesheet.csv
           echo "ntc-bc47,$(realpath reads/ntc-bc47.fastq.gz)" | tee -a samplesheet.csv
       - name: Cache subsampled influenza.fna
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-influenza-fna
         with:
           path: influenza-10k.fna.zst
@@ -187,7 +187,7 @@ jobs:
         run: |
           curl --silent -SLk ${FASTA_ZST_URL} | zstdcat | seqtk sample -s 789 - 10000 | zstd -ck > influenza-10k.fna.zst
       - name: Cache influenza.csv
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-influenza-csv
         with:
           path: influenza.csv.zst
@@ -207,25 +207,25 @@ jobs:
       - name: Tree of results
         run: tree -h results/
       - name: Upload .nextflow.log
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: nextflow-log-nanopore-${{ matrix.nxf_ver }}
           path: .nextflow.log
       - name: Upload pipeline_info/
         if: success()
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: nanopore-test-results-pipline_info-${{ matrix.nxf_ver }}
           path: results/pipeline_info
       - name: Upload nf-flu-subtyping-report.xlsx
         if: success()
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: nanopore-test-results-subtyping-report-${{ matrix.nxf_ver }}
           path: results/nf-flu-subtyping-report.xlsx
       - name: Upload multiqc_report.html
         if: success()
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: nanopore-test-results-multiqc-${{ matrix.nxf_ver }}
           path: results/MultiQC/multiqc_report.html
