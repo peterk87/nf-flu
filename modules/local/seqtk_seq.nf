@@ -5,11 +5,11 @@ process SEQTK_SEQ{
   tag "$sample|$segment|$ref_id"
   // use default process resources
 
-  conda "bioconda::seqtk=1.3"
+  conda "bioconda::seqtk=1.4"
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/seqtk:1.3--h5bf99c6_3'
+    container 'https://depot.galaxyproject.org/singularity/seqtk:1.4--he4a0461_2'
   } else {
-    container 'quay.io/biocontainers/seqtk:1.3--h5bf99c6_3'
+    container 'quay.io/biocontainers/seqtk:1.4--he4a0461_2'
   }
 
   input:

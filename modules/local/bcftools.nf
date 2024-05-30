@@ -5,11 +5,11 @@ process BCF_CONSENSUS {
   tag "$sample|$segment|$ref_id"
   label 'process_medium'
 
-  conda 'bioconda::bcftools=1.15.1 conda-forge::gsl=2.7'
+  conda 'bioconda::bcftools=1.20 conda-forge::gsl=2.7'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/bcftools:1.15.1--h0ea216a_0'
+    container 'https://depot.galaxyproject.org/singularity/bcftools:1.20--h8b25389_0'
   } else {
-    container 'quay.io/biocontainers/bcftools:1.15.1--h0ea216a_0'
+    container 'quay.io/biocontainers/bcftools:1.20--h8b25389_0'
   }
 
   input:
