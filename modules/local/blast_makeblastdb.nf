@@ -3,11 +3,11 @@ process BLAST_MAKEBLASTDB {
   tag "$fasta"
   label 'process_low'
 
-  conda 'bioconda::blast=2.14.0'
+  conda 'bioconda::blast=2.15.0'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/blast:2.14.0--h7d5a4b4_1'
+    container 'https://depot.galaxyproject.org/singularity/blast:2.15.0--pl5321h6f7f691_1'
   } else {
-    container 'quay.io/biocontainers/blast:2.14.0--h7d5a4b4_1'
+    container 'quay.io/biocontainers/blast:2.15.0--pl5321h6f7f691_1'
   }
 
   input:

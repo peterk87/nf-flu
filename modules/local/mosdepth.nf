@@ -4,12 +4,13 @@ process MOSDEPTH_GENOME {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda 'bioconda::mosdepth=0.3.3'
+  conda 'bioconda::mosdepth=0.3.8'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-      container "https://depot.galaxyproject.org/singularity/mosdepth:0.3.3--h37c5b7d_2"
+    container 'https://depot.galaxyproject.org/singularity/mosdepth:0.3.8--hd299d5a_0'
   } else {
-      container "quay.io/biocontainers/mosdepth:0.3.3--h01d7912_0"
+    container 'quay.io/biocontainers/mosdepth:0.3.8--hd299d5a_0'
   }
+
   input:
   tuple val(sample), val(segment), val(ref_id), path(fasta), path(bam_bai)
 

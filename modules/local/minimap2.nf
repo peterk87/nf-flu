@@ -4,13 +4,12 @@ process MINIMAP2 {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda 'bioconda::minimap2=2.24 bioconda::samtools=1.15'
+  conda 'bioconda::minimap2=2.28 bioconda::samtools=1.20'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/mulled-v2-66534bcbb7031a148b13e2ad42583020b9cd25c4:1679e915ddb9d6b4abda91880c4b48857d471bd8-0'
+    container 'https://depot.galaxyproject.org/singularity/mulled-v2-058de387f9917a7a63953f496cdd203bca83b790:86215829f86df9201683956877a19d025261ff66-0'
   } else {
-    container 'quay.io/biocontainers/mulled-v2-66534bcbb7031a148b13e2ad42583020b9cd25c4:1679e915ddb9d6b4abda91880c4b48857d471bd8-0'
+    container 'quay.io/biocontainers/mulled-v2-058de387f9917a7a63953f496cdd203bca83b790:86215829f86df9201683956877a19d025261ff66-0'
   }
-
 
   input:
   tuple val(sample), val(segment), val(ref_id), path(ref_fasta), path(reads)
