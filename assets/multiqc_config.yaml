@@ -20,20 +20,14 @@ module_order:
         name: 'Samtools (Minimap2)'
         anchor: 'samtools_minimap2'
         info: 'This section of the report shows Samtools counts/statistics after mapping with Minimap2.'
-        path_filters:
-            - './samtools/*'
     - mosdepth:
         name: 'Mosdepth (Minimap2)'
         anchor: 'mosdepth_minimap2'
         info: 'This section of the report shows Mosdepth calculated depth statistics after mapping with Minimap2'
-        path_filters:
-            - './mosdepth/*'
     - bcftools:
         name: 'Bcftools Stats'
         anchor: 'bcftools'
         info: 'This section of the report shows Bcftools calculated statistics after variant calling using Clair3/Medaka and filter frameshift'
-        path_filters:
-            - './bcftools/*'
 
 extra_fn_clean_exts:
     - type: remove
