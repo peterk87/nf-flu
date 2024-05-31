@@ -4,9 +4,9 @@ report_comment: >
     analysis pipeline. For information about how to interpret these results, please see the
     <a href="https://github.com/CFIA-NCFAD/nf-flu" target="_blank">documentation</a>.
 report_section_order:
-    software_versions:
+    CFIA-NCFAD-nf-flu-summary-module:
         order: -1000
-    CFIA-NCFAD-nf-flu-summary:
+    software_versions-module:
         order: -1001
 
 read_count_multiplier: 1.0
@@ -14,26 +14,21 @@ read_count_prefix: ''
 read_count_desc: ''
 
 export_plots: true
+disable_version_detection: true
 
 module_order:
     - samtools:
         name: 'Samtools (Minimap2)'
         anchor: 'samtools_minimap2'
         info: 'This section of the report shows Samtools counts/statistics after mapping with Minimap2.'
-        path_filters:
-            - './samtools/*'
     - mosdepth:
         name: 'Mosdepth (Minimap2)'
         anchor: 'mosdepth_minimap2'
         info: 'This section of the report shows Mosdepth calculated depth statistics after mapping with Minimap2'
-        path_filters:
-            - './mosdepth/*'
     - bcftools:
         name: 'Bcftools Stats'
         anchor: 'bcftools'
         info: 'This section of the report shows Bcftools calculated statistics after variant calling using Clair3/Medaka and filter frameshift'
-        path_filters:
-            - './bcftools/*'
 
 extra_fn_clean_exts:
     - type: remove
@@ -54,32 +49,21 @@ mosdepth_config:
         - 30
         - 10000
 
-run_modules:
-    - custom_content
-    - samtools
-    - mosdepth
-    - bcftools
-
-sp:
-    mosdepth/global_dist:
-        fn: '*.global.dist.txt'
-
 table_columns_visible:
-    'Samtools (Minimap2)':
+    'Samtools (Minimap2): stats':
         flagstat_total: false
         mapped_passed: false
         error_rate: false
         'non-primary_alignments': false
-    'Bcftools Stats':
+    'Bcftools Stats: Stats':
         number_of_MNPs: true
 
-
 table_columns_placement:
-    'Samtools (Minimap2)':
+    'Samtools (Minimap2): stats':
         reads_mapped: 1010
         raw_total_sequences: 1020
         reads_mapped_percent: 1030
-    'Bcftools Stats':
+    'Bcftools Stats: Stats':
         number_of_records: 1060
         number_of_SNPs: 1070
         number_of_MNPs: 1080
