@@ -46,7 +46,14 @@ def write_aa_fasta(recs: list[SeqRecord], out_file: os.PathLike) -> None:
             for feature in rec.features:
                 if feature.type not in {"CDS", "mat_peptide", "sig_peptide"}:
                     continue
-                translation = get_translation(rec.seq, feature.location)
+                try:
+                    translation = feature.qualifiers["translation"][0]
+                except (KeyError, IndexError):
+                    logging.warning(
+                        f"Could not retrieve translation qualifier for feature {feature} from {rec}. "
+                        "Trying to obtain translation from nucleotide sequence."
+                    )
+                    translation = get_translation(rec.seq, feature.location)
                 try:
                     gene = feature.qualifiers["gene"][0]
                 except KeyError:
