@@ -258,6 +258,8 @@ Consensus sequences are annotated using [VADR][]. The output files are available
   - Each sample will have its own VADR annotation analysis output directory. Feature table output can be found in the `*.vadr.pass.tbl` files.
 - `annotation/<sample>/`
   - VADR Feature Table output is converted to Genbank, GFF and FASTA format for downstream analyses. FASTA files with nucleotide sequences of genetic features (CDS, mature peptide, signal peptide, etc) can be found in the `.ffn` files and amino acid sequences of genetic features can be found in the `.faa` files.
+- `annotation/vadr-annotation-failed-sequences.txt`: list of sequences that failed VADR annotation
+- `annotation/vadr-annotation-issues.txt`: table describing sequences that had issues with VADR annotation 
 
 </details>
 
