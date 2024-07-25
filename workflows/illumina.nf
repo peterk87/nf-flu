@@ -20,7 +20,7 @@ include { BLAST_MAKEBLASTDB } from '../modules/local/blast_makeblastdb'
 include { BLAST_BLASTN } from '../modules/local/blastn'
 include { CAT_ILLUMINA_FASTQ } from '../modules/local/cat_illumina_fastq'
 include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA; ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_CSV } from '../modules/local/zstd_decompress'
-include { VADR                                                } from '../modules/local/vadr'
+include { VADR; VADR_SUMMARIZE_ISSUES                         } from '../modules/local/vadr'
 include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN            } from '../modules/local/table2asn'
 include { CUSTOM_DUMPSOFTWAREVERSIONS  as SOFTWARE_VERSIONS   } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 
@@ -92,6 +92,7 @@ workflow ILLUMINA {
   VADR.out.feature_table
     .combine(VADR.out.pass_fasta, by: 0)
     .set { ch_pre_table2asn }
+  VADR_SUMMARIZE_ISSUES(VADR.out.vadr_outdir.map { [it[1]] }.collect())
   PRE_TABLE2ASN(ch_pre_table2asn)
   ch_versions = ch_versions.mix(PRE_TABLE2ASN.out.versions)
   TABLE2ASN(PRE_TABLE2ASN.out.table2asn_input)

@@ -29,3 +29,21 @@ process VADR {
   END_VERSIONS
   """
 }
+
+process VADR_SUMMARIZE_ISSUES {
+  executor 'local'
+  memory 100.MB
+
+  input:
+  path(vadr_output, stageAs: "input*/*")
+
+  output:
+  path('vadr-annotation-issues.txt'), emit: issues
+  path('vadr-annotation-failed-sequences.txt'), emit: failed
+
+  script:
+  """
+  cat input*/**/*.alt.list | awk 'NR == 1 || \$0 !~ /^#/' > vadr-annotation-issues.txt
+  cat input*/**/*.fail.list > vadr-annotation-failed-sequences.txt
+  """
+}
