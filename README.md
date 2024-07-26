@@ -24,7 +24,8 @@ After reference sequence selection, the pipeline performs read mapping to each r
 5. H/N subtype prediction and Excel XLSX report generation based on BLAST results.
 6. Automatically select top match reference sequences for segments
 7. Read mapping, variant calling and consensus sequence generation for each segment against top reference sequence based on BLAST results.
-8. MultiQC report generation.
+8. Annotation of consensus sequences with [VADR][]
+9. [MultiQC][] report generation.
 
 ## Quick Start
 
@@ -178,6 +179,18 @@ Ewels, P.A., Peltzer, A., Fillinger, S., Patel, H., Alneberg, J., Wilm, A., Garc
 
 [seqtk][] is used for rapid manipulation of FASTA/Q files. Available from GitHub at [lh3/seqtk](https://github.com/lh3/seqtk)
 
+### [VADR][]
+
+[VADR][] is used for annotation of Influenza virus sequences.
+
+```text
+Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney Brister, Ilene Karsch-Mizrachi, Eric P Nawrocki; VADR: validation and annotation of virus sequence submissions to GenBank. BMC Bioinformatics 21, 211 (2020). https://doi.org/10.1186/s12859-020-3537-3
+```
+
+### [table2asn][]
+
+[table2asn][] is used for converting the [VADR][] Feature Table format output to Genbank format to help with conversion to other formats such as FASTA and GFF.
+
 ## Credits
 
 The nf-flu pipeline was originally developed by [Peter Kruczkiewicz](https://github.com/peterk87) from [CFIA-NCFAD](https://github.com/CFIA-NCFAD), [Hai Nguyen](https://github.com/nhhaidee) extended the piepline for Nanopore data analysis.
@@ -203,3 +216,5 @@ The nf-flu pipeline was originally developed by [Peter Kruczkiewicz](https://git
 [Mosdepth]: https://github.com/brentp/mosdepth
 [seqtk]: https://github.com/lh3/seqtk
 [MultiQC]: https://multiqc.info/
+[VADR]: https://github.com/ncbi/vadr
+[table2asn]: https://www.ncbi.nlm.nih.gov/genbank/table2asn/

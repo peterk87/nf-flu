@@ -58,11 +58,11 @@ process CAT_DB {
 
 process CAT_CONSENSUS {
   tag "$sample"
-  conda 'bioconda::shiptv=0.4.0'
+  conda 'bioconda::shiptv=0.4.1'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/shiptv:0.4.0--pyh5e36f6f_0'
+    container 'https://depot.galaxyproject.org/singularity/shiptv:0.4.1--pyh5e36f6f_0'
   } else {
-    container 'quay.io/biocontainers/shiptv:0.4.0--pyh5e36f6f_0'
+    container 'quay.io/biocontainers/shiptv:0.4.1--pyh5e36f6f_0'
   }
 
   input:
@@ -70,7 +70,7 @@ process CAT_CONSENSUS {
 
   output:
   tuple val(sample), path('*.consensus.blastn.fasta'), emit: fasta
-  path('*.consensus.fasta'), emit: consensus_fasta
+  tuple val(sample), path('*.consensus.fasta'), emit: consensus_fasta
   path "versions.yml" , emit: versions
 
   script:

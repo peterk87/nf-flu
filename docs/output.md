@@ -14,6 +14,7 @@ The directories listed below will be created in the results directory after the 
 - [Reference Sequences](#reference-sequences)
 - [Variant Calling](#variant-calling)
 - [H/N Subtyping](#hn-subtyping)
+- [Annotation](#annotation)
 
 ### IRMA
 
@@ -246,6 +247,22 @@ Below are shown the fields for the "3_H Segment Results" sheet. The fields are n
 | H: top match collection date | Reference sequence date of collection | 2009/04/27 |
 | H: type prediction | H segment subtype prediction | 1 |
 
+### Annotation
+
+Consensus sequences are annotated using [VADR][]. The output files are available in multiple formats including Feature Table, Genbank, nucleotide and amino acid FASTA and GFF.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `annotation/vadr/<sample>`
+  - Each sample will have its own VADR annotation analysis output directory. Feature table output can be found in the `*.vadr.pass.tbl` files.
+- `annotation/<sample>/`
+  - VADR Feature Table output is converted to Genbank, GFF and FASTA format for downstream analyses. FASTA files with nucleotide sequences of genetic features (CDS, mature peptide, signal peptide, etc) can be found in the `.ffn` files and amino acid sequences of genetic features can be found in the `.faa` files.
+- `annotation/vadr-annotation-failed-sequences.txt`: list of sequences that failed VADR annotation
+- `annotation/vadr-annotation-issues.txt`: table describing sequences that had issues with VADR annotation
+
+</details>
+
 ### Pipeline information
 
 <details markdown="1">
@@ -264,3 +281,4 @@ Below are shown the fields for the "3_H Segment Results" sheet. The fields are n
 [NCBI Influenza DB]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
 [IRMA]: https://wonder.cdc.gov/amd/flu/irma/
 [BLAST]: https://blast.ncbi.nlm.nih.gov/Blast.cgi
+[VADR]: https://github.com/ncbi/vadr
