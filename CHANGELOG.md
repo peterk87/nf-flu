@@ -3,6 +3,16 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.4.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.4.0)] - 2024-07-24
+
+This release adds Influenza virus sequence annotation using VADR.
+
+### Changes
+
+* Add VADR for Influenza consensus sequence annotation
+* Add table2asn for Feature Table conversion to Genbank
+* Add pre- and post-table2asn processing to workaround sequence ID length limits imposed by table2asn when converting from Feature Table format to Genbank
+
 ## [[3.3.10](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.3.10)] - 2024-05-31
 
 Fix MultiQC report generation due to module filter paths not working like in v1.12.

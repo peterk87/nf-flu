@@ -32,6 +32,9 @@ include { PULL_TOP_REF_ID } from '../modules/local/pull_top_ref_id'
 include { BCF_FILTER as BCF_FILTER_FREEBAYES                     } from '../modules/local/bcftools'
 include { VCF_FILTER_FRAMESHIFT                               } from '../modules/local/vcf_filter_frameshift'
 include { FREEBAYES                                           } from '../modules/local/freebayes'
+include { VADR; VADR_SUMMARIZE_ISSUES                         } from '../modules/local/vadr'
+include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN            } from '../modules/local/table2asn'
+include { CUSTOM_DUMPSOFTWAREVERSIONS  as SOFTWARE_VERSIONS   } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 
 //=============================================================================
 // Workflow Params Setup
@@ -139,6 +142,26 @@ workflow ILLUMINA {
   BLAST_BLASTN(IRMA.out.majority_consensus, BLAST_MAKEBLASTDB.out.db)
   ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions)
 
+  // VADR application on IRMA concsensus
+  IRMA.out.consensus
+    .map { [it[0].id, it[1]] }
+    .set { ch_irma_consensus }
+  VADR(ch_irma_consensus)
+  ch_versions = ch_versions.mix(VADR.out.versions)
+  VADR.out.feature_table
+    .combine(VADR.out.pass_fasta, by: 0)
+    .set { ch_pre_table2asn }
+  VADR_SUMMARIZE_ISSUES(VADR.out.vadr_outdir.map { [it[1]] }.collect())
+  PRE_TABLE2ASN(ch_pre_table2asn)
+  ch_versions = ch_versions.mix(PRE_TABLE2ASN.out.versions)
+  TABLE2ASN(PRE_TABLE2ASN.out.table2asn_input)
+  ch_versions = ch_versions.mix(TABLE2ASN.out.versions)
+  POST_TABLE2ASN(TABLE2ASN.out.genbank)
+  ch_versions = ch_versions.mix(POST_TABLE2ASN.out.versions)
+
+  BLAST_BLASTN(IRMA.out.consensus, BLAST_MAKEBLASTDB.out.db)
+  ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first().ifEmpty(null))
+
   ch_blast = BLAST_BLASTN.out.txt.collect({ it[1] })
   SUBTYPING_REPORT(
     ZSTD_DECOMPRESS_CSV.out.file,
@@ -186,7 +209,7 @@ workflow ILLUMINA {
   workflow_summary    = Schema.params_summary_multiqc(workflow, summary_params)
   ch_workflow_summary = Channel.value(workflow_summary)
   ch_multiqc_config = Channel.fromPath("$projectDir/assets/multiqc_config.yaml")
-  
+
   // Software Versions
   SOFTWARE_VERSIONS(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
 
