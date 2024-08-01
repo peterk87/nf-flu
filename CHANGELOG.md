@@ -3,6 +3,11 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.4.1](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.4.1)] - 2024-08-02
+
+This patch release fixes an issue (#75) with CAT_ILLUMINA_FASTQ where `1:N:0:.` or `2:N:0:.` may be mistakenly appended
+to Q-score lines beginning with `@`.
+
 ## [[3.4.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.4.0)] - 2024-07-24
 
 This release adds Influenza virus sequence annotation using VADR.

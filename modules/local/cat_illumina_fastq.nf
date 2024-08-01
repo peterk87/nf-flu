@@ -72,28 +72,28 @@ touch ${prefix}_2.merged.fastq.gz
 
 if [[ ${read1.size} > 0 ]]; then
   cat ${read1.join(' ')} \\
-  | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
+  | perl -ne 'if (\$_ =~ /^@.* .*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
   | gzip -ck \\
   >> ${prefix}_1.merged.fastq.gz
 fi
 
 if [[ ${read1gz.size} > 0 ]]; then
   zcat ${read1gz.join(' ')} \\
-  | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
+  | perl -ne 'if (\$_ =~ /^@.* .*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
   | gzip -ck \\
   >> ${prefix}_1.merged.fastq.gz
 fi
 
 if [[ ${read2.size} > 0 ]]; then
   cat ${read2.join(' ')} \\
-  | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
+  | perl -ne 'if (\$_ =~ /^@.* .*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
   | gzip -ck \\
   >> ${prefix}_2.merged.fastq.gz
 fi
 
 if [[ ${read2gz.size} > 0 ]]; then
   zcat ${read2gz.join(' ')} \\
-  | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
+  | perl -ne 'if (\$_ =~ /^@.* .*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
   | gzip -ck \\
   >> ${prefix}_2.merged.fastq.gz
 fi
