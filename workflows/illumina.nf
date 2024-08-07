@@ -22,7 +22,7 @@ include { CAT_ILLUMINA_FASTQ } from '../modules/local/cat_illumina_fastq'
 include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA; ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_CSV } from '../modules/local/zstd_decompress'
 include { VADR; VADR_SUMMARIZE_ISSUES                         } from '../modules/local/vadr'
 include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN            } from '../modules/local/table2asn'
-include { CUSTOM_DUMPSOFTWAREVERSIONS  as SOFTWARE_VERSIONS   } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
+include { MQC_VERSIONS_TABLE } from '../modules/local/mqc_versions_table'
 
 //=============================================================================
 // Workflow Params Setup
@@ -111,5 +111,5 @@ workflow ILLUMINA {
   )
   ch_versions = ch_versions.mix(SUBTYPING_REPORT.out.versions)
 
-  SOFTWARE_VERSIONS(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
+  MQC_VERSIONS_TABLE(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
 }
