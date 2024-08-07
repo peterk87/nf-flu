@@ -35,6 +35,12 @@ jobs:
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v4
+      - name: pre - df, Docker df, Docker images
+        if: ${{ always() }}
+        run: |
+          df -h
+          docker system df
+          docker images
       - name: Cache Nextflow binary
         uses: actions/cache@v4
         id: cache-nextflow
@@ -90,6 +96,12 @@ jobs:
             -profile test_illumina,docker \
             --ncbi_influenza_fasta influenza-10k.fna.zst \
             --ncbi_influenza_metadata influenza.csv.zst
+      - name: post - df, Docker df, Docker images
+        if: ${{ always() }}
+        run: |
+          df -h
+          docker system df
+          docker images
       - name: Upload Artifact
         if: success()
         uses: actions/upload-artifact@v4
@@ -117,6 +129,12 @@ jobs:
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v4
+      - name: pre - df, Docker df, Docker images
+        if: ${{ always() }}
+        run: |
+          df -h
+          docker system df
+          docker images
       - name: Cache Nextflow binary
         uses: actions/cache@v4
         id: cache-nextflow
@@ -210,6 +228,12 @@ jobs:
             --ncbi_influenza_metadata influenza.csv.zst
       - name: Tree of results
         run: tree -h results/
+      - name: post - df, Docker df, Docker images
+        if: ${{ always() }}
+        run: |
+          df -h
+          docker system df
+          docker images
       - name: Upload .nextflow.log
         uses: actions/upload-artifact@v4
         with:

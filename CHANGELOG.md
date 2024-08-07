@@ -12,6 +12,8 @@ to Q-score lines beginning with `@`.
 
 * fix: updated Perl regex to better match Illumina FASTQ header lines starting with `@`. At least one space ` ` is expected in the header line. Match regex has been changed to `/^@.* .*/` from `/^@.*/` so hopefully Q-score lines should not be matched anymore.
 * dev: replaced nf-core/modules DUMPSOFTWAREVERSIONS with [mqc_versions_table v0.2.0](https://github.com/CFIA-NCFAD/nim-mqc-versions-yml/releases/tag/0.2.0) Nim statically compiled binary to parse `versions.yml` and output necessary YAML with HTML content for display of process and tool versions table in MultiQC report. In theory DUMPSOFTWAREVERSIONS should be using the same Docker/Singularity image/Conda env as the MultiQC process, but DUMPSOFTWAREVERSIONS uses an older version of MultiQC and only uses it for the pyyaml library. `mqc_versions_table` was developed to handle this instead with a small 200KB binary instead.
+* dev: harmonize Docker/Singularity containers and Conda envs used across processes.
+* ci: use `symlink` mode for `publishDir` by default for `test_nanopore.config` and `test_illumina.config` to limit disk usage during CI.
 
 ## [[3.4.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.4.0)] - 2024-07-24
 
