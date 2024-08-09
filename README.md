@@ -1,7 +1,5 @@
 # CFIA-NCFAD/nf-flu - Influenza A and B Virus Genome Assembly Nextflow Workflow
 
-
-
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12968792.svg)](https://doi.org/10.5281/zenodo.12968792)
 [![CI](https://github.com/CFIA-NCFAD/nf-flu/actions/workflows/ci.yml/badge.svg)](https://github.com/CFIA-NCFAD/nf-flu/actions/workflows/ci.yml)
 
