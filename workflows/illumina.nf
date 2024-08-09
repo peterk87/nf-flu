@@ -13,28 +13,32 @@ ch_influenza_metadata = file(params.ncbi_influenza_metadata)
 // MODULES
 //=============================================================================
 
-include { IRMA } from '../modules/local/irma'
-include { CHECK_SAMPLE_SHEET } from '../modules/local/check_sample_sheet'
-include { SUBTYPING_REPORT } from '../modules/local/subtyping_report'
-include { BLAST_MAKEBLASTDB } from '../modules/local/blast_makeblastdb'
-include { BLAST_BLASTN } from '../modules/local/blastn'
-include { CAT_ILLUMINA_FASTQ } from '../modules/local/cat_illumina_fastq'
+include { IRMA                                                                             } from '../modules/local/irma'
+include { CHECK_SAMPLE_SHEET                                                               } from '../modules/local/check_sample_sheet'
+include { SUBTYPING_REPORT as SUBTYPING_REPORT_IRMA_CONSENSUS                              } from '../modules/local/subtyping_report'
+include { SUBTYPING_REPORT as SUBTYPING_REPORT_BCF_CONSENSUS                               } from '../modules/local/subtyping_report'
+include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI                                      } from '../modules/local/blast_makeblastdb'
+include { BLAST_BLASTN as BLAST_BLASTN_IRMA                                                } from '../modules/local/blastn'
+include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS                                           } from '../modules/local/blastn'
+include { CAT_ILLUMINA_FASTQ                                                               } from '../modules/local/cat_illumina_fastq'
 include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA; ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_CSV } from '../modules/local/zstd_decompress'
-include { CUSTOM_DUMPSOFTWAREVERSIONS as SOFTWARE_VERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
-include { MULTIQC } from '../modules/local/multiqc'
-include { MULTIQC_TSV_FROM_LIST as READ_COUNT_FAIL_TSV } from '../modules/local/multiqc_tsv_from_list'
-include { MULTIQC_TSV_FROM_LIST as READ_COUNT_PASS_TSV } from '../modules/local/multiqc_tsv_from_list'
-include { MINIMAP2 } from '../modules/local/minimap2_new'
-include { MOSDEPTH_GENOME } from '../modules/local/mosdepth'
-include { BCFTOOLS_STATS } from '../modules/local/bcftools'
-include { SEQTK_SEQ } from '../modules/local/seqtk_seq'
-include { PULL_TOP_REF_ID } from '../modules/local/pull_top_ref_id'
-include { BCF_FILTER as BCF_FILTER_FREEBAYES                     } from '../modules/local/bcftools'
-include { VCF_FILTER_FRAMESHIFT                               } from '../modules/local/vcf_filter_frameshift'
-include { FREEBAYES                                           } from '../modules/local/freebayes'
-include { VADR; VADR_SUMMARIZE_ISSUES                         } from '../modules/local/vadr'
-include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN            } from '../modules/local/table2asn'
-include { CUSTOM_DUMPSOFTWAREVERSIONS  as SOFTWARE_VERSIONS   } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
+include { MULTIQC                                                                          } from '../modules/local/multiqc'
+include { MULTIQC_TSV_FROM_LIST as READ_COUNT_FAIL_TSV                                     } from '../modules/local/multiqc_tsv_from_list'
+include { MULTIQC_TSV_FROM_LIST as READ_COUNT_PASS_TSV                                     } from '../modules/local/multiqc_tsv_from_list'
+include { MINIMAP2                                                                         } from '../modules/local/minimap2_new'
+include { MOSDEPTH_GENOME                                                                  } from '../modules/local/mosdepth'
+include { BCFTOOLS_STATS                                                                   } from '../modules/local/bcftools'
+include { SEQTK_SEQ                                                                        } from '../modules/local/seqtk_seq'
+include { PULL_TOP_REF_ID                                                                  } from '../modules/local/pull_top_ref_id'
+include { BCF_FILTER as BCF_FILTER_FREEBAYES                                               } from '../modules/local/bcftools'
+include { BCF_CONSENSUS                                                                    } from '../modules/local/bcftools'
+include { VCF_FILTER_FRAMESHIFT                                                            } from '../modules/local/vcf_filter_frameshift'
+include { COVERAGE_PLOT                                                                    } from '../modules/local/coverage_plot'
+include { CAT_CONSENSUS                                                                    } from '../modules/local/misc'
+include { FREEBAYES                                                                        } from '../modules/local/freebayes'
+include { VADR; VADR_SUMMARIZE_ISSUES                                                      } from '../modules/local/vadr'
+include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN                                         } from '../modules/local/table2asn'
+include { CUSTOM_DUMPSOFTWAREVERSIONS  as SOFTWARE_VERSIONS                                } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 
 //=============================================================================
 // Workflow Params Setup
@@ -117,18 +121,18 @@ workflow ILLUMINA {
   )
   // Keep samples which have reads count >= min_sample_reads for downstream analysis
   // Re-arrange channels to have meta map of information for sample
-  ch_input_sorted
-    .filter { it[2] >= params.min_sample_reads }
-    .map { meta, reads, count -> [ meta, reads ] }
-    .set { ch_reads }
+  // ch_input_sorted
+  //   .filter { it[2] >= params.min_sample_reads }
+  //   .map { meta, reads, count -> [ meta, reads ] }
+  //   .set { ch_reads }
 
   // Decompress reference data
   ZSTD_DECOMPRESS_FASTA(ch_influenza_db_fasta, "influenza.fasta")
   ch_versions = ch_versions.mix(ZSTD_DECOMPRESS_FASTA.out.versions)
   ZSTD_DECOMPRESS_CSV(ch_influenza_metadata, "influenza.csv")
   ch_versions = ch_versions.mix(ZSTD_DECOMPRESS_CSV.out.versions)
-  BLAST_MAKEBLASTDB(ZSTD_DECOMPRESS_FASTA.out.file)
-  ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
+  BLAST_MAKEBLASTDB_NCBI(ZSTD_DECOMPRESS_FASTA.out.file)
+  ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB_NCBI.out.versions)
 
   // Use ch_input_sorted for CAT_ILLUMINA_FASTQ to ensure IRMA triggers
   CAT_ILLUMINA_FASTQ(ch_input_sorted)
@@ -139,8 +143,8 @@ workflow ILLUMINA {
   ch_versions = ch_versions.mix(IRMA.out.versions.first().ifEmpty(null))
 
   // BLAST and subtype prediction from IRMA results
-  BLAST_BLASTN(IRMA.out.majority_consensus, BLAST_MAKEBLASTDB.out.db)
-  ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions)
+  // BLAST_BLASTN(IRMA.out.majority_consensus, BLAST_MAKEBLASTDB.out.db)
+  // ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions)
 
   // VADR application on IRMA concsensus
   IRMA.out.consensus
@@ -159,19 +163,19 @@ workflow ILLUMINA {
   POST_TABLE2ASN(TABLE2ASN.out.genbank)
   ch_versions = ch_versions.mix(POST_TABLE2ASN.out.versions)
 
-  BLAST_BLASTN(IRMA.out.consensus, BLAST_MAKEBLASTDB.out.db)
-  ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first().ifEmpty(null))
+  BLAST_BLASTN_IRMA(IRMA.out.consensus, BLAST_MAKEBLASTDB_NCBI.out.db)
+  ch_versions = ch_versions.mix(BLAST_BLASTN_IRMA.out.versions.first().ifEmpty(null))
 
-  ch_blast = BLAST_BLASTN.out.txt.collect({ it[1] })
-  SUBTYPING_REPORT(
+  ch_blast = BLAST_BLASTN_IRMA.out.txt.collect({ it[1] })
+  SUBTYPING_REPORT_IRMA_CONSENSUS(
     ZSTD_DECOMPRESS_CSV.out.file,
     ch_blast,
     CHECK_SAMPLE_SHEET.out
   )
-  ch_versions = ch_versions.mix(SUBTYPING_REPORT.out.versions)
+  ch_versions = ch_versions.mix(SUBTYPING_REPORT_IRMA_CONSENSUS.out.versions)
 
   // Prepare top ncbi accession id for each segment of each sample (id which has top bitscore)
-  PULL_TOP_REF_ID(BLAST_BLASTN.out.txt, ZSTD_DECOMPRESS_CSV.out.file)
+  PULL_TOP_REF_ID(BLAST_BLASTN_IRMA.out.txt, ZSTD_DECOMPRESS_CSV.out.file)
   ch_versions = ch_versions.mix(PULL_TOP_REF_ID.out.versions)
 
   PULL_TOP_REF_ID.out.accession_id
@@ -205,6 +209,39 @@ workflow ILLUMINA {
 
   BCFTOOLS_STATS(VCF_FILTER_FRAMESHIFT.out.vcf)
   ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions)
+
+  VCF_FILTER_FRAMESHIFT.out.vcf
+    .combine(MOSDEPTH_GENOME.out.bedgz, by: [0, 1, 2]) // combine channels based on sample_name, segment and accession_id
+    .set { ch_bcf_consensus } // ch_bcf_consensus: [sample_name, segment, id, fasta, filt_vcf, mosdepth_per_base]
+
+  COVERAGE_PLOT(ch_bcf_consensus, params.low_coverage)
+  ch_versions = ch_versions.mix(COVERAGE_PLOT.out.versions)
+
+  // Generate consensus sequences
+  BCF_CONSENSUS(ch_bcf_consensus, params.low_coverage)
+  ch_versions = ch_versions.mix(BCF_CONSENSUS.out.versions)
+
+  BCF_CONSENSUS.out.fasta
+    .groupTuple(by: 0)
+    .set { ch_final_consensus }
+
+  CAT_CONSENSUS(ch_final_consensus)
+  ch_versions = ch_versions.mix(CAT_CONSENSUS.out.versions)
+
+  CAT_CONSENSUS.out.fasta
+    .map { [[id:it[0]], it[1]] }
+    .set { ch_cat_consensus }
+
+  BLAST_BLASTN_CONSENSUS(ch_cat_consensus, BLAST_MAKEBLASTDB_NCBI.out.db)
+  ch_versions = ch_versions.mix(BLAST_BLASTN_CONSENSUS.out.versions)
+
+  ch_blastn_consensus = BLAST_BLASTN_CONSENSUS.out.txt.collect({ it[1] })
+  SUBTYPING_REPORT_BCF_CONSENSUS(
+    ZSTD_DECOMPRESS_CSV.out.file, 
+    ch_blastn_consensus,
+    CHECK_SAMPLE_SHEET.out
+  )
+  ch_versions = ch_versions.mix(SUBTYPING_REPORT_BCF_CONSENSUS.out.versions)
 
   workflow_summary    = Schema.params_summary_multiqc(workflow, summary_params)
   ch_workflow_summary = Channel.value(workflow_summary)

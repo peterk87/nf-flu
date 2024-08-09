@@ -66,7 +66,14 @@ process BCF_FILTER {
 
   script:
   // def exclude = (params.variant_caller == 'medaka') ? "AF < $allele_fraction" : "%FILTER='RefCall' | AF < $allele_fraction"
-  def exclude = "INFO/AF < ${allele_fraction}"
+  // def exclude = "INFO/AF < ${allele_fraction}"
+  def exclude
+  if (params.platform == "illumina") {
+    exclude = "INFO/AF < ${allele_fraction}"
+  } else {
+    exclude = (params.variant_caller == 'medaka') ? "AF < ${allele_fraction}" : "%FILTER='RefCall' | AF < ${allele_fraction}"
+  }
+
   def prefix = fluPrefix(sample, segment, ref_id)
   bcftools_filt_vcf = "${prefix}.bcftools_filt.vcf"
   """
