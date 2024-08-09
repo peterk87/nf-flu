@@ -1,12 +1,38 @@
+process SETUP_FLU_VADR_MODEL {
+  conda 'bioconda::vadr=1.6.4'
+  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+    container 'https://depot.galaxyproject.org/singularity/vadr:1.6.4--pl5321h031d066_0'
+  } else {
+    container 'quay.io/biocontainers/vadr:1.6.4--pl5321h031d066_0'
+  }
+
+  input:
+  path(model_targz)
+
+  output:
+  path("vadr-model/")
+
+  script:
+  """
+  mkdir -p vadr-model
+  tar -xzf $model_targz -C vadr-model --strip-components=1
+  """
+}
+
 process VADR {
   tag "$sample"
   label 'process_low'
 
-  conda 'pkru22::vadr=1.6.3'
-  container 'staphb/vadr:1.6.3-hav-flu2'
+  conda 'bioconda::vadr=1.6.4'
+  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+    container 'https://depot.galaxyproject.org/singularity/vadr:1.6.4--pl5321h031d066_0'
+  } else {
+    container 'quay.io/biocontainers/vadr:1.6.4--pl5321h031d066_0'
+  }
 
   input:
   tuple val(sample), path(fasta)
+  path(modeldir)
 
   output:
   tuple val(sample), path("${prefix}/*.vadr.pass.tbl"), optional: true, emit: feature_table
@@ -20,6 +46,7 @@ process VADR {
   """
   v-annotate.pl \\
     $args \\
+    --mdir $modeldir \\
     $fasta \\
     ${prefix}
 

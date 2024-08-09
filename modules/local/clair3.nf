@@ -5,12 +5,12 @@ process CLAIR3 {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda 'bioconda::clair3==1.0.9'
+  conda 'bioconda::clair3==1.0.10'
   // use official images to avoid issues with full alignment failing. See issues:
   // https://github.com/HKU-BAL/Clair3/issues/98
   // https://github.com/HKU-BAL/Clair3/issues/181
   // Biocontainers image fails for some reason.
-  container 'hkubal/clair3:v1.0.9'
+  container 'hkubal/clair3:v1.0.10'
 
   input:
   tuple val(sample), val(segment), val(ref_id), path(ref_fasta), path(bam)
