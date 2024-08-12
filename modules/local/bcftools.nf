@@ -49,11 +49,11 @@ process BCF_FILTER {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda 'bioconda::bcftools=1.15.1 conda-forge::gsl=2.7'
+  conda 'bioconda::bcftools=1.20 conda-forge::gsl=2.7'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/bcftools:1.15.1--h0ea216a_0'
+    container 'https://depot.galaxyproject.org/singularity/bcftools:1.20--h8b25389_0'
   } else {
-    container 'quay.io/biocontainers/bcftools:1.15.1--h0ea216a_0'
+    container 'quay.io/biocontainers/bcftools:1.20--h8b25389_0'
   }
 
   input:
@@ -65,7 +65,7 @@ process BCF_FILTER {
   path "versions.yml" , emit: versions
 
   script:
-  def exclude = (params.variant_caller == 'medaka') ? "AF < $allele_fraction" : "%FILTER='RefCall' | AF < $allele_fraction"
+  def exclude = (params.variant_caller == 'medaka') ? "AF < $allele_fraction" : "FILTER='RefCall' | AF < $allele_fraction"
   def prefix = fluPrefix(sample, segment, ref_id)
   bcftools_filt_vcf = "${prefix}.bcftools_filt.vcf"
   """
@@ -95,11 +95,11 @@ process BCFTOOLS_STATS {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda 'bioconda::bcftools=1.15.1 conda-forge::gsl=2.7'
+  conda 'bioconda::bcftools=1.20 conda-forge::gsl=2.7'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/bcftools:1.15.1--h0ea216a_0'
+    container 'https://depot.galaxyproject.org/singularity/bcftools:1.20--h8b25389_0'
   } else {
-    container 'quay.io/biocontainers/bcftools:1.15.1--h0ea216a_0'
+    container 'quay.io/biocontainers/bcftools:1.20--h8b25389_0'
   }
   input:
   tuple val(sample), val(segment), val(ref_id), path(fasta), path(vcf)

@@ -9,9 +9,9 @@ process CAT_ILLUMINA_FASTQ {
   // use BLAST container here since it has Perl and is required by other
   // processes in the pipeline
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/blast:2.14.0--h7d5a4b4_1'
+    container 'https://depot.galaxyproject.org/singularity/blast:2.15.0--pl5321h6f7f691_1'
   } else {
-    container 'quay.io/biocontainers/blast:2.14.0--h7d5a4b4_1'
+    container 'quay.io/biocontainers/blast:2.15.0--pl5321h6f7f691_1'
   }
 
   input:
@@ -72,28 +72,28 @@ touch ${prefix}_2.merged.fastq.gz
 
 if [[ ${read1.size} > 0 ]]; then
   cat ${read1.join(' ')} \\
-  | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
+  | perl -ne 'if (\$_ =~ /^@.* .*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
   | gzip -ck \\
   >> ${prefix}_1.merged.fastq.gz
 fi
 
 if [[ ${read1gz.size} > 0 ]]; then
   zcat ${read1gz.join(' ')} \\
-  | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
+  | perl -ne 'if (\$_ =~ /^@.* .*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
   | gzip -ck \\
   >> ${prefix}_1.merged.fastq.gz
 fi
 
 if [[ ${read2.size} > 0 ]]; then
   cat ${read2.join(' ')} \\
-  | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
+  | perl -ne 'if (\$_ =~ /^@.* .*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
   | gzip -ck \\
   >> ${prefix}_2.merged.fastq.gz
 fi
 
 if [[ ${read2gz.size} > 0 ]]; then
   zcat ${read2gz.join(' ')} \\
-  | perl -ne 'if (\$_ =~ /^@.*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
+  | perl -ne 'if (\$_ =~ /^@.* .*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
   | gzip -ck \\
   >> ${prefix}_2.merged.fastq.gz
 fi

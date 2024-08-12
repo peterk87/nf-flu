@@ -11,3 +11,4 @@ no-inline-html:
         - details
         - summary
 MD056: false
+MD038: false
