@@ -1,6 +1,6 @@
 process IRMA {
   tag "$meta.id"
-  label 'process_high'
+  label 'process_long'
 
   conda "bioconda::irma=1.0.2"
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

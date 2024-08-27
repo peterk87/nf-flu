@@ -34,6 +34,7 @@ process FREEBAYES {
   freebayes \\
       -f $ref_fasta \\
       -b ${bam[0]} \\
+      --min-alternate-fraction ${params.min_alternate_fraction} \\
       --vcf ${freebayes_dir}/${vcf}
 
   ln -s ${freebayes_dir}/${vcf} ${vcf}

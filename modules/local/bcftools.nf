@@ -65,11 +65,10 @@ process BCF_FILTER {
   path "versions.yml" , emit: versions
 
   script:
-  // def exclude = (params.variant_caller == 'medaka') ? "AF < $allele_fraction" : "%FILTER='RefCall' | AF < $allele_fraction"
-  // def exclude = "INFO/AF < ${allele_fraction}"
   def exclude
   if (params.platform == "illumina") {
-    exclude = "INFO/AF < ${allele_fraction}"
+    // exclude = "INFO/AF < ${allele_fraction}"
+    exclude = null
   } else {
     exclude = (params.variant_caller == 'medaka') ? "AF < ${allele_fraction}" : "%FILTER='RefCall' | AF < ${allele_fraction}"
   }
@@ -84,21 +83,31 @@ process BCF_FILTER {
   else
     vcf_input=$vcf
   fi
-  
-  bcftools norm \\
-    --check-ref w \\
-    -Ov \\
-    -m- \\
-    -f $fasta \\
-    $vcf \\
-    > norm.vcf
 
-  # filter for major alleles
-  bcftools filter \\
-    -e "$exclude" \\
-    norm.vcf \\
-    -Ov \\
-    -o $bcftools_filt_vcf
+  if [[ "${params.platform}" == "illumina" ]]; then
+    bcftools norm \\
+      --check-ref w \\
+      -Ov \\
+      -m- \\
+      -f $fasta \\
+      $vcf \\
+      > $bcftools_filt_vcf
+  else
+    bcftools norm \\
+      --check-ref w \\
+      -Ov \\
+      -m- \\
+      -f $fasta \\
+      $vcf \\
+      > norm.vcf
+
+    # filter for major alleles
+    bcftools filter \\
+      -e "$exclude" \\
+      norm.vcf \\
+      -Ov \\
+      -o $bcftools_filt_vcf
+  fi
 
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
