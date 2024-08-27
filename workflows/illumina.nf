@@ -10,6 +10,12 @@ ch_influenza_db_fasta = file(params.ncbi_influenza_fasta)
 ch_influenza_metadata = file(params.ncbi_influenza_metadata)
 
 //=============================================================================
+// NCBI VADR Influenza virus model
+//=============================================================================
+
+ch_vadr_model_targz = file(params.vadr_model_targz)
+
+//=============================================================================
 // MODULES
 //=============================================================================
 
@@ -22,6 +28,7 @@ include { BLAST_BLASTN as BLAST_BLASTN_IRMA                                     
 include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS                                           } from '../modules/local/blastn'
 include { CAT_ILLUMINA_FASTQ                                                               } from '../modules/local/cat_illumina_fastq'
 include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA; ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_CSV } from '../modules/local/zstd_decompress'
+<<<<<<< HEAD
 include { MULTIQC                                                                          } from '../modules/local/multiqc'
 include { MULTIQC_TSV_FROM_LIST as READ_COUNT_FAIL_TSV                                     } from '../modules/local/multiqc_tsv_from_list'
 include { MULTIQC_TSV_FROM_LIST as READ_COUNT_PASS_TSV                                     } from '../modules/local/multiqc_tsv_from_list'
@@ -39,6 +46,11 @@ include { FREEBAYES                                                             
 include { VADR; VADR_SUMMARIZE_ISSUES                                                      } from '../modules/local/vadr'
 include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN                                         } from '../modules/local/table2asn'
 include { CUSTOM_DUMPSOFTWAREVERSIONS  as SOFTWARE_VERSIONS                                } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
+=======
+include { SETUP_FLU_VADR_MODEL; VADR; VADR_SUMMARIZE_ISSUES } from '../modules/local/vadr'
+include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN } from '../modules/local/table2asn'
+include { MQC_VERSIONS_TABLE } from '../modules/local/mqc_versions_table'
+>>>>>>> 4deac8b8d1b0db37277aae8c9190bf18fcbc7145
 
 //=============================================================================
 // Workflow Params Setup
@@ -59,6 +71,17 @@ def summary_params = NfcoreSchema.params_summary_map(workflow, params, "$project
 
 workflow ILLUMINA {
   ch_versions = Channel.empty()
+<<<<<<< HEAD
+=======
+  // Decompress reference data
+  ZSTD_DECOMPRESS_FASTA(ch_influenza_db_fasta, "influenza.fasta")
+  ch_versions = ch_versions.mix(ZSTD_DECOMPRESS_FASTA.out.versions)
+  ZSTD_DECOMPRESS_CSV(ch_influenza_metadata, "influenza.csv")
+  ch_versions = ch_versions.mix(ZSTD_DECOMPRESS_CSV.out.versions)
+  BLAST_MAKEBLASTDB(ZSTD_DECOMPRESS_FASTA.out.file)
+  ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
+  SETUP_FLU_VADR_MODEL(ch_vadr_model_targz)
+>>>>>>> 4deac8b8d1b0db37277aae8c9190bf18fcbc7145
 
   // Sample Sheet Check
   ch_input = CHECK_SAMPLE_SHEET(Channel.fromPath(params.input, checkIfExists: true))
@@ -150,7 +173,7 @@ workflow ILLUMINA {
   IRMA.out.consensus
     .map { [it[0].id, it[1]] }
     .set { ch_irma_consensus }
-  VADR(ch_irma_consensus)
+  VADR(ch_irma_consensus, SETUP_FLU_VADR_MODEL.out)
   ch_versions = ch_versions.mix(VADR.out.versions)
   VADR.out.feature_table
     .combine(VADR.out.pass_fasta, by: 0)
@@ -262,4 +285,6 @@ workflow ILLUMINA {
       SOFTWARE_VERSIONS.out.mqc_yml.collect(),
       ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
   )
+  
+  MQC_VERSIONS_TABLE(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
 }
