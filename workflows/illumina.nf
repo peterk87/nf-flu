@@ -28,7 +28,6 @@ include { BLAST_BLASTN as BLAST_BLASTN_IRMA                                     
 include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS                                           } from '../modules/local/blastn'
 include { CAT_ILLUMINA_FASTQ                                                               } from '../modules/local/cat_illumina_fastq'
 include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA; ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_CSV } from '../modules/local/zstd_decompress'
-<<<<<<< HEAD
 include { MULTIQC                                                                          } from '../modules/local/multiqc'
 include { MULTIQC_TSV_FROM_LIST as READ_COUNT_FAIL_TSV                                     } from '../modules/local/multiqc_tsv_from_list'
 include { MULTIQC_TSV_FROM_LIST as READ_COUNT_PASS_TSV                                     } from '../modules/local/multiqc_tsv_from_list'
@@ -43,14 +42,9 @@ include { VCF_FILTER_FRAMESHIFT                                                 
 include { COVERAGE_PLOT                                                                    } from '../modules/local/coverage_plot'
 include { CAT_CONSENSUS                                                                    } from '../modules/local/misc'
 include { FREEBAYES                                                                        } from '../modules/local/freebayes'
-include { VADR; VADR_SUMMARIZE_ISSUES                                                      } from '../modules/local/vadr'
+include { SETUP_FLU_VADR_MODEL; VADR; VADR_SUMMARIZE_ISSUES                                } from '../modules/local/vadr'
 include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN                                         } from '../modules/local/table2asn'
-include { CUSTOM_DUMPSOFTWAREVERSIONS  as SOFTWARE_VERSIONS                                } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
-=======
-include { SETUP_FLU_VADR_MODEL; VADR; VADR_SUMMARIZE_ISSUES } from '../modules/local/vadr'
-include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN } from '../modules/local/table2asn'
-include { MQC_VERSIONS_TABLE } from '../modules/local/mqc_versions_table'
->>>>>>> 4deac8b8d1b0db37277aae8c9190bf18fcbc7145
+include { MQC_VERSIONS_TABLE                                                               } from '../modules/local/mqc_versions_table'
 
 //=============================================================================
 // Workflow Params Setup
@@ -71,17 +65,6 @@ def summary_params = NfcoreSchema.params_summary_map(workflow, params, "$project
 
 workflow ILLUMINA {
   ch_versions = Channel.empty()
-<<<<<<< HEAD
-=======
-  // Decompress reference data
-  ZSTD_DECOMPRESS_FASTA(ch_influenza_db_fasta, "influenza.fasta")
-  ch_versions = ch_versions.mix(ZSTD_DECOMPRESS_FASTA.out.versions)
-  ZSTD_DECOMPRESS_CSV(ch_influenza_metadata, "influenza.csv")
-  ch_versions = ch_versions.mix(ZSTD_DECOMPRESS_CSV.out.versions)
-  BLAST_MAKEBLASTDB(ZSTD_DECOMPRESS_FASTA.out.file)
-  ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
-  SETUP_FLU_VADR_MODEL(ch_vadr_model_targz)
->>>>>>> 4deac8b8d1b0db37277aae8c9190bf18fcbc7145
 
   // Sample Sheet Check
   ch_input = CHECK_SAMPLE_SHEET(Channel.fromPath(params.input, checkIfExists: true))
@@ -156,6 +139,7 @@ workflow ILLUMINA {
   ch_versions = ch_versions.mix(ZSTD_DECOMPRESS_CSV.out.versions)
   BLAST_MAKEBLASTDB_NCBI(ZSTD_DECOMPRESS_FASTA.out.file)
   ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB_NCBI.out.versions)
+  SETUP_FLU_VADR_MODEL(ch_vadr_model_targz)
 
   // Use ch_input_sorted for CAT_ILLUMINA_FASTQ to ensure IRMA triggers
   CAT_ILLUMINA_FASTQ(ch_input_sorted)
@@ -271,7 +255,8 @@ workflow ILLUMINA {
   ch_multiqc_config = Channel.fromPath("$projectDir/assets/multiqc_config.yaml")
 
   // Software Versions
-  SOFTWARE_VERSIONS(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
+  // SOFTWARE_VERSIONS(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
+  MQC_VERSIONS_TABLE(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
 
   // MultiQC
   ch_workflow_summary = Channel.value(Schema.params_summary_multiqc(workflow, summary_params))
@@ -282,9 +267,7 @@ workflow ILLUMINA {
       MINIMAP2.out.stats.collect().ifEmpty([]),
       MOSDEPTH_GENOME.out.mqc.collect().ifEmpty([]),
       BCFTOOLS_STATS.out.stats.collect().ifEmpty([]),
-      SOFTWARE_VERSIONS.out.mqc_yml.collect(),
+      MQC_VERSIONS_TABLE.out.mqc_yml.collect(),
       ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
   )
-  
-  MQC_VERSIONS_TABLE(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
 }

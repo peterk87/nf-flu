@@ -1,10 +1,7 @@
 process SETUP_FLU_VADR_MODEL {
-  conda 'bioconda::vadr=1.6.4'
-  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/vadr:1.6.4--pl5321h031d066_0'
-  } else {
-    container 'quay.io/biocontainers/vadr:1.6.4--pl5321h031d066_0'
-  }
+
+  conda 'pkru22::vadr=1.6.3'
+  container 'staphb/vadr:1.6.3-hav-flu2'
 
   input:
   path(model_targz)
@@ -23,12 +20,8 @@ process VADR {
   tag "$sample"
   label 'process_low'
 
-  conda 'bioconda::vadr=1.6.4'
-  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/vadr:1.6.4--pl5321h031d066_0'
-  } else {
-    container 'quay.io/biocontainers/vadr:1.6.4--pl5321h031d066_0'
-  }
+  conda 'pkru22::vadr=1.6.3'
+  container 'staphb/vadr:1.6.3-hav-flu2'
 
   input:
   tuple val(sample), path(fasta)
