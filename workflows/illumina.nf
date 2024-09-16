@@ -31,7 +31,7 @@ include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA; ZSTD_DECOMPRESS as ZSTD_DECO
 include { MULTIQC                                                                          } from '../modules/local/multiqc'
 include { MULTIQC_TSV_FROM_LIST as READ_COUNT_FAIL_TSV                                     } from '../modules/local/multiqc_tsv_from_list'
 include { MULTIQC_TSV_FROM_LIST as READ_COUNT_PASS_TSV                                     } from '../modules/local/multiqc_tsv_from_list'
-include { MINIMAP2                                                                         } from '../modules/local/minimap2_new'
+include { MINIMAP2                                                                         } from '../modules/local/minimap2'
 include { MOSDEPTH_GENOME                                                                  } from '../modules/local/mosdepth'
 include { BCFTOOLS_STATS                                                                   } from '../modules/local/bcftools'
 include { SEQTK_SEQ                                                                        } from '../modules/local/seqtk_seq'
@@ -149,10 +149,6 @@ workflow ILLUMINA {
   IRMA(CAT_ILLUMINA_FASTQ.out.reads, irma_module)
   ch_versions = ch_versions.mix(IRMA.out.versions.first().ifEmpty(null))
 
-  // BLAST and subtype prediction from IRMA results
-  // BLAST_BLASTN(IRMA.out.majority_consensus, BLAST_MAKEBLASTDB.out.db)
-  // ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions)
-
   // VADR application on IRMA concsensus
   IRMA.out.consensus
     .map { [it[0].id, it[1]] }
@@ -254,8 +250,6 @@ workflow ILLUMINA {
   ch_workflow_summary = Channel.value(workflow_summary)
   ch_multiqc_config = Channel.fromPath("$projectDir/assets/multiqc_config.yaml")
 
-  // Software Versions
-  // SOFTWARE_VERSIONS(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
   MQC_VERSIONS_TABLE(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
 
   // MultiQC

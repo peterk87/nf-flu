@@ -3,6 +3,23 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.5.0](URL)] - Date
+
+This release expands the Illumina workflow by adding BLAST analysis, coverage plots, variant calling, and MultiQC reports. Modifications were made to existing modules, and new modules were added.
+
+### Changes
+
+* **feat**: Added variant calling, BLAST analysis, coverage plots, and MultiQC to the Illumina workflow to match the capabilities of the Nanopore workflow.
+* **feat**: Introduced a new module, Freebayes, for Illumina variant calling.
+* **refactor**: Rearranged the Illumina workflow to integrate the new changes and enhance compatibility.
+* **update**: Updated Minimap2 and BCFtools modules to better accommodate Illumina reads.
+* **config**: Changed process labels for IRMA and MultiQC modules to "long" to avoid timeouts for large short-read datasets.
+* **config**: Added `-min_alternate_fraction` as a user option by modifying `nextflow.config`, `nextflow_schema.json`, and updating usage documentation accordingly.
+* **fix**: Updated VADR command by removing `--alt_fail extrant5,extrant3` as it was not relevant to the analysis.
+* **enhance**: Changed VADR staged file to use the FTP NCBI link to bypass certificate issues during Nextflow staging.
+* **rollback**: Reverted VADR containers to an earlier version to resolve potential issues on Singularity.
+* **refactor**: Rearranged `modules_illumina.config` for consistency with the updated workflow.
+
 ## [[3.4.1](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.4.1)] - 2024-08-02
 
 This patch release fixes an issue (#75) with CAT_ILLUMINA_FASTQ where `1:N:0:.` or `2:N:0:.` may be mistakenly appended

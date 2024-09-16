@@ -28,9 +28,13 @@ process MINIMAP2 {
   idxstats    = "${prefix}.idxstats"
   stats       = "${prefix}.stats"
   minimap2_log = "${prefix}.minimap2.log"
+
+  // Determine the mapping option based on the platform
+  def map_option = params.platform == 'nanopore' ? 'map-ont' : 'sr'
+
   """
   minimap2 \\
-    -ax map-ont \\
+    -ax $map_option \\
     -t${task.cpus} \\
     $ref_fasta \\
     $reads \\
