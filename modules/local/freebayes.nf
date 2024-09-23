@@ -22,7 +22,6 @@ process FREEBAYES {
   path "versions.yml", emit: versions
 
   script:
-  def software = getSoftwareName(task.process)
   def prefix   = fluPrefix(sample, segment, ref_id)
   vcf          = "${prefix}.freebayes.vcf"
   freebayes_dir   = "${prefix}.freebayes"
