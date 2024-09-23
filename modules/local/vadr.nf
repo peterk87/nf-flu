@@ -1,7 +1,12 @@
 process SETUP_FLU_VADR_MODEL {
 
-  conda 'pkru22::vadr=1.6.3'
-  container 'staphb/vadr:1.6.3-hav-flu2'
+  conda 'bioconda::vadr=1.6.4'
+  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+    // use staphb/vadr Docker container due to issues running VADR Bioconda/Biocontainers Singularity container with Nextflow
+    container 'staphb/vadr:1.6.3-hav-flu2'
+  } else {
+    container 'quay.io/biocontainers/vadr:1.6.4--pl5321h031d066_0'
+  }
 
   input:
   path(model_targz)
@@ -20,8 +25,13 @@ process VADR {
   tag "$sample"
   label 'process_low'
 
-  conda 'pkru22::vadr=1.6.3'
-  container 'staphb/vadr:1.6.3-hav-flu2'
+  conda 'bioconda::vadr=1.6.4'
+  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+    // use staphb/vadr Docker container due to issues running VADR Bioconda/Biocontainers Singularity container with Nextflow
+    container 'staphb/vadr:1.6.3-hav-flu2'
+  } else {
+    container 'quay.io/biocontainers/vadr:1.6.4--pl5321h031d066_0'
+  }
 
   input:
   tuple val(sample), path(fasta)
