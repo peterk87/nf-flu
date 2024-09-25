@@ -43,7 +43,9 @@ include { COVERAGE_PLOT                                                         
 include { CAT_CONSENSUS                                                                    } from '../modules/local/misc'
 include { FREEBAYES                                                                        } from '../modules/local/freebayes'
 include { SETUP_FLU_VADR_MODEL; VADR; VADR_SUMMARIZE_ISSUES                                } from '../modules/local/vadr'
+include { VADR as VADR_CONSENSUS; VADR_SUMMARIZE_ISSUES as VADR_SUMMARIZE_ISSUES_CONSENSUS } from '../modules/local/vadr'
 include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN                                         } from '../modules/local/table2asn'
+include { PRE_TABLE2ASN as PRE_TABLE2ASN_CONSENSUS; TABLE2ASN as TABLE2ASN_CONSENSUS; POST_TABLE2ASN as POST_TABLE2ASN_CONSENSUS} from '../modules/local/table2asn'
 include { MQC_VERSIONS_TABLE                                                               } from '../modules/local/mqc_versions_table'
 
 //=============================================================================
@@ -230,6 +232,19 @@ workflow ILLUMINA {
 
   CAT_CONSENSUS(ch_final_consensus)
   ch_versions = ch_versions.mix(CAT_CONSENSUS.out.versions)
+
+  VADR_CONSENSUS(CAT_CONSENSUS.out.consensus_fasta, SETUP_FLU_VADR_MODEL.out)
+  ch_versions = ch_versions.mix(VADR.out.versions)
+  VADR_CONSENSUS.out.feature_table
+    .combine(VADR_CONSENSUS.out.pass_fasta, by: 0)
+    .set { ch_pre_table2asn }
+  VADR_SUMMARIZE_ISSUES_CONSENSUS(VADR_CONSENSUS.out.vadr_outdir.map { [it[1]] }.collect())
+  PRE_TABLE2ASN_CONSENSUS(ch_pre_table2asn)
+  ch_versions = ch_versions.mix(PRE_TABLE2ASN_CONSENSUS.out.versions)
+  TABLE2ASN_CONSENSUS(PRE_TABLE2ASN.out.table2asn_input)
+  ch_versions = ch_versions.mix(TABLE2ASN.out.versions)
+  POST_TABLE2ASN_CONSENSUS(TABLE2ASN.out.genbank)
+  ch_versions = ch_versions.mix(POST_TABLE2ASN_CONSENSUS.out.versions)
 
   CAT_CONSENSUS.out.fasta
     .map { [[id:it[0]], it[1]] }
