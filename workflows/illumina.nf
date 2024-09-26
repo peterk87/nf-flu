@@ -41,7 +41,7 @@ include { BCF_CONSENSUS                                                         
 include { VCF_FILTER_FRAMESHIFT                                                            } from '../modules/local/vcf_filter_frameshift'
 include { COVERAGE_PLOT                                                                    } from '../modules/local/coverage_plot'
 include { CAT_CONSENSUS                                                                    } from '../modules/local/misc'
-include { FREEBAYES                                                                        } from '../modules/local/freebayes'
+include { FREEBAYES; SAMTOOLS_INDEX                                                        } from '../modules/local/freebayes'
 include { SETUP_FLU_VADR_MODEL; VADR; VADR_SUMMARIZE_ISSUES                                } from '../modules/local/vadr'
 include { VADR as VADR_CONSENSUS; VADR_SUMMARIZE_ISSUES as VADR_SUMMARIZE_ISSUES_CONSENSUS } from '../modules/local/vadr'
 include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN                                         } from '../modules/local/table2asn'
@@ -202,7 +202,9 @@ workflow ILLUMINA {
   MOSDEPTH_GENOME(MINIMAP2.out.alignment)
   ch_versions = ch_versions.mix(MOSDEPTH_GENOME.out.versions)
 
-  FREEBAYES(MINIMAP2.out.alignment)
+  // Index the reference FASTA after MINIMAP2 with samtools
+  SAMTOOLS_INDEX(MINIMAP2.out.alignment)
+  FREEBAYES(SAMTOOLS_INDEX.out)
   ch_versions = ch_versions.mix(FREEBAYES.out.versions)
 
   BCF_FILTER_FREEBAYES(FREEBAYES.out.vcf, params.major_allele_fraction)
