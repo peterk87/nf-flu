@@ -98,13 +98,6 @@
                     "minimum": 0,
                     "default": 10,
                     "description": "Low coverage depth threshold. Consensus sequence positions with less than this coverage depth will be masked with `N`."
-                },
-                "min_alternate_fraction": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 1.0,
-                    "default": 0.5,
-                    "description": "Minimum fraction of observations supporting an alternate allele within a single individual for Illumina platform."
                 }
             },
             "fa_icon": "fas fa-dna"
