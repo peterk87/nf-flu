@@ -222,7 +222,7 @@ workflow ILLUMINA {
   COVERAGE_PLOT(ch_bcf_consensus, params.low_coverage)
   ch_versions = ch_versions.mix(COVERAGE_PLOT.out.versions)
 
-  // Generate consensus sequences
+  // Generate consensus sequences 
   BCF_CONSENSUS(ch_bcf_consensus, params.low_coverage)
   ch_versions = ch_versions.mix(BCF_CONSENSUS.out.versions)
 
