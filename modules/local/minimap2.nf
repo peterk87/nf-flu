@@ -49,6 +49,8 @@ process MINIMAP2 {
 
   ln -s .command.log $minimap2_log
 
+  ${params.platform == 'illumina' ? "samtools faidx $ref_fasta" : ""}
+  
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
       minimap2: \$(minimap2 --version 2>&1)

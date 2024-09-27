@@ -45,28 +45,3 @@ process FREEBAYES {
     cat versions.yml
     """
 }
-
-process SAMTOOLS_INDEX {
-    tag "$sample|$segment|$ref_id"
-    label 'process_low'
-
-    // Container settings for different environments
-    conda 'bioconda::samtools=1.20'
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container 'https://depot.galaxyproject.org/singularity/samtools:1.20--h50ea8bc_1'
-    } else {
-        container 'quay.io/biocontainers/samtools:1.20--h50ea8bc_1'
-    }
-
-    input:
-    tuple val(sample), val(segment), val(ref_id), path(ref_fasta), path(bam)
-  
-    output:
-    tuple val(sample), val(segment), val(ref_id), path(ref_fasta), path(bam)
-
-
-    script:
-    """
-    samtools faidx $ref_fasta
-    """
-}
