@@ -31,7 +31,7 @@ process MINIMAP2 {
 
   // Determine the mapping option based on the platform
   def map_option = params.platform == 'nanopore' ? 'map-ont' : 'sr'
-
+  samtools_view_flag = params.output_unmapped_reads ? "" : "-F 4"
   """
   minimap2 \\
     -ax $map_option \\
@@ -39,6 +39,7 @@ process MINIMAP2 {
     $ref_fasta \\
     $reads \\
     | samtools sort -@${task.cpus} \\
+    | samtools view -b $samtools_view_flag \\
     > $bam
 
   samtools index $bam
