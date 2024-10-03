@@ -61,20 +61,14 @@ process BCF_FILTER {
 
   input:
   tuple val(sample), val(segment), val(ref_id), path(fasta), path(vcf)
-  val(allele_fraction)
+  val(major_allele_fraction)
+  val(minor_allele_fraction)
 
   output:
   tuple val(sample), val(segment), val(ref_id), path(fasta), path(bcftools_filt_vcf), emit: vcf
   path "versions.yml" , emit: versions
 
   script:
-  def exclude
-  if (params.platform == "illumina") {
-    // exclude = "INFO/AF < ${allele_fraction}"
-    exclude = "(INFO/AO / INFO/DP) < ${allele_fraction}"
-  } else {
-    exclude = (params.variant_caller == 'medaka') ? "AF < $allele_fraction" : "FILTER='RefCall' | AF < $allele_fraction"
-  }
   def prefix = fluPrefix(sample, segment, ref_id)
   bcftools_filt_vcf = "${prefix}.bcftools_filt.vcf"
   """
@@ -86,12 +80,29 @@ process BCF_FILTER {
     $vcf \\
     > norm.vcf
 
-  # filter for major alleles
-  bcftools filter \\
-    -e "$exclude" \\
+  bcftools +fill-tags \\
     norm.vcf \\
     -Ov \\
-    -o $bcftools_filt_vcf
+    -o filled.vcf \\
+    -- -t all
+
+  bcftools +setGT \\
+    filled.vcf \\
+    -Ov \\
+    -o setGT.major.vcf \\
+    -- -t q -n 'c:1/1' -i 'FMT/VAF >= ${major_allele_fraction}'
+
+  bcftools +setGT \\
+    setGT.major.vcf \\
+    -Ov \\
+    -o setGT.minor.vcf \\
+    -- -t q  -n 'c:0/1' -i 'FMT/VAF >= ${minor_allele_fraction} && FMT/VAF < ${major_allele_fraction}'
+
+  bcftools +setGT \\
+    setGT.minor.vcf \\
+    -Ov \\
+    -o $bcftools_filt_vcf \\
+    -- -t q -n 'c:0/0' -i 'FMT/VAF < ${minor_allele_fraction}'
 
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":

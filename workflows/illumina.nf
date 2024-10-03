@@ -205,7 +205,7 @@ workflow ILLUMINA {
   FREEBAYES(MINIMAP2.out.alignment)
   ch_versions = ch_versions.mix(FREEBAYES.out.versions)
 
-  BCF_FILTER_FREEBAYES(FREEBAYES.out.vcf, params.major_allele_fraction)
+  BCF_FILTER_FREEBAYES(FREEBAYES.out.vcf, params.major_allele_fraction, params.minor_allele_fraction)
   ch_versions = ch_versions.mix(BCF_FILTER_FREEBAYES.out.versions)
   ch_vcf_filter = BCF_FILTER_FREEBAYES.out.vcf
 
