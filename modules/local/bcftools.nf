@@ -31,8 +31,11 @@ process BCF_CONSENSUS {
   # get low coverage depth mask BED file by filtering for regions with less than ${low_coverage}X
   zcat $mosdepth_per_base | awk '\$4<${low_coverage}' > low_cov.bed
 
+  awk '/^>/ {print; next} {gsub(/[RYSWKMBDHVryswkmbdhv]/, "N"); print}' $fasta > ${fasta}.no_ambiguous.fasta
+
+
   bcftools consensus \\
-    -f $fasta \\
+    -f ${fasta}.no_ambiguous.fasta \\
     -m low_cov.bed \\
     ${vcf}.gz > $consensus
 
@@ -68,45 +71,27 @@ process BCF_FILTER {
   def exclude
   if (params.platform == "illumina") {
     // exclude = "INFO/AF < ${allele_fraction}"
-    exclude = null
+    exclude = "(INFO/AO / INFO/DP) < ${allele_fraction}"
   } else {
     exclude = (params.variant_caller == 'medaka') ? "AF < $allele_fraction" : "FILTER='RefCall' | AF < $allele_fraction"
   }
   def prefix = fluPrefix(sample, segment, ref_id)
   bcftools_filt_vcf = "${prefix}.bcftools_filt.vcf"
   """
-  if [[ "${params.platform}" == "illumina" ]]; then
-    bgzip -c $vcf > ${vcf}.gz
-    tabix ${vcf}.gz
-    vcf_input=${vcf}.gz
-  else
-    vcf_input=$vcf
-  fi
+  bcftools norm \\
+    --check-ref w \\
+    -Ov \\
+    -m- \\
+    -f $fasta \\
+    $vcf \\
+    > norm.vcf
 
-  if [[ "${params.platform}" == "illumina" ]]; then
-    bcftools norm \\
-      --check-ref w \\
-      -Ov \\
-      -m- \\
-      -f $fasta \\
-      $vcf \\
-      > $bcftools_filt_vcf
-  else
-    bcftools norm \\
-      --check-ref w \\
-      -Ov \\
-      -m- \\
-      -f $fasta \\
-      $vcf \\
-      > norm.vcf
-
-    # filter for major alleles
-    bcftools filter \\
-      -e "$exclude" \\
-      norm.vcf \\
-      -Ov \\
-      -o $bcftools_filt_vcf
-  fi
+  # filter for major alleles
+  bcftools filter \\
+    -e "$exclude" \\
+    norm.vcf \\
+    -Ov \\
+    -o $bcftools_filt_vcf
 
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
