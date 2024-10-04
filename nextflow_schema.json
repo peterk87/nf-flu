@@ -171,6 +171,12 @@
                     "default": false,
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip genome-wide and amplicon coverage plot generation from mosdepth output."
+                },
+                "output_unmapped_reads": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fas fa-dna",
+                    "description": "Keep unmapped reads in BAM output. BAM output sizes without unmapped reads may be drastically smaller."
                 }
             },
             "fa_icon": "fas fa-retweet"

@@ -1,5 +1,5 @@
 process MULTIQC {
-  label 'process_low'
+  label 'process_long'
 
   conda "bioconda::multiqc=1.23"
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

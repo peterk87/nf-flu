@@ -28,13 +28,18 @@ process MINIMAP2 {
   idxstats    = "${prefix}.idxstats"
   stats       = "${prefix}.stats"
   minimap2_log = "${prefix}.minimap2.log"
+
+  // Determine the mapping option based on the platform
+  def map_option = params.platform == 'nanopore' ? 'map-ont' : 'sr'
+  samtools_view_flag = params.output_unmapped_reads ? "" : "-F 4"
   """
   minimap2 \\
-    -ax map-ont \\
+    -ax $map_option \\
     -t${task.cpus} \\
     $ref_fasta \\
     $reads \\
     | samtools sort -@${task.cpus} \\
+    | samtools view -b $samtools_view_flag \\
     > $bam
 
   samtools index $bam
@@ -45,6 +50,8 @@ process MINIMAP2 {
 
   ln -s .command.log $minimap2_log
 
+  ${params.platform == 'illumina' ? "samtools faidx $ref_fasta" : ""}
+  
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
       minimap2: \$(minimap2 --version 2>&1)

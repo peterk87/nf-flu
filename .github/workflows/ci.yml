@@ -113,6 +113,12 @@ jobs:
         with:
           name: nextflow-log-illumina-${{ matrix.nxf_ver }}
           path: .nextflow.log
+      - name: Upload multiqc_report.html
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: illumina-test-results-multiqc-${{ matrix.nxf_ver }}
+          path: results/MultiQC/multiqc_report.html
 
   test_nanopore:
     name: Run Nanopore test

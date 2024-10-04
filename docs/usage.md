@@ -227,6 +227,16 @@ Low coverage depth threshold. Consensus sequence positions with less than this c
 
 Minimum number of raw reads required per sample in order to be considered for the downstream processing steps.
 
+### Illumina options
+
+#### `--min_alternate_fraction`
+
+- Optional
+- Type: number
+- Default: `0.5`
+
+Minimum fraction of observations supporting an alternate allele within a single sample in the in order to evaluate the position.
+
 ### Mismatch Report options
 
 #### `--min_aln_length`
