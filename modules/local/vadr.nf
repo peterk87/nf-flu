@@ -1,7 +1,9 @@
 process SETUP_FLU_VADR_MODEL {
+
   conda 'bioconda::vadr=1.6.4'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/vadr:1.6.4--pl5321h031d066_0'
+    // use staphb/vadr Docker container due to issues running VADR Bioconda/Biocontainers Singularity container with Nextflow
+    container 'staphb/vadr:1.6.3-hav-flu2'
   } else {
     container 'quay.io/biocontainers/vadr:1.6.4--pl5321h031d066_0'
   }
@@ -25,7 +27,8 @@ process VADR {
 
   conda 'bioconda::vadr=1.6.4'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/vadr:1.6.4--pl5321h031d066_0'
+    // use staphb/vadr Docker container due to issues running VADR Bioconda/Biocontainers Singularity container with Nextflow
+    container 'staphb/vadr:1.6.3-hav-flu2'
   } else {
     container 'quay.io/biocontainers/vadr:1.6.4--pl5321h031d066_0'
   }

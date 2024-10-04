@@ -209,14 +209,14 @@ workflow NANOPORE {
 
     ch_versions = ch_versions.mix(CLAIR3.out.versions)
 
-    BCF_FILTER_CLAIR3(CLAIR3.out.vcf, params.major_allele_fraction)
+    BCF_FILTER_CLAIR3(CLAIR3.out.vcf, params.major_allele_fraction, params.minor_allele_fraction)
     ch_versions = ch_versions.mix(BCF_FILTER_CLAIR3.out.versions)
     ch_vcf_filter = BCF_FILTER_CLAIR3.out.vcf
   } else if (params.variant_caller == 'medaka') {
     MEDAKA(MINIMAP2.out.alignment)
     ch_versions = ch_versions.mix(MEDAKA.out.versions)
 
-    BCF_FILTER_MEDAKA(MEDAKA.out.vcf, params.major_allele_fraction)
+    BCF_FILTER_MEDAKA(MEDAKA.out.vcf, params.major_allele_fraction, params.minor_allele_fraction)
     ch_versions = ch_versions.mix(BCF_FILTER_MEDAKA.out.versions)
     ch_vcf_filter = BCF_FILTER_MEDAKA.out.vcf
   }

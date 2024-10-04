@@ -1,6 +1,7 @@
 .nextflow/
 .nextflow.log*
 results
+results*
 results/*
 work
 work/*

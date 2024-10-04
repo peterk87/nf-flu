@@ -193,7 +193,7 @@ Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney
 
 ## Credits
 
-The nf-flu pipeline was originally developed by [Peter Kruczkiewicz](https://github.com/peterk87) from [CFIA-NCFAD](https://github.com/CFIA-NCFAD), [Hai Nguyen](https://github.com/nhhaidee) extended the piepline for Nanopore data analysis.
+The nf-flu pipeline was originally developed by [Peter Kruczkiewicz](https://github.com/peterk87) from [CFIA-NCFAD](https://github.com/CFIA-NCFAD), [Hai Nguyen](https://github.com/nhhaidee) extended the piepline for Nanopore data analysis, [Abdallah Meknas](https://github.com/ameknas-phac) expanded the Illumina workflow.
 
 * [nf-core](https://nf-co.re) project for establishing Nextflow workflow development best-practices, [nf-core tools](https://nf-co.re/tools-docs/) and [nf-core modules](https://github.com/nf-core/modules)
 * [nf-core/viralrecon](https://github.com/nf-core/viralrecon) for inspiration and setting a high standard for viral sequence data analysis pipelines

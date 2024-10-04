@@ -3,10 +3,22 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [[Unreleased](https://github.com/CFIA-NCFAD/nf-flu/releases)] - ReleaseDate
+## [[3.5.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.5.0)] - 2024-10
 
-* container: switched to Biocontainers images for Clair3 v1.0.10. [Issue](https://github.com/HKU-BAL/Clair3/issues/98) with full alignment not working with the Biocontainers Docker/Apptainer images seems to have been resolved. This should also resolve an issue with CI where it would fail due to not being able to pull the official Clair3 image [hbukal/clair3](https://hub.docker.com/r/hkubal/clair3) from Docker Hub.
-* dev: Added `tests/run-illumina-test.sh` to make it more convenient to run the Illumina test locally with the same conditions as GitHub Actions CI.
+This release expands the Illumina workflow by adding BLAST analysis, coverage plots, variant calling, and MultiQC reports. Modifications were made to existing modules, and new modules were added.
+
+### Changes
+
+* **feat**: Added variant calling, BLAST analysis, coverage plots, and MultiQC to the Illumina workflow to match the capabilities of the Nanopore workflow.
+* **feat**: Introduced a new module, Freebayes, for Illumina variant calling.
+* **refactor**: Rearranged the Illumina workflow to integrate the new changes and enhance compatibility.
+* **update**: Updated Bcftools filtering to add missing tags with `fill-tags` plugin and to set genotype with the `setGT` plugin based on `major/minor_allele_fraction` thresholds to influence consensus sequence output.
+* **config**: Changed process labels for IRMA and MultiQC modules to "long" to avoid timeouts for large short-read datasets.
+* **enhance**: Changed VADR staged file to use the FTP NCBI link to bypass certificate issues during Nextflow staging.
+* **rollback**: Reverted VADR containers to an earlier version to resolve potential issues on Singularity.
+* **refactor**: Rearranged `modules_illumina.config` for consistency with the updated workflow.
+* **container**: Switched to Biocontainers images for Clair3 v1.0.10. [Issue](https://github.com/HKU-BAL/Clair3/issues/98) with full alignment not working with the Biocontainers Docker/Apptainer images seems to have been resolved. This should also resolve an issue with CI where it would fail due to not being able to pull the official Clair3 image [hbukal/clair3](https://hub.docker.com/r/hkubal/clair3) from Docker Hub.
+* **dev**: Added `tests/run-illumina-test.sh` to make it more convenient to run the Illumina test locally with the same conditions as GitHub Actions CI.
 
 ## [[3.4.1](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.4.1)] - 2024-08-02
 

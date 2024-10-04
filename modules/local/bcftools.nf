@@ -31,8 +31,11 @@ process BCF_CONSENSUS {
   # get low coverage depth mask BED file by filtering for regions with less than ${low_coverage}X
   zcat $mosdepth_per_base | awk '\$4<${low_coverage}' > low_cov.bed
 
+  awk '/^>/ {print; next} {gsub(/[RYSWKMBDHVryswkmbdhv]/, "N"); print}' $fasta > ${fasta}.no_ambiguous.fasta
+
+
   bcftools consensus \\
-    -f $fasta \\
+    -f ${fasta}.no_ambiguous.fasta \\
     -m low_cov.bed \\
     ${vcf}.gz > $consensus
 
@@ -58,14 +61,14 @@ process BCF_FILTER {
 
   input:
   tuple val(sample), val(segment), val(ref_id), path(fasta), path(vcf)
-  val(allele_fraction)
+  val(major_allele_fraction)
+  val(minor_allele_fraction)
 
   output:
   tuple val(sample), val(segment), val(ref_id), path(fasta), path(bcftools_filt_vcf), emit: vcf
   path "versions.yml" , emit: versions
 
   script:
-  def exclude = (params.variant_caller == 'medaka') ? "AF < $allele_fraction" : "FILTER='RefCall' | AF < $allele_fraction"
   def prefix = fluPrefix(sample, segment, ref_id)
   bcftools_filt_vcf = "${prefix}.bcftools_filt.vcf"
   """
@@ -77,12 +80,29 @@ process BCF_FILTER {
     $vcf \\
     > norm.vcf
 
-  # filter for major alleles
-  bcftools filter \\
-    -e "$exclude" \\
+  bcftools +fill-tags \\
     norm.vcf \\
     -Ov \\
-    -o $bcftools_filt_vcf
+    -o filled.vcf \\
+    -- -t all
+
+  bcftools +setGT \\
+    filled.vcf \\
+    -Ov \\
+    -o setGT.major.vcf \\
+    -- -t q -n 'c:1/1' -i 'FMT/VAF >= ${major_allele_fraction}'
+
+  bcftools +setGT \\
+    setGT.major.vcf \\
+    -Ov \\
+    -o setGT.minor.vcf \\
+    -- -t q  -n 'c:0/1' -i 'FMT/VAF >= ${minor_allele_fraction} && FMT/VAF < ${major_allele_fraction}'
+
+  bcftools +setGT \\
+    setGT.minor.vcf \\
+    -Ov \\
+    -o $bcftools_filt_vcf \\
+    -- -t q -n 'c:0/0' -i 'FMT/VAF < ${minor_allele_fraction}'
 
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
