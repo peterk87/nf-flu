@@ -6,11 +6,11 @@ process CLAIR3 {
   label 'process_low'
 
   conda 'bioconda::clair3==1.0.10'
-  // use official images to avoid issues with full alignment failing. See issues:
-  // https://github.com/HKU-BAL/Clair3/issues/98
-  // https://github.com/HKU-BAL/Clair3/issues/181
-  // Biocontainers image fails for some reason.
-  container 'hkubal/clair3:v1.0.10'
+  if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+    container 'https://depot.galaxyproject.org/singularity/clair3:1.0.10--py39h46983ab_0'
+  } else {
+    container 'quay.io/biocontainers/clair3:1.0.10--py39h46983ab_0'
+  }
 
   input:
   tuple val(sample), val(segment), val(ref_id), path(ref_fasta), path(bam)
@@ -40,6 +40,15 @@ process CLAIR3 {
           MODEL_PATH="\$CLAIR_BIN_DIR/${model_suffix}"
       else [[ ${using_conda} = false ]]
           MODEL_PATH="/opt/models/${params.clair3_variant_model}"
+          if [[ -d \$MODEL_PATH ]] ; then
+              echo "Using built-in model: \$MODEL_PATH"
+          else
+              MODEL_PATH="/usr/local/bin/models/${params.clair3_variant_model}"
+          fi
+          if [[ ! -d \$MODEL_PATH ]] ; then
+              echo "Model not found: \$MODEL_PATH"
+              exit 1
+          fi
       fi
   fi
 
