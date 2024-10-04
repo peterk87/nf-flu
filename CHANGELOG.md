@@ -3,6 +3,11 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+### [[Unreleased](https://github.com/CFIA-NCFAD/nf-flu/releases)] - ReleaseDate
+
+* container: switched to Biocontainers images for Clair3 v1.0.10. [Issue](https://github.com/HKU-BAL/Clair3/issues/98) with full alignment not working with the Biocontainers Docker/Apptainer images seems to have been resolved. This should also resolve an issue with CI where it would fail due to not being able to pull the official Clair3 image [hbukal/clair3](https://hub.docker.com/r/hkubal/clair3) from Docker Hub.
+* dev: Added `tests/run-illumina-test.sh` to make it more convenient to run the Illumina test locally with the same conditions as GitHub Actions CI.
+
 ## [[3.4.1](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.4.1)] - 2024-08-02
 
 This patch release fixes an issue (#75) with CAT_ILLUMINA_FASTQ where `1:N:0:.` or `2:N:0:.` may be mistakenly appended
