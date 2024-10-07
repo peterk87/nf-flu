@@ -1,6 +1,6 @@
 # CFIA-NCFAD/nf-flu - Influenza A and B Virus Genome Assembly Nextflow Workflow
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12968792.svg)](https://doi.org/10.5281/zenodo.12968792)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13892044.svg)](https://doi.org/10.5281/zenodo.13892044)
 [![CI](https://github.com/CFIA-NCFAD/nf-flu/actions/workflows/ci.yml/badge.svg)](https://github.com/CFIA-NCFAD/nf-flu/actions/workflows/ci.yml)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.04.0-23aa62.svg?labelColor=000000)](https://www.nextflow.io/)
@@ -191,9 +191,13 @@ Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney
 
 [table2asn][] is used for converting the [VADR][] Feature Table format output to Genbank format to help with conversion to other formats such as FASTA and GFF.
 
-## Credits
+## Contributors
 
-The nf-flu pipeline was originally developed by [Peter Kruczkiewicz](https://github.com/peterk87) from [CFIA-NCFAD](https://github.com/CFIA-NCFAD), [Hai Nguyen](https://github.com/nhhaidee) extended the piepline for Nanopore data analysis, [Abdallah Meknas](https://github.com/ameknas-phac) expanded the Illumina workflow.
+* [Peter Kruczkiewicz](https://github.com/peterk87) ([CFIA-NCFAD](https://github.com/CFIA-NCFAD)) - lead developer
+* [Hai Nguyen](https://github.com/nhhaidee) ([CFIA-NCFAD](https://github.com/CFIA-NCFAD)) - Nanopore workflow
+* [Abdallah Meknas](https://github.com/ameknas-phac) (Influenza, Respiratory Viruses, and Coronavirus Section (IRVC), Public Health Agency of Canada (PHAC)) - expansion of the Illumina workflow
+
+## Credits
 
 * [nf-core](https://nf-co.re) project for establishing Nextflow workflow development best-practices, [nf-core tools](https://nf-co.re/tools-docs/) and [nf-core modules](https://github.com/nf-core/modules)
 * [nf-core/viralrecon](https://github.com/nf-core/viralrecon) for inspiration and setting a high standard for viral sequence data analysis pipelines
