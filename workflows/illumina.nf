@@ -42,10 +42,15 @@ include { VCF_FILTER_FRAMESHIFT                                                 
 include { COVERAGE_PLOT                                                                    } from '../modules/local/coverage_plot'
 include { CAT_CONSENSUS                                                                    } from '../modules/local/misc'
 include { FREEBAYES                                                                        } from '../modules/local/freebayes'
-include { SETUP_FLU_VADR_MODEL; VADR; VADR_SUMMARIZE_ISSUES                                } from '../modules/local/vadr'
-include { VADR as VADR_CONSENSUS; VADR_SUMMARIZE_ISSUES as VADR_SUMMARIZE_ISSUES_CONSENSUS } from '../modules/local/vadr'
-include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN                                         } from '../modules/local/table2asn'
-include { PRE_TABLE2ASN as PRE_TABLE2ASN_CONSENSUS; TABLE2ASN as TABLE2ASN_CONSENSUS; POST_TABLE2ASN as POST_TABLE2ASN_CONSENSUS} from '../modules/local/table2asn'
+include { SETUP_FLU_VADR_MODEL                                                             } from '../modules/local/vadr'
+include { VADR as VADR_IRMA; VADR_SUMMARIZE_ISSUES as VADR_SUMMARIZE_ISSUES_IRMA           } from '../modules/local/vadr'
+include { VADR as VADR_BCFTOOLS; VADR_SUMMARIZE_ISSUES as VADR_SUMMARIZE_ISSUES_BCFTOOLS   } from '../modules/local/vadr'
+include { PRE_TABLE2ASN as PRE_TABLE2ASN_IRMA                                              } from '../modules/local/table2asn'
+include { TABLE2ASN as TABLE2ASN_IRMA                                                      } from '../modules/local/table2asn'
+include { POST_TABLE2ASN as POST_TABLE2ASN_IRMA                                            } from '../modules/local/table2asn'
+include { PRE_TABLE2ASN as PRE_TABLE2ASN_BCFTOOLS                                          } from '../modules/local/table2asn'
+include { TABLE2ASN as TABLE2ASN_BCFTOOLS                                                  } from '../modules/local/table2asn'
+include { POST_TABLE2ASN as POST_TABLE2ASN_BCFTOOLS                                        } from '../modules/local/table2asn'
 include { MQC_VERSIONS_TABLE                                                               } from '../modules/local/mqc_versions_table'
 
 //=============================================================================
@@ -155,18 +160,18 @@ workflow ILLUMINA {
   IRMA.out.consensus
     .map { [it[0].id, it[1]] }
     .set { ch_irma_consensus }
-  VADR(ch_irma_consensus, SETUP_FLU_VADR_MODEL.out)
-  ch_versions = ch_versions.mix(VADR.out.versions)
-  VADR.out.feature_table
-    .combine(VADR.out.pass_fasta, by: 0)
+  VADR_IRMA(ch_irma_consensus, SETUP_FLU_VADR_MODEL.out)
+  ch_versions = ch_versions.mix(VADR_IRMA.out.versions)
+  VADR_IRMA.out.feature_table
+    .combine(VADR_IRMA.out.pass_fasta, by: 0)
     .set { ch_pre_table2asn }
-  VADR_SUMMARIZE_ISSUES(VADR.out.vadr_outdir.map { [it[1]] }.collect())
-  PRE_TABLE2ASN(ch_pre_table2asn)
-  ch_versions = ch_versions.mix(PRE_TABLE2ASN.out.versions)
-  TABLE2ASN(PRE_TABLE2ASN.out.table2asn_input)
-  ch_versions = ch_versions.mix(TABLE2ASN.out.versions)
-  POST_TABLE2ASN(TABLE2ASN.out.genbank)
-  ch_versions = ch_versions.mix(POST_TABLE2ASN.out.versions)
+  VADR_SUMMARIZE_ISSUES_IRMA(VADR_IRMA.out.vadr_outdir.map { [it[1]] }.collect())
+  PRE_TABLE2ASN_IRMA(ch_pre_table2asn)
+  ch_versions = ch_versions.mix(PRE_TABLE2ASN_IRMA.out.versions)
+  TABLE2ASN_IRMA(PRE_TABLE2ASN_IRMA.out.table2asn_input)
+  ch_versions = ch_versions.mix(TABLE2ASN_IRMA.out.versions)
+  POST_TABLE2ASN_IRMA(TABLE2ASN_IRMA.out.genbank)
+  ch_versions = ch_versions.mix(POST_TABLE2ASN_IRMA.out.versions)
 
   BLAST_BLASTN_IRMA(IRMA.out.consensus, BLAST_MAKEBLASTDB_NCBI.out.db)
   ch_versions = ch_versions.mix(BLAST_BLASTN_IRMA.out.versions.first().ifEmpty(null))
@@ -233,18 +238,18 @@ workflow ILLUMINA {
   CAT_CONSENSUS(ch_final_consensus)
   ch_versions = ch_versions.mix(CAT_CONSENSUS.out.versions)
 
-  VADR_CONSENSUS(CAT_CONSENSUS.out.consensus_fasta, SETUP_FLU_VADR_MODEL.out)
-  ch_versions = ch_versions.mix(VADR.out.versions)
-  VADR_CONSENSUS.out.feature_table
-    .combine(VADR_CONSENSUS.out.pass_fasta, by: 0)
+  VADR_BCFTOOLS(CAT_CONSENSUS.out.consensus_fasta, SETUP_FLU_VADR_MODEL.out)
+  ch_versions = ch_versions.mix(VADR_BCFTOOLS.out.versions)
+  VADR_BCFTOOLS.out.feature_table
+    .combine(VADR_BCFTOOLS.out.pass_fasta, by: 0)
     .set { ch_pre_table2asn }
-  VADR_SUMMARIZE_ISSUES_CONSENSUS(VADR_CONSENSUS.out.vadr_outdir.map { [it[1]] }.collect())
-  PRE_TABLE2ASN_CONSENSUS(ch_pre_table2asn)
-  ch_versions = ch_versions.mix(PRE_TABLE2ASN_CONSENSUS.out.versions)
-  TABLE2ASN_CONSENSUS(PRE_TABLE2ASN.out.table2asn_input)
-  ch_versions = ch_versions.mix(TABLE2ASN.out.versions)
-  POST_TABLE2ASN_CONSENSUS(TABLE2ASN.out.genbank)
-  ch_versions = ch_versions.mix(POST_TABLE2ASN_CONSENSUS.out.versions)
+  VADR_SUMMARIZE_ISSUES_BCFTOOLS(VADR_BCFTOOLS.out.vadr_outdir.map { [it[1]] }.collect())
+  PRE_TABLE2ASN_BCFTOOLS(ch_pre_table2asn)
+  ch_versions = ch_versions.mix(PRE_TABLE2ASN_BCFTOOLS.out.versions)
+  TABLE2ASN_BCFTOOLS(PRE_TABLE2ASN_BCFTOOLS.out.table2asn_input)
+  ch_versions = ch_versions.mix(TABLE2ASN_BCFTOOLS.out.versions)
+  POST_TABLE2ASN_BCFTOOLS(TABLE2ASN_BCFTOOLS.out.genbank)
+  ch_versions = ch_versions.mix(POST_TABLE2ASN_BCFTOOLS.out.versions)
 
   CAT_CONSENSUS.out.fasta
     .map { [[id:it[0]], it[1]] }
