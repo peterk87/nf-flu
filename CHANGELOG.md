@@ -3,6 +3,15 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.5.1](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.5.1)] - 2024-10-08
+
+This patch release fixes an issue ([#84](https://github.com/CFIA-NCFAD/nf-flu/issues/84)) with long sample names (over 50 characters) causing VADR to fail. `--noseqnamemax` has been added to the default arguments for VADR to avoid this issue.
+
+### Changes
+
+* **fix**: Added `--noseqnamemax` to VADR default arguments to avoid issues with long sample names causing VADR to fail.
+* **config**: Output directory paths for IRMA and Bcftools consensus VADR annotation results were made more explicit and clear for the Illumina workflow.
+
 ## [[3.5.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.5.0)] - 2024-10
 
 This release expands the Illumina workflow by adding BLAST analysis, coverage plots, variant calling, and MultiQC reports. Modifications were made to existing modules, and new modules were added.
