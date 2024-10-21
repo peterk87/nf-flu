@@ -150,7 +150,6 @@ workflow ILLUMINA {
 
   // Use ch_input_sorted for CAT_ILLUMINA_FASTQ to ensure IRMA triggers
   CAT_ILLUMINA_FASTQ(ch_input_sorted)
-  ch_versions = ch_versions.mix(CAT_ILLUMINA_FASTQ.out.versions.first().ifEmpty(null))
 
   // IRMA processing
   IRMA(CAT_ILLUMINA_FASTQ.out.reads, irma_module)

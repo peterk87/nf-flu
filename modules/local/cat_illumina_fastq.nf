@@ -19,7 +19,6 @@ process CAT_ILLUMINA_FASTQ {
 
   output:
   tuple val(meta), path("*.merged.fastq.gz"), emit: reads
-  path "versions.yml"                       , emit: versions
 
   when:
   task.ext.when == null || task.ext.when
@@ -47,12 +46,6 @@ process CAT_ILLUMINA_FASTQ {
   if [[ ${fqgzList.size} > 0 ]]; then
     cat ${readList.join(' ')} >> ${prefix}.merged.fastq.gz
   fi
-
-  cat <<-END_VERSIONS > versions.yml
-  "${task.process}":
-    cat: \$(echo \$(cat --help 2>&1) | sed 's/ (.*//')
-    gzip: \$(echo \$(gzip --help 2>&1) | sed 's/ (.*//')
-  END_VERSIONS
   """
     }
   } else {
@@ -97,12 +90,6 @@ if [[ ${read2gz.size} > 0 ]]; then
   | gzip -ck \\
   >> ${prefix}_2.merged.fastq.gz
 fi
-
-cat <<-END_VERSIONS > versions.yml
-"${task.process}":
-  cat: \$(echo \$(cat --help 2>&1) | sed 's/ (.*//')
-  gzip: \$(echo \$(gzip --help 2>&1) | sed 's/ (.*//')
-END_VERSIONS
 """
     }
   }

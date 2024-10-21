@@ -34,37 +34,37 @@ process CLAIR3 {
   """
   CLAIR_BIN_DIR=\$(dirname \$(which run_clair3.sh))
   if [[ "${params.clair3_user_variant_model}" != "" ]] ; then
-      MODEL_PATH=${model_path}
+    MODEL_PATH="${model_path}"
   else
-      if [[ ${using_conda} = true ]] ; then
-          MODEL_PATH="\$CLAIR_BIN_DIR/${model_suffix}"
-      else [[ ${using_conda} = false ]]
-          MODEL_PATH="/opt/models/${params.clair3_variant_model}"
-          if [[ -d \$MODEL_PATH ]] ; then
-              echo "Using built-in model: \$MODEL_PATH"
-          else
-              MODEL_PATH="/usr/local/bin/models/${params.clair3_variant_model}"
-          fi
-          if [[ ! -d \$MODEL_PATH ]] ; then
-              echo "Model not found: \$MODEL_PATH"
-              exit 1
-          fi
+    if [[ ${using_conda} = true ]] ; then
+      MODEL_PATH="\$CLAIR_BIN_DIR/${model_suffix}"
+    else [[ ${using_conda} = false ]]
+      MODEL_PATH="/opt/models/${params.clair3_variant_model}"
+      if [[ -d \$MODEL_PATH ]] ; then
+        echo "Using built-in model: \$MODEL_PATH"
+      else
+        MODEL_PATH="/usr/local/bin/models/${params.clair3_variant_model}"
       fi
+      if [[ ! -d \$MODEL_PATH ]] ; then
+        echo "Model not found: \$MODEL_PATH"
+        exit 1
+      fi
+    fi
   fi
 
   samtools faidx $ref_fasta
 
   run_clair3.sh \\
-      --bam_fn=${bam[0]} \\
-      --ref_fn=$ref_fasta \\
-      --model_path="\$MODEL_PATH"\\
-      --threads=${task.cpus} \\
-      --platform="ont" \\
-      --output=${clair3_dir} \\
-      --haploid_sensitive \\
-      --enable_long_indel \\
-      --keep_iupac_bases \\
-      --include_all_ctgs
+    --bam_fn=${bam[0]} \\
+    --ref_fn=$ref_fasta \\
+    --model_path="\$MODEL_PATH"\\
+    --threads=${task.cpus} \\
+    --platform="ont" \\
+    --output=${clair3_dir} \\
+    --haploid_sensitive \\
+    --enable_long_indel \\
+    --keep_iupac_bases \\
+    --include_all_ctgs
 
   ln -s ${clair3_dir}/merge_output.vcf.gz ${vcf}
 

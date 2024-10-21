@@ -15,6 +15,8 @@ Since Influenza has a segmented genome consisting of 8 gene segments, the pipeli
 Users can also provide their own reference sequences to include in the top reference sequence selection process.
 After reference sequence selection, the pipeline performs read mapping to each reference sequence, variant calling and depth-masked consensus sequence generation.
 
+> **Note:** The officially supported version of the pipeline is [CFIA-NCFAD/nf-flu](https://github.com/CFIA-NCFAD/nf-flu). If you have issues with using the pipeline, please create an issue [here](https://github.com/CFIA-NCFAD/nf-flu/issues/new/choose) on [CFIA-NCFAD/nf-flu](https://github.com/CFIA-NCFAD/nf-flu) repo.
+
 ## Pipeline summary
 
 1. Download latest [NCBI Orthomyxoviridae sequences](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Undef&id=11308&lvl=3&keep=1&srchmode=1&unlock) and metadata (parsed from [NCBI Viruses FTP data](https://ftp.ncbi.nlm.nih.gov/genomes/Viruses/AllNucleotide/)).
@@ -107,6 +109,14 @@ Camacho, C., Coulouris, G., Avagyan, V., Ma, N., Papadopoulos, J., Bealer, K., M
 
 ```text
 Zheng, Z., Li, S., Su, J., Leung, A.W.-S., Lam, T.-W., Luo, R., 2022. Symphonizing pileup and full-alignment for deep learning-based long-read variant calling. Nat Comput Sci 2, 797–803. https://doi.org/10.1038/s43588-022-00387-x
+```
+
+### [Freebayes][]
+
+[Freebayes][] is used for variant calling.
+
+```text
+Garrison, E., Marth, G., 2012. Haplotype-based variant detection from short-read sequencing. arXiv:1207.3907 [q-bio]. https://doi.org/10.48550/arXiv.1207.3907
 ```
 
 ### [IRMA][] Iterative Refinement Meta-Assembler
@@ -222,3 +232,4 @@ Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney
 [MultiQC]: https://multiqc.info/
 [VADR]: https://github.com/ncbi/vadr
 [table2asn]: https://www.ncbi.nlm.nih.gov/genbank/table2asn/
+[Freebayes]: https://github.com/freebayes/freebayes
