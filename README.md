@@ -119,7 +119,6 @@ Zheng, Z., Li, S., Su, J., Leung, A.W.-S., Lam, T.-W., Luo, R., 2022. Symphonizi
 Garrison, E., Marth, G., 2012. Haplotype-based variant detection from short-read sequencing. arXiv:1207.3907 [q-bio]. https://doi.org/10.48550/arXiv.1207.3907
 ```
 
-
 ### [IRMA][] Iterative Refinement Meta-Assembler
 
 ```text
