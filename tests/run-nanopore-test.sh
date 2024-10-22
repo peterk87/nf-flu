@@ -62,6 +62,12 @@ while getopts "w:m:c:h" opt; do
     esac
 done
 
+shift $((OPTIND-1))
+
+if [[ "$1" == "--" ]]; then
+    shift
+fi
+
 info "Starting nf-flu Nanopore test execution script with ${CPU} CPU cores and ${MEMORY} memory..."
 
 FASTA_ZST_URL="https://api.figshare.com/v2/file/download/41415330"
@@ -135,4 +141,4 @@ nextflow run "$WORKFLOW_PATH" \
     --input samplesheet.csv \
     --ncbi_influenza_fasta $FASTA_ZST_FILE \
     --ncbi_influenza_metadata $CSV_ZST_FILE \
-    --max_cpus $CPU --max_memory "$MEMORY"
+    --max_cpus $CPU --max_memory "$MEMORY" $@
