@@ -38,14 +38,47 @@ process IRMA {
 
   IRMA $irma_module $reads $meta.id
 
+  cat_nonempty() {
+    awk '
+      # When a new header line is encountered
+      /^>/ {
+          # If there is an existing sequence (i.e., it is not empty), print the header and sequence
+          if (seqlen > 0) {
+              print header;
+              print seq;
+          }
+          # Set the new header and reset the sequence and sequence length for the next entry
+          header = \$0;
+          seq = "";
+          seqlen = 0;
+          next;
+      }
+
+      # For sequence lines, concatenate the sequence and update the length
+      {
+          seq = seq \$0;
+          seqlen += length(\$0);
+      }
+
+      # At the end of the file, print the last sequence if it is not empty
+      END {
+          if (seqlen > 0) {
+              print header;
+              print seq;
+          }
+      }
+    ' \$@
+  }
+
   if ls ${meta.id}/amended_consensus/*.fa > /dev/null 2>&1; then
-    cat ${meta.id}/amended_consensus/*.fa > ${meta.id}.irma.consensus.fasta
+    # use awk to concatenate only fasta sequences that actually have a sequence; ignore empty sequences
+    cat_nonempty ${meta.id}/amended_consensus/*.fa > ${meta.id}.irma.consensus.fasta
   fi
 
   if ls ${meta.id}/tables/*-allAlleles.txt > /dev/null 2>&1; then
     irma-alleles2fasta -n "${meta.id}" -i "${meta.id}/tables" -o majority-consensus
     if ls majority-consensus/*.fasta > /dev/null 2>&1; then
-      cat majority-consensus/*.fasta > ${meta.id}.irma.majority_consensus.fasta
+      cat_nonempty majority-consensus/*.fasta > ${meta.id}.irma.majority_consensus.fasta
     fi
   fi
 
