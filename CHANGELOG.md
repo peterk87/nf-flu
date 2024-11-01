@@ -3,6 +3,10 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.5.3](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.5.3)] - 2024-11-01
+
+This patch release fixes an issue ([#22](https://github.com/peterk87/nf-flu/issues/22)) with Illumina paired-end read analysis by IRMA producing empty consensus sequences when the forward and reverse reads do not contain "1:N:0:." or "2:N:0:." in the FASTQ header lines.
+
 ## [[3.5.2](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.5.2)] - 2024-10-18
 
 This patch release fixes a few issues when running the pipeline.

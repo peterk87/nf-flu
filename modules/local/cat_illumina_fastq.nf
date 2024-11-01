@@ -59,34 +59,47 @@ process CAT_ILLUMINA_FASTQ {
       // append 1:N:0:. or 2:N:0:. to forward and reverse reads if "[12]:N:.*"
       // not present in the FASTQ header for compatability with IRMA assembly
 """
+function modify_fastq_header() {
+  local replacement="\$1"
+  awk -v repl="\$replacement" '
+    NR % 4 == 1 {
+        # Only process the first line of each 4-line block
+        if (\$0 ~ /^@/ && \$0 !~ /[12]:N:.*/) {
+            sub(/\\s*\$/, " " repl ":N:0:."); # Append " <replacement>:N:0:."
+        }
+    }
+    { print }
+  '
+}
+
 touch ${prefix}_1.merged.fastq.gz
 
 touch ${prefix}_2.merged.fastq.gz
 
 if [[ ${read1.size} > 0 ]]; then
   cat ${read1.join(' ')} \\
-  | perl -ne 'if (\$_ =~ /^@.* .*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
+  | modify_fastq_header 1 \\
   | gzip -ck \\
   >> ${prefix}_1.merged.fastq.gz
 fi
 
 if [[ ${read1gz.size} > 0 ]]; then
   zcat ${read1gz.join(' ')} \\
-  | perl -ne 'if (\$_ =~ /^@.* .*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 1:N:0:.\n"; } else { print "\$_"; }' \\
+  | modify_fastq_header 1 \\
   | gzip -ck \\
   >> ${prefix}_1.merged.fastq.gz
 fi
 
 if [[ ${read2.size} > 0 ]]; then
   cat ${read2.join(' ')} \\
-  | perl -ne 'if (\$_ =~ /^@.* .*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
+  | modify_fastq_header 2 \\
   | gzip -ck \\
   >> ${prefix}_2.merged.fastq.gz
 fi
 
 if [[ ${read2gz.size} > 0 ]]; then
   zcat ${read2gz.join(' ')} \\
-  | perl -ne 'if (\$_ =~ /^@.* .*/ && !(\$_ =~ /^@.* [12]:N:.*/)){  chomp \$_; print "\$_ 2:N:0:.\n"; } else { print "\$_"; }' \\
+  | modify_fastq_header 2 \\
   | gzip -ck \\
   >> ${prefix}_2.merged.fastq.gz
 fi
