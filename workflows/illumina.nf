@@ -52,6 +52,7 @@ include { PRE_TABLE2ASN as PRE_TABLE2ASN_BCFTOOLS                               
 include { TABLE2ASN as TABLE2ASN_BCFTOOLS                                                  } from '../modules/local/table2asn'
 include { POST_TABLE2ASN as POST_TABLE2ASN_BCFTOOLS                                        } from '../modules/local/table2asn'
 include { MQC_VERSIONS_TABLE                                                               } from '../modules/local/mqc_versions_table'
+include { FLUMUT; PREP_FLUMUT_FASTA                                                        } from '../modules/local/flumut'
 
 //=============================================================================
 // Workflow Params Setup
@@ -264,6 +265,10 @@ workflow ILLUMINA {
     CHECK_SAMPLE_SHEET.out
   )
   ch_versions = ch_versions.mix(SUBTYPING_REPORT_BCF_CONSENSUS.out.versions)
+
+  PREP_FLUMUT_FASTA(CAT_CONSENSUS.out.consensus_fasta.collect({ it[1] }))
+  FLUMUT(PREP_FLUMUT_FASTA.out.fasta)
+  ch_versions = ch_versions.mix(FLUMUT.out.versions)
 
   workflow_summary    = Schema.params_summary_multiqc(workflow, summary_params)
   ch_workflow_summary = Channel.value(workflow_summary)

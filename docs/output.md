@@ -15,6 +15,7 @@ The directories listed below will be created in the results directory after the 
 - [Variant Calling](#variant-calling)
 - [H/N Subtyping](#hn-subtyping)
 - [Annotation](#annotation)
+- [FluMut](#flumut)
 
 ### IRMA
 
@@ -263,6 +264,19 @@ Consensus sequences are annotated using [VADR][]. The output files are available
 
 </details>
 
+### FluMut
+
+Consensus sequences are analyzed using [FluMut] to identify mutations of interest, specifically for H5N1. The output files are available in multiple formats including Excel and TSV.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `flumut/`
+  - `flumut.xlsm`: Excel file containing all the results from the FluMut analysis.
+  - `flumut-markers.tsv`: Tab-separated file containing the list of detected markers by FluMut analysis.
+  - `flumut-mutations.tsv`: Tab-separated file containing the list of amino acids present in the positions of mutations of interest for each sample by FluMut analysis.
+  - `seqs-for-flumut.fasta`: FASTA file containing the sequences of the samples that were analyzed by FluMut.
+
 ### Pipeline information
 
 <details markdown="1">
@@ -278,7 +292,8 @@ Consensus sequences are annotated using [VADR][]. The output files are available
 
 [Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
 
-[NCBI Influenza DB]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
-[IRMA]: https://wonder.cdc.gov/amd/flu/irma/
 [BLAST]: https://blast.ncbi.nlm.nih.gov/Blast.cgi
+[FluMut]: https://github.com/izsvenezie-virology/FluMut
+[IRMA]: https://wonder.cdc.gov/amd/flu/irma/
+[NCBI Influenza DB]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
 [VADR]: https://github.com/ncbi/vadr
