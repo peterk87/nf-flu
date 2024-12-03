@@ -33,6 +33,7 @@ include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS              } from '../modules
 include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS_REF_DB       } from '../modules/local/blastn'
 include { SETUP_FLU_VADR_MODEL; VADR; VADR_SUMMARIZE_ISSUES   } from '../modules/local/vadr'
 include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN            } from '../modules/local/table2asn'
+include { FLUMUT; PREP_FLUMUT_FASTA                           } from '../modules/local/flumut'
 include { MULTIQC                                             } from '../modules/local/multiqc'
 include { MQC_VERSIONS_TABLE } from '../modules/local/mqc_versions_table'
 
@@ -283,6 +284,10 @@ workflow NANOPORE {
     BLASTN_REPORT(BLAST_BLASTN_CONSENSUS_REF_DB.out.txt)
     ch_versions = ch_versions.mix(BLASTN_REPORT.out.versions)
   }
+
+  PREP_FLUMUT_FASTA(CAT_CONSENSUS.out.consensus_fasta.collect({ it[1] }))
+  FLUMUT(PREP_FLUMUT_FASTA.out.fasta)
+  ch_versions = ch_versions.mix(FLUMUT.out.versions)
 
   workflow_summary    = Schema.params_summary_multiqc(workflow, summary_params)
   ch_workflow_summary = Channel.value(workflow_summary)

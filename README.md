@@ -27,7 +27,8 @@ After reference sequence selection, the pipeline performs read mapping to each r
 6. Automatically select top match reference sequences for segments
 7. Read mapping, variant calling and consensus sequence generation for each segment against top reference sequence based on BLAST results.
 8. Annotation of consensus sequences with [VADR][]
-9. [MultiQC][] report generation.
+9. [FluMut][] detection of molecular markers and mutation in Influenza A(H5N1) viruses.
+10. [MultiQC][] report generation.
 
 ## Quick Start
 
@@ -110,6 +111,16 @@ Camacho, C., Coulouris, G., Avagyan, V., Ma, N., Papadopoulos, J., Bealer, K., M
 ```text
 Zheng, Z., Li, S., Su, J., Leung, A.W.-S., Lam, T.-W., Luo, R., 2022. Symphonizing pileup and full-alignment for deep learning-based long-read variant calling. Nat Comput Sci 2, 797–803. https://doi.org/10.1038/s43588-022-00387-x
 ```
+
+### [FluMut][]
+
+[FluMut][] is used to "search for molecular markers with potential impact on the biological characteristics of Influenza A viruses of the A(H5N1) subtype, starting from complete or partial nucleotide genome sequences".
+
+```text
+https://github.com/izsvenezie-virology/FluMut
+```
+
+> **NOTE:** Since the FluMut paper has not been published yet, the authors [recommend](https://github.com/izsvenezie-virology/FluMut?tab=readme-ov-file#cite-flumut) citing the GitHub repository as of 2024-12-02.
 
 ### [Freebayes][]
 
@@ -214,22 +225,23 @@ Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney
 * [Conda](https://docs.conda.io/projects/conda/en/latest/) and [Bioconda](https://bioconda.github.io/) project for making it easy to install, distribute and use bioinformatics software.
 * [Biocontainers](https://biocontainers.pro/) for automatic creation of [Docker] and [Singularity] containers for bioinformatics software in [Bioconda]
 
-[NCBI Influenza DB]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
-[BLAST]: https://blast.ncbi.nlm.nih.gov/Blast.cgi
-[IRMA]: https://wonder.cdc.gov/amd/flu/irma/
-[Nextflow]: https://www.nextflow.io/
-[Docker]: https://www.docker.com/
-[Singularity]: https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps
-[NCBI Influenza Virus Resource]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
 [BcfTools]: https://samtools.github.io/bcftools/
-[Samtools]: https://www.htslib.org/
-[nf-core]: https://nf-co.re/
-[Minimap2]: https://github.com/lh3/minimap2/
+[BLAST]: https://blast.ncbi.nlm.nih.gov/Blast.cgi
 [Clair3]: https://github.com/HKU-BAL/Clair3
-[Medaka]: https://github.com/nanoporetech/medaka
-[Mosdepth]: https://github.com/brentp/mosdepth
-[seqtk]: https://github.com/lh3/seqtk
-[MultiQC]: https://multiqc.info/
-[VADR]: https://github.com/ncbi/vadr
-[table2asn]: https://www.ncbi.nlm.nih.gov/genbank/table2asn/
+[Docker]: https://www.docker.com/
+[FluMut]: https://github.com/izsvenezie-virology/FluMut
 [Freebayes]: https://github.com/freebayes/freebayes
+[IRMA]: https://wonder.cdc.gov/amd/flu/irma/
+[Medaka]: https://github.com/nanoporetech/medaka
+[Minimap2]: https://github.com/lh3/minimap2/
+[Mosdepth]: https://github.com/brentp/mosdepth
+[MultiQC]: https://multiqc.info/
+[NCBI Influenza DB]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
+[NCBI Influenza Virus Resource]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
+[Nextflow]: https://www.nextflow.io/
+[nf-core]: https://nf-co.re/
+[Samtools]: https://www.htslib.org/
+[seqtk]: https://github.com/lh3/seqtk
+[Singularity]: https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps
+[table2asn]: https://www.ncbi.nlm.nih.gov/genbank/table2asn/
+[VADR]: https://github.com/ncbi/vadr
