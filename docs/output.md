@@ -158,11 +158,11 @@ The report contains 2 sheets:
 <details markdown="1">
 <summary>Output files</summary>
 
-- H/N subtyping Excel report: `iav-subtyping-report.xlsx`
+- H/N subtyping Excel report: `nf-flu-subtyping-report.xlsx`
 
 </details>
 
-A H/N subtyping Excel report is generated from all [BLAST analysis](#blast-analysis) results for all samples and final assembled gene segments.
+A H/N subtyping Excel report is generated from all [BLAST analysis](#blast-analysis) results for all samples and final assembled gene segments. The H and N subtypes are based on the proportion of high-quality BLAST matches that support the subtype prediction, that is, the top BLAST match for the HA and NA segments does not determine the subtype since the metadata for the top match could be incorrectly entered into NCBI.
 
 The subtyping report spreadsheet contains four sheets:
 
@@ -190,7 +190,7 @@ This sheet contains the H/N subtype prediction results for each sample along wit
 
 #### Sheet: 2_Top Segment Matches
 
-This sheet contains the top 3 Influenza DB sequence matches for each segment of each sample along with BLASTN hit values and reference sequence metadata.
+This sheet contains the top N Influenza DB sequence matches for each segment of each sample along with BLASTN hit values and reference sequence metadata.
 
 | Field | Description | Example |
 |-------|-------------|---------|

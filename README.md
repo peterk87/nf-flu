@@ -1,12 +1,14 @@
 # CFIA-NCFAD/nf-flu - Influenza A and B Virus Genome Assembly Nextflow Workflow
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13892044.svg)](https://doi.org/10.5281/zenodo.13892044)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14268099.svg)](https://doi.org/10.5281/zenodo.14268099)
 [![CI](https://github.com/CFIA-NCFAD/nf-flu/actions/workflows/ci.yml/badge.svg)](https://github.com/CFIA-NCFAD/nf-flu/actions/workflows/ci.yml)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.04.0-23aa62.svg?labelColor=000000)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
+[![run with apptainer](https://img.shields.io/badge/run%20with-apptainer-1d355c.svg?labelColor=000000)](https://apptainer.org/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
+[![run with podman](https://img.shields.io/badge/run%20with-podman-1d355c.svg?labelColor=000000)](https://podman.io/)
 
 ## Introduction
 
@@ -32,25 +34,25 @@ After reference sequence selection, the pipeline performs read mapping to each r
 
 ## Quick Start
 
-1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=21.04.0`).
-2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort)_
+1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=22.10.1`; latest stable release recommended!).
+2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Apptainer`][], [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort)_
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
     For Illumina workflow test:
 
     ```bash
-    nextflow run CFIA-NCFAD/nf-flu -profile test_illumina,<docker/singularity/podman/shifter/charliecloud/conda> \
+    nextflow run CFIA-NCFAD/nf-flu -profile test_illumina,<docker/apptainer/singularity/podman/shifter/charliecloud/conda> \
       --max_cpus $(nproc) # use all available CPUs; default is 2
     ```
 
     For Nanopore workflow test:
 
     ```bash
-    nextflow run CFIA-NCFAD/nf-flu -profile test_nanopore,<docker/singularity/podman/shifter/charliecloud/conda> \
+    nextflow run CFIA-NCFAD/nf-flu -profile test_nanopore,<docker/apptainer/singularity/podman/shifter/charliecloud/conda> \
       --max_cpus $(nproc) # use all available CPUs; default is 2
     ```
 
-    > * If you are using `singularity` then the pipeline will auto-detect this and attempt to download the Singularity images directly as opposed to performing a conversion from Docker images. If you are persistently observing issues downloading Singularity images directly due to timeout or network issues then please use the `--singularity_pull_docker_container` parameter to pull and convert the Docker image instead. Alternatively, it is highly recommended to use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to pre-download all of the required containers before running the pipeline and to set the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options to be able to store and re-use the images from a central location for future pipeline runs.
+    > * If you are using `apptainer`/`singularity` then the pipeline will auto-detect this and attempt to download the Apptainer/Singularity images directly as opposed to performing a conversion from Docker images. If you are persistently observing issues downloading Apptainer/Singularity images directly due to timeout or network issues then please use the `--singularity_pull_docker_container` parameter to pull and convert the Docker image instead. Alternatively, it is highly recommended to use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to pre-download all of the required containers before running the pipeline and to set the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options to be able to store and re-use the images from a central location for future pipeline runs.
     > * If you are using `conda`, it is highly recommended to use the [`NXF_CONDA_CACHEDIR` or `conda.cacheDir`](https://www.nextflow.io/docs/latest/conda.html) settings to store the environments in a central location for future pipeline runs.
 
 4. Run your own analysis
@@ -69,7 +71,7 @@ After reference sequence selection, the pipeline performs read mapping to each r
         nextflow run CFIA-NCFAD/nf-flu \
           --input samplesheet.csv \
           --platform illumina \
-          --profile <docker/singularity/podman/shifter/charliecloud/conda>
+          --profile <docker/apptainer/singularity/podman/shifter/charliecloud/conda>
         ```
 
     * Typical command for Nanopore Platform
@@ -78,7 +80,7 @@ After reference sequence selection, the pipeline performs read mapping to each r
       nextflow run CFIA-NCFAD/nf-flu \
         --input samplesheet.csv \
         --platform nanopore \
-        --profile <docker/singularity/conda>
+        --profile <docker/apptainer/singularity/conda>
       ```
 
 ## Documentation
@@ -223,8 +225,9 @@ Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney
 * [nf-core](https://nf-co.re) project for establishing Nextflow workflow development best-practices, [nf-core tools](https://nf-co.re/tools-docs/) and [nf-core modules](https://github.com/nf-core/modules)
 * [nf-core/viralrecon](https://github.com/nf-core/viralrecon) for inspiration and setting a high standard for viral sequence data analysis pipelines
 * [Conda](https://docs.conda.io/projects/conda/en/latest/) and [Bioconda](https://bioconda.github.io/) project for making it easy to install, distribute and use bioinformatics software.
-* [Biocontainers](https://biocontainers.pro/) for automatic creation of [Docker] and [Singularity] containers for bioinformatics software in [Bioconda]
+* [Biocontainers](https://biocontainers.pro/) for automatic creation of [Docker] and [Apptainer]/[Singularity] containers for bioinformatics software in [Bioconda]
 
+[Apptainer]: https://apptainer.org/
 [BcfTools]: https://samtools.github.io/bcftools/
 [BLAST]: https://blast.ncbi.nlm.nih.gov/Blast.cgi
 [Clair3]: https://github.com/HKU-BAL/Clair3
