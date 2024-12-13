@@ -36,6 +36,18 @@
                     "description": "The output directory where the results will be saved.",
                     "default": "./results",
                     "fa_icon": "fas fa-folder-open"
+                },
+                "save_ncbi_db": {
+                    "type": "boolean",
+                    "description": "Save the NCBI Influenza database FASTA and metadata CSV to the output directory.",
+                    "default": false,
+                    "fa_icon": "fas fa-database"
+                },
+                "save_blastdb": {
+                    "type": "boolean",
+                    "description": "Save the BLAST database to the output directory.",
+                    "default": false,
+                    "fa_icon": "fas fa-database"
                 }
             },
             "required": [

@@ -10,7 +10,7 @@ process CAT_NANOPORE_FASTQ {
   }
 
   input:
-  tuple val(meta), path(fqgz), path(fq)
+  tuple val(meta), path(fqgz, stageAs: "input*/*"), path(fq, stageAs: "input*/*")
 
   output:
   tuple val(meta), path(merged_fqgz), emit: reads
