@@ -133,6 +133,20 @@ Reference database in fasta file, sequence ID must be in format `SequenceName_se
 
 The output directory where the results will be saved.
 
+#### `--save_ncbi_db`
+
+- Type: boolean
+- Default: `false`
+
+Save the NCBI Influenza database FASTA and metadata CSV to the output directory.
+
+#### `--save_blastdb`
+
+- Type: boolean
+- Default: `false`
+
+Save the BLAST database to the output directory.
+
 ### IRMA assembly options
 
 #### `--irma_module`

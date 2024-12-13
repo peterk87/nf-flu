@@ -64,7 +64,10 @@ process CLAIR3 {
     --haploid_sensitive \\
     --enable_long_indel \\
     --keep_iupac_bases \\
-    --include_all_ctgs
+    --include_all_ctgs \\
+    --var_pct_phasing=1 \\
+    --var_pct_full=1 \\
+    --ref_pct_full=1
 
   ln -s ${clair3_dir}/merge_output.vcf.gz ${vcf}
 
