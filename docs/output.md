@@ -164,6 +164,8 @@ The report contains 2 sheets:
 
 A H/N subtyping Excel report is generated from all [BLAST analysis](#blast-analysis) results for all samples and final assembled gene segments. The H and N subtypes are based on the proportion of high-quality BLAST matches that support the subtype prediction, that is, the top BLAST match for the HA and NA segments does not determine the subtype since the metadata for the top match could be incorrectly entered into NCBI.
 
+More specifically, H and N subtype is predicted based on determining what the subtype is using the BLAST analysis results starting at a % identity threshold of 99% and decrementing by 1% until a subtype or the minimum % identity is reached (default: 85%). At least 3 hits are required to determine a subtype at a particular threshold. If no subtype is determined, the subtype is set to "N/A".
+
 The subtyping report spreadsheet contains four sheets:
 
 - **1_Subtype Predictions**: H/N subtype prediction results for each sample along with top matching Influenza DB segment for the H and N segments

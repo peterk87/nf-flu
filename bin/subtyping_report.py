@@ -22,7 +22,7 @@ import polars as pl
 from rich.logging import RichHandler
 
 LOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s [in %(filename)s:%(lineno)d]"
-logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 pl.enable_string_cache(True)
 
@@ -118,10 +118,12 @@ SUBTYPE_RESULTS_SUMMARY_COLUMNS = [
     "H_type",
     "H_virus_name",
     "H_NCBI_Influenza_DB_proportion_matches",
+    "H_NCBI_Influenza_DB_pident_threshold",
     "N_top_accession",
     "N_type",
     "N_virus_name",
     "N_NCBI_Influenza_DB_proportion_matches",
+    "N_NCBI_Influenza_DB_pident_threshold",
 ]
 
 H_COLUMNS = [
@@ -131,6 +133,7 @@ H_COLUMNS = [
     "H_NCBI_Influenza_DB_proportion_matches",
     "H_NCBI_Influenza_DB_subtype_matches",
     "H_NCBI_Influenza_DB_total_matches",
+    "H_NCBI_Influenza_DB_pident_threshold",
     "H_sample_segment_length",
     "H_top_align_length",
     "H_top_bitscore",
@@ -152,6 +155,7 @@ N_COLUMNS = [
     "N_NCBI_Influenza_DB_proportion_matches",
     "N_NCBI_Influenza_DB_subtype_matches",
     "N_NCBI_Influenza_DB_total_matches",
+    "N_NCBI_Influenza_DB_pident_threshold",
     "N_sample_segment_length",
     "N_top_align_length",
     "N_top_bitscore",
@@ -185,6 +189,7 @@ SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES = {
     "N_NCBI_Influenza_DB_proportion_matches": "N: NCBI Influenza DB subtype match proportion",
     "N_NCBI_Influenza_DB_subtype_matches": "N: NCBI Influenza DB subtype match count",
     "N_NCBI_Influenza_DB_total_matches": "N: NCBI Influenza DB total count",
+    "N_NCBI_Influenza_DB_pident_threshold": "N: NCBI Influenza DB % identity threshold",
     "H_type": "H: type prediction",
     "H_top_accession": "H: top match accession",
     "H_virus_name": "H: top match virus name",
@@ -201,6 +206,7 @@ SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES = {
     "H_NCBI_Influenza_DB_proportion_matches": "H: NCBI Influenza DB subtype match proportion",
     "H_NCBI_Influenza_DB_subtype_matches": "H: NCBI Influenza DB subtype match count",
     "H_NCBI_Influenza_DB_total_matches": "H: NCBI Influenza DB total count",
+    "H_NCBI_Influenza_DB_pident_threshold": "H: NCBI Influenza DB % identity threshold",
 }
 
 # Regex to find unallowed characters in Excel worksheet names
@@ -216,7 +222,7 @@ def parse_blast_result(
         pident_threshold: float = 0.85,
         min_aln_length: int = 50,
 ) -> Optional[Tuple[pl.DataFrame, Dict, str]]:
-    logging.info(f"Parsing BLAST results from {blast_result}")
+    logger.info(f"Parsing BLAST results from {blast_result}")
 
     try:
         df_filtered = (
@@ -234,14 +240,14 @@ def parse_blast_result(
             .collect(streaming=True)
         )
     except pl.exceptions.NoDataError:
-        logging.warning(f"No BLAST results found in {blast_result}")
+        logger.warning(f"No BLAST results found in {blast_result}")
         return None
 
     first_qaccver = df_filtered["qaccver"][0]
     sample_name: str = re.sub(r"^([\w\-]+)_\d$", r"\1", first_qaccver)
     if first_qaccver == sample_name:
         sample_name = re.sub(r"^(.+)_[1-8]_\w{1,3}$", r"\1", first_qaccver)
-    logging.info(
+    logger.info(
         f"{sample_name} | n={df_filtered.shape[0]} | Filtered for hits above {pident_threshold}% identity."
         f"and Min Alignment length > {min_aln_length}"
     )
@@ -251,7 +257,7 @@ def parse_blast_result(
         pl.col('qaccver').str.extract(f"{sample_name}_([1-8]).*").cast(pl.Categorical).alias("sample_segment"),
         pl.col("stitle").str.extract(regex_subtype_pattern).alias("subtype_from_match_title").cast(pl.Categorical)
     ])
-    logging.info(
+    logger.info(
         f"{sample_name} | Merging NCBI Influenza DB genome metadata with BLAST results on accession."
     )
     df_merge = df_filtered.join(df_metadata, on="#Accession", how="left")
@@ -268,7 +274,7 @@ def parse_blast_result(
     )
 
     segments = df_merge["sample_segment"].unique().sort()
-    logging.info(f"{segments=}")
+    logger.debug(f"{segments=}")
     dfs = [
         df_merge.filter(pl.col("sample_segment") == seg).head(top)
         for seg in segments
@@ -283,10 +289,10 @@ def parse_blast_result(
         H_results = None
         N_results = None
         if "4" in segments:
-            H_results = find_h_or_n_type(df_merge, "4", is_iav)
+            H_results = find_h_or_n_type(df_merge, "4", is_iav, min_pident=pident_threshold)
             subtype_results_summary |= H_results
         if "6" in segments:
-            N_results = find_h_or_n_type(df_merge, "6", is_iav)
+            N_results = find_h_or_n_type(df_merge, "6", is_iav, min_pident=pident_threshold)
             subtype_results_summary.update(N_results)
         subtype_results_summary["Genotype"] = get_subtype_value(H_results, N_results, is_iav)
 
@@ -324,35 +330,50 @@ def get_subtype_value(H_results: Optional[Dict], N_results: Optional[Dict], is_i
     return subtype
 
 
-def find_h_or_n_type(df_merge: pl.DataFrame, seg: str, is_iav: bool) -> Dict[str, Union[str, int, float]]:
+def find_h_or_n_type(
+        df_merge: pl.DataFrame,
+        seg: str,
+        is_iav: bool,
+        min_pident: float = 0.85,
+) -> Dict[str, Union[str, int, float]]:
     assert seg in {
         "4",
         "6",
     }, "Can only determine H or N type from segments 4 or 6, respectively!"
     h_or_n, type_name = ("H", "H_type") if seg == "4" else ("N", "N_type")
     df_segment = df_merge.filter(pl.col("sample_segment") == seg)
+    pident_threshold = min_pident
+    top_type = "N/A"
+    top_type_count = "N/A"
+    total_count = "N/A"
     if is_iav:
-        type_counts = df_segment["Genotype"].value_counts(sort=True)
-        type_counts = type_counts.filter(~pl.col("Genotype").is_null())
-        reg_h_or_n_type = "[Hh]" if h_or_n == "H" else "[Nn]"
-        df_type_counts = type_counts.with_columns(
-            pl.lit(type_counts["Genotype"].str.extract(reg_h_or_n_type + r"(\d+)").alias(type_name)))
-        df_type_counts = df_type_counts.filter(~pl.col(type_name).is_null())
-        logging.debug(f"{df_type_counts}")
-        type_to_count = defaultdict(int)
-        for x in df_type_counts.iter_rows(named=True):
-            type_to_count[x[type_name]] += x["counts"]
-        type_to_count = list(type_to_count.items())
-        type_to_count.sort(key=lambda x: x[1], reverse=True)
-        top_type, top_type_count = type_to_count[0]
-        total_count = type_counts["counts"].sum()
-        logging.info(
-            f"{h_or_n}{top_type} n={top_type_count}/{total_count} ({top_type_count / total_count:.1%})"
-        )
-    else:
-        top_type = "N/A"
-        top_type_count = "N/A"
-        total_count = "N/A"
+        # Low quality matches may lead to incorrect subtyping so we try to first filter for high quality matches
+        # start at 99% identity and work down to minimum threshold by 1% increments
+        for pident_threshold in range(99, int(min_pident * 100) - 1, -1):
+            df_filt = df_segment.filter((pl.col("pident") >= pident_threshold) & ~(pl.col("Genotype").is_null()))
+            if df_filt.shape[0] <= 2:
+                continue
+            type_counts = df_filt["Genotype"].value_counts(sort=True)
+            type_counts = type_counts.filter(~pl.col("Genotype").is_null())
+            reg_h_or_n_type = "[Hh]" if h_or_n == "H" else "[Nn]"
+            df_type_counts = type_counts.with_columns(
+                pl.lit(type_counts["Genotype"].str.extract(reg_h_or_n_type + r"(\d+)").alias(type_name)))
+            df_type_counts = df_type_counts.filter(~pl.col(type_name).is_null())
+            logger.debug(f"{df_type_counts=}")
+            type_to_count = defaultdict(int)
+            for x in df_type_counts.iter_rows(named=True):
+                type_to_count[x[type_name]] += x["counts"]
+            if len(type_to_count) == 0 and pident_threshold > min_pident * 100:
+                continue
+            type_to_count = list(type_to_count.items())
+            type_to_count.sort(key=lambda x: x[1], reverse=True)
+            logger.debug(f"{type_to_count=}")
+            top_type, top_type_count = type_to_count[0]
+            total_count = type_counts["counts"].sum()
+            logger.info(
+                f"{h_or_n}{top_type} n={top_type_count}/{total_count} ({top_type_count / total_count:.1%}) at {pident_threshold}% identity."
+            )
+            break
 
     top_result: Dict[str, Any] = list(df_segment.head(1).iter_rows(named=True))[0]
     results_summary = {
@@ -372,8 +393,9 @@ def find_h_or_n_type(df_merge: pl.DataFrame, seg: str, is_iav: bool) -> Dict[str
         f"{h_or_n}_NCBI_Influenza_DB_subtype_matches": top_type_count,
         f"{h_or_n}_NCBI_Influenza_DB_total_matches": total_count,
         f"{h_or_n}_NCBI_Influenza_DB_proportion_matches": top_type_count / total_count if is_iav else "N/A",
+        f"{h_or_n}_NCBI_Influenza_DB_pident_threshold": pident_threshold / 100,
     }
-    logging.info(f"Seg {seg} results: {results_summary}")
+    logger.info(f"Seg {seg} results: {results_summary}")
     return results_summary
 
 
@@ -388,6 +410,7 @@ def find_h_or_n_type(df_merge: pl.DataFrame, seg: str, is_iav: bool) -> Dict[str
 @click.option("--get-top-ref", default=False, help="Get top ref accession id from ncbi database.")
 @click.option("--sample-name", default="", help="Sample Name.")
 @click.option("--samplesheet", default="", help="samplesheet.csv to get order of samples.")
+@click.option("--verbose", is_flag=True, help="Enable verbose logging")
 @click.argument("blast_results", nargs=-1)
 def report(
         flu_metadata,
@@ -399,10 +422,12 @@ def report(
         get_top_ref,
         sample_name,
         samplesheet,
+        verbose,
 ):
-    init_logging()
+    init_logging(verbose)
+    logger.debug(f"{blast_results=}")
     if not blast_results:
-        logging.error("No BLAST results files specified!")
+        logger.error("No BLAST results files specified!")
         sys.exit(1)
 
     ordered_samples: Optional[List[str]] = None
@@ -411,15 +436,15 @@ def report(
         if samplesheet_path.resolve().exists():
             # force reading of samplesheet.csv columns as string data type
             ordered_samples = pl.read_csv(samplesheet_path, dtypes=[pl.Utf8, pl.Utf8])['sample'].to_list()
-            logging.info(f"Using samplesheet to order samples: {ordered_samples}")
+            logger.info(f"Using samplesheet to order samples: {ordered_samples}")
 
-    logging.info(f'Parsing Influenza metadata file "{flu_metadata}"')
+    logger.info(f'Parsing Influenza metadata file "{flu_metadata}"')
 
     df_md = read_refseq_metadata(flu_metadata)
 
     unique_subtypes = df_md.select("Genotype").unique()
     unique_subtypes = unique_subtypes.filter(~pl.col("Genotype").is_null())
-    logging.info(
+    logger.info(
         f"Parsed Influenza metadata file into DataFrame with n={df_md.shape[0]} rows and n={df_md.shape[1]} columns. "
         f"There are {len(unique_subtypes)} unique subtypes."
     )
@@ -459,9 +484,11 @@ def report(
         df_subtype_results = pd.DataFrame(all_subtype_results).transpose()
         ordered_sample_to_idx = {sample: idx for idx, sample in enumerate(ordered_samples)} if ordered_samples else None
 
-        cols = pd.Series(SUBTYPE_RESULTS_SUMMARY_COLUMNS)
-        cols = cols[cols.isin(df_subtype_results.columns)]
-        df_subtype_results = df_subtype_results[cols]
+        cols_concat = {}
+        for col in SUBTYPE_RESULTS_SUMMARY_COLUMNS + H_COLUMNS + N_COLUMNS:
+            if col in df_subtype_results.columns:
+                cols_concat[col] = ''
+        df_subtype_results = df_subtype_results[list(cols_concat.keys())]
 
         if ordered_samples and ordered_sample_to_idx:
             df_subtype_results = df_subtype_results.sort_values(
@@ -562,13 +589,13 @@ def read_refseq_metadata(flu_metadata):
     )
 
 
-def init_logging():
+def init_logging(verbose: bool = False) -> None:
     from rich.traceback import install
     install(show_locals=True, width=120, word_wrap=True)
     logging.basicConfig(
         format="%(message)s",
         datefmt="[%Y-%m-%d %X]",
-        level=logging.DEBUG,
+        level=logging.DEBUG if verbose else logging.INFO,
         handlers=[RichHandler(rich_tracebacks=True, tracebacks_show_locals=False)],
     )
 
@@ -589,12 +616,12 @@ def write_excel(
         output_dest: str,
         sheet_name_index: bool = True,
 ) -> None:
-    logging.info("Starting to write tabular data to worksheets in Excel workbook")
+    logger.info("Starting to write tabular data to worksheets in Excel workbook")
     with pd.ExcelWriter(output_dest, engine="xlsxwriter") as writer:
         idx = 1
         for name_df in name_dfs:
             if not isinstance(name_df, (list, tuple)):
-                logging.error(
+                logger.error(
                     'Input "%s" is not a list or tuple (type="%s"). Skipping...',
                     name_df,
                     type(name_df),
@@ -611,14 +638,14 @@ def write_excel(
                 fixed_sheetname = fixed_sheetname[:max_chars]
 
             if len(fixed_sheetname) > max_chars:
-                logging.warning(
+                logger.warning(
                     'Sheetname "%s" is >= %s characters so may be truncated (n=%s)',
                     max_chars,
                     fixed_sheetname,
                     len(fixed_sheetname),
                 )
 
-            logging.info(f'Writing table to Excel sheet "{fixed_sheetname}"')
+            logger.info(f'Writing table to Excel sheet "{fixed_sheetname}"')
             df.to_excel(
                 writer, sheet_name=fixed_sheetname, index=False, freeze_panes=(1, 1)
             )
@@ -626,7 +653,7 @@ def write_excel(
             for i, width in enumerate(get_col_widths(df, index=False)):
                 worksheet.set_column(i, i, width)
             idx += 1
-    logging.info('Done writing worksheets to spreadsheet "%s".', output_dest)
+    logger.info('Done writing worksheets to spreadsheet "%s".', output_dest)
 
 
 if __name__ == "__main__":
