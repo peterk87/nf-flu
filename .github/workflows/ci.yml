@@ -24,8 +24,6 @@ jobs:
   cacheroni:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out pipeline code
-        uses: actions/checkout@v4
       - name: Cache seqtk binary
         uses: actions/cache@v4
         id: cache-seqtk
@@ -84,6 +82,30 @@ jobs:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['22.10.1', '24.10.3']
     steps:
+      - name: Check out pipeline code
+        uses: actions/checkout@v4
+      - name: restore cached seqtk binary
+        uses: actions/cache/restore@v4
+        with:
+          path: /usr/local/bin/seqtk
+          key: seqtk
+      - name: restore cached influenza-10k.fna.zst
+        uses: actions/cache/restore@v4
+        with:
+          path: influenza-10k.fna.zst
+          key: influenza-fna
+      - name: restore cached influenza.csv.zst
+        uses: actions/cache/restore@v4
+        with:
+          path: influenza.csv.zst
+          key: influenza-csv
+      - name: restore cached vadr-models-flu-1.6.3-2.tar.gz
+        uses: actions/cache/restore@v4
+        with:
+          path: vadr-models-flu-1.6.3-2.tar.gz
+          key: vadr-models
+      - name: ls
+        run: ls -laht
       - name: pre - df, Docker df, Docker images
         if: ${{ always() }}
         run: |
@@ -152,6 +174,30 @@ jobs:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['22.10.1', '24.10.3']
     steps:
+      - name: Check out pipeline code
+        uses: actions/checkout@v4
+      - name: restore cached seqtk binary
+        uses: actions/cache/restore@v4
+        with:
+          path: /usr/local/bin/seqtk
+          key: seqtk
+      - name: restore cached influenza-10k.fna.zst
+        uses: actions/cache/restore@v4
+        with:
+          path: influenza-10k.fna.zst
+          key: influenza-fna
+      - name: restore cached influenza.csv.zst
+        uses: actions/cache/restore@v4
+        with:
+          path: influenza.csv.zst
+          key: influenza-csv
+      - name: restore cached vadr-models-flu-1.6.3-2.tar.gz
+        uses: actions/cache/restore@v4
+        with:
+          path: vadr-models-flu-1.6.3-2.tar.gz
+          key: vadr-models
+      - name: ls
+        run: ls -laht
       - name: pre - df, Docker df, Docker images
         if: ${{ always() }}
         run: |
