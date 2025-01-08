@@ -342,7 +342,7 @@ def find_h_or_n_type(
     }, "Can only determine H or N type from segments 4 or 6, respectively!"
     h_or_n, type_name = ("H", "H_type") if seg == "4" else ("N", "N_type")
     df_segment = df_merge.filter(pl.col("sample_segment") == seg)
-    pident_threshold = min_pident
+    pident_threshold = None
     top_type = "N/A"
     top_type_count = "N/A"
     total_count = "N/A"
@@ -393,7 +393,7 @@ def find_h_or_n_type(
         f"{h_or_n}_NCBI_Influenza_DB_subtype_matches": top_type_count,
         f"{h_or_n}_NCBI_Influenza_DB_total_matches": total_count,
         f"{h_or_n}_NCBI_Influenza_DB_proportion_matches": top_type_count / total_count if is_iav else "N/A",
-        f"{h_or_n}_NCBI_Influenza_DB_pident_threshold": pident_threshold / 100,
+        f"{h_or_n}_NCBI_Influenza_DB_pident_threshold": pident_threshold,
     }
     logger.info(f"Seg {seg} results: {results_summary}")
     return results_summary
