@@ -165,6 +165,13 @@ IRMA module to use for analysis.
 
 Set "DEL_TYPE=NNN" to keep deletions to reference sequence as N characters in consensus.
 
+#### `--irma_min_len`
+
+- Type: integer
+- Default: `50`
+
+IRMA minimum read length. This value should not be greater than the typical read length.
+
 ### Variant Calling options
 
 #### `--variant_caller`

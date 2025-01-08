@@ -14,48 +14,16 @@ env:
   # default ncbi_influenza_fasta and ncbi_influenza_metadata params
   FASTA_ZST_URL: https://api.figshare.com/v2/file/download/41415330
   CSV_ZST_URL: https://api.figshare.com/v2/file/download/41415333
+  VADR_MODEL_URL: https://ftp.ncbi.nlm.nih.gov/pub/nawrocki/vadr-models/flu/1.6.3-2/vadr-models-flu-1.6.3-2.tar.gz
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
   cancel-in-progress: true
 
 jobs:
-  test_illumina:
-    name: Run Illumina test
-    # Only run on push if this is the nf-flu dev branch (merged PRs)
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'CFIA-NCFAD/nf-flu') }}
+  cacheroni:
     runs-on: ubuntu-latest
-    env:
-      NXF_VER: ${{ matrix.nxf_ver }}
-      NXF_ANSI_LOG: false
-    strategy:
-      matrix:
-        # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['22.10.1', '24.04.4']
     steps:
-      - name: Check out pipeline code
-        uses: actions/checkout@v4
-      - name: pre - df, Docker df, Docker images
-        if: ${{ always() }}
-        run: |
-          df -h
-          docker system df
-          docker images
-      - name: Cache Nextflow binary
-        uses: actions/cache@v4
-        id: cache-nextflow
-        with:
-          path: |
-            /usr/local/bin/nextflow
-            ~/.nextflow
-          key: nextflow-${{ matrix.nxf_ver }}
-      - name: Install Nextflow
-        if: steps.cache-nextflow.outputs.cache-hit != 'true'
-        env:
-          CAPSULE_LOG: none
-        run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
       - name: Cache seqtk binary
         uses: actions/cache@v4
         id: cache-seqtk
@@ -90,51 +58,54 @@ jobs:
         if: steps.cache-influenza-csv.outputs.cache-hit != 'true'
         run: |
           curl --silent -SLk ${CSV_ZST_URL} > influenza.csv.zst
-      - name: Run pipeline with test data
+      - name: Cache VADR flu model tar.gz
+        uses: actions/cache@v4
+        id: cache-vadr-models
+        with:
+          path: vadr-models-flu-1.6.3-2.tar.gz
+          key: vadr-models
+      - name: Download VADR flu model tar.gz
+        if: steps.cache-vadr-models.outputs.cache-hit != 'true'
         run: |
-          nextflow run ${GITHUB_WORKSPACE} \
-            -profile test_illumina,docker \
-            --ncbi_influenza_fasta influenza-10k.fna.zst \
-            --ncbi_influenza_metadata influenza.csv.zst
-      - name: post - df, Docker df, Docker images
-        if: ${{ always() }}
-        run: |
-          df -h
-          docker system df
-          docker images
-      - name: Upload Artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: illumina-test-results-${{ matrix.nxf_ver }}
-          path: results/pipeline_info
-      - name: Upload .nextflow.log
-        uses: actions/upload-artifact@v4
-        with:
-          name: nextflow-log-illumina-${{ matrix.nxf_ver }}
-          path: .nextflow.log
-      - name: Upload multiqc_report.html
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: illumina-test-results-multiqc-${{ matrix.nxf_ver }}
-          path: results/MultiQC/multiqc_report.html
-
-  test_nanopore:
-    name: Run Nanopore test
+          curl --silent -SLk ${VADR_MODEL_URL} > vadr-models-flu-1.6.3-2.tar.gz
+  test_illumina:
+    name: Run Illumina test
     # Only run on push if this is the nf-flu dev branch (merged PRs)
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'CFIA-NCFAD/nf-flu') }}
     runs-on: ubuntu-latest
+    needs: cacheroni
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['22.10.1', '24.04.4']
+        nxf_ver: ['22.10.1', '24.10.3']
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v4
+      - name: restore cached seqtk binary
+        uses: actions/cache/restore@v4
+        with:
+          path: /usr/local/bin/seqtk
+          key: seqtk
+      - name: restore cached influenza-10k.fna.zst
+        uses: actions/cache/restore@v4
+        with:
+          path: influenza-10k.fna.zst
+          key: influenza-fna
+      - name: restore cached influenza.csv.zst
+        uses: actions/cache/restore@v4
+        with:
+          path: influenza.csv.zst
+          key: influenza-csv
+      - name: restore cached vadr-models-flu-1.6.3-2.tar.gz
+        uses: actions/cache/restore@v4
+        with:
+          path: vadr-models-flu-1.6.3-2.tar.gz
+          key: vadr-models
+      - name: ls
+        run: ls -laht
       - name: pre - df, Docker df, Docker images
         if: ${{ always() }}
         run: |
@@ -156,20 +127,98 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Cache seqtk binary
-        uses: actions/cache@v4
-        id: cache-seqtk
+      - name: Run pipeline with test data
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} \
+            -profile test_illumina,docker \
+            --ncbi_influenza_fasta influenza-10k.fna.zst \
+            --ncbi_influenza_metadata influenza.csv.zst \
+            --vadr_model_targz vadr-models-flu-1.6.3-2.tar.gz
+      - name: post - df, Docker df, Docker images
+        if: ${{ always() }}
+        run: |
+          df -h
+          docker system df
+          docker images
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: illumina-test-results-${{ matrix.nxf_ver }}
+          path: results/pipeline_info
+      - name: Upload .nextflow.log
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextflow-log-illumina-${{ matrix.nxf_ver }}
+          path: .nextflow.log
+          include-hidden-files: true
+      - name: Upload multiqc_report.html
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: illumina-test-results-multiqc-${{ matrix.nxf_ver }}
+          path: results/MultiQC/multiqc_report.html
+
+  test_nanopore:
+    name: Run Nanopore test
+    # Only run on push if this is the nf-flu dev branch (merged PRs)
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'CFIA-NCFAD/nf-flu') }}
+    runs-on: ubuntu-latest
+    needs: cacheroni
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
+    strategy:
+      matrix:
+        # Nextflow versions: check pipeline minimum and current latest
+        nxf_ver: ['22.10.1', '24.10.3']
+    steps:
+      - name: Check out pipeline code
+        uses: actions/checkout@v4
+      - name: restore cached seqtk binary
+        uses: actions/cache/restore@v4
         with:
           path: /usr/local/bin/seqtk
           key: seqtk
-      - name: Build and install seqtk
-        if: steps.cache-seqtk.outputs.cache-hit != 'true'
+      - name: restore cached influenza-10k.fna.zst
+        uses: actions/cache/restore@v4
+        with:
+          path: influenza-10k.fna.zst
+          key: influenza-fna
+      - name: restore cached influenza.csv.zst
+        uses: actions/cache/restore@v4
+        with:
+          path: influenza.csv.zst
+          key: influenza-csv
+      - name: restore cached vadr-models-flu-1.6.3-2.tar.gz
+        uses: actions/cache/restore@v4
+        with:
+          path: vadr-models-flu-1.6.3-2.tar.gz
+          key: vadr-models
+      - name: ls
+        run: ls -laht
+      - name: pre - df, Docker df, Docker images
+        if: ${{ always() }}
         run: |
-          git clone --depth=1 https://github.com/lh3/seqtk.git
-          cd seqtk
-          make -j2
-          make install
-          which seqtk
+          df -h
+          docker system df
+          docker images
+      - name: Cache Nextflow binary
+        uses: actions/cache@v4
+        id: cache-nextflow
+        with:
+          path: |
+            /usr/local/bin/nextflow
+            ~/.nextflow
+          key: nextflow-${{ matrix.nxf_ver }}
+      - name: Install Nextflow
+        if: steps.cache-nextflow.outputs.cache-hit != 'true'
+        env:
+          CAPSULE_LOG: none
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
       - name: Cache test sample reads
         uses: actions/cache@v4
         id: cache-reads
@@ -204,26 +253,6 @@ jobs:
           echo "ntc-bc15,$(realpath reads/ntc-bc15.fastq.gz)" | tee -a samplesheet.csv
           echo "ntc-bc31,$(realpath reads/ntc-bc31.fastq.gz)" | tee -a samplesheet.csv
           echo "ntc-bc47,$(realpath reads/ntc-bc47.fastq.gz)" | tee -a samplesheet.csv
-      - name: Cache subsampled influenza.fna
-        uses: actions/cache@v4
-        id: cache-influenza-fna
-        with:
-          path: influenza-10k.fna.zst
-          key: influenza-fna
-      - name: Subsample NCBI influenza.fna
-        if: steps.cache-influenza-fna.outputs.cache-hit != 'true'
-        run: |
-          curl --silent -SLk ${FASTA_ZST_URL} | zstdcat | seqtk sample -s 789 - 10000 | zstd -ck > influenza-10k.fna.zst
-      - name: Cache influenza.csv
-        uses: actions/cache@v4
-        id: cache-influenza-csv
-        with:
-          path: influenza.csv.zst
-          key: influenza-csv
-      - name: Download influenza.csv
-        if: steps.cache-influenza-csv.outputs.cache-hit != 'true'
-        run: |
-          curl --silent -SLk ${CSV_ZST_URL} > influenza.csv.zst
       - name: Run pipeline with test data
         run: |
           nextflow run ${GITHUB_WORKSPACE} \
@@ -231,7 +260,8 @@ jobs:
             --platform nanopore \
             --input samplesheet.csv \
             --ncbi_influenza_fasta influenza-10k.fna.zst \
-            --ncbi_influenza_metadata influenza.csv.zst
+            --ncbi_influenza_metadata influenza.csv.zst \
+            --vadr_model_targz vadr-models-flu-1.6.3-2.tar.gz
       - name: Tree of results
         run: tree -h results/
       - name: post - df, Docker df, Docker images
@@ -241,10 +271,12 @@ jobs:
           docker system df
           docker images
       - name: Upload .nextflow.log
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: nextflow-log-nanopore-${{ matrix.nxf_ver }}
           path: .nextflow.log
+          include-hidden-files: true
       - name: Upload pipeline_info/
         if: success()
         uses: actions/upload-artifact@v4

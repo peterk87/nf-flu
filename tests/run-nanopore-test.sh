@@ -40,6 +40,7 @@ info() {
 WORKFLOW_PATH="CFIA-NCFAD/nf-flu"
 CPU=$(nproc)
 MEMORY="8 GB"
+PROFILE="test_nanopore,docker"
 
 print_help() {
     echo "Usage: $0 [-w WORKFLOW_PATH] [-m MEMORY] [-c CPU]"
@@ -48,14 +49,16 @@ print_help() {
     echo "  -w WORKFLOW_PATH    Path to the Nextflow workflow (default: ${WORKFLOW_PATH})"
     echo "  -m MEMORY           Memory allocation for the Nextflow run (default: ${MEMORY})"
     echo "  -c CPU              CPU allocation for the Nextflow run (default: ${CPU})"
+    echo "  -p PROFILE          Nextflow profile to use (default: ${PROFILE})"
     echo "  -h                  Display this help message"
 }
 
-while getopts "w:m:c:h" opt; do
+while getopts "w:m:c:p:h" opt; do
     case $opt in
         w) WORKFLOW_PATH=$OPTARG ;;
         m) MEMORY=$OPTARG ;;
         c) CPU=$OPTARG ;;
+        p) PROFILE=$OPTARG ;;
         h) print_help; exit 0 ;;
         \?) error "Invalid option: -$OPTARG" >&2; print_help; exit 1 ;;
         :) error "Option -$OPTARG requires an argument." >&2; print_help; exit 1 ;;
@@ -135,7 +138,7 @@ else
 fi
 
 nextflow run "$WORKFLOW_PATH" \
-    -profile test_nanopore,docker \
+    -profile $PROFILE \
     -resume \
     --platform nanopore \
     --input samplesheet.csv \

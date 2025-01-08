@@ -30,20 +30,20 @@ process SUBTYPING_REPORT {
 
   output:
   path('nf-flu-subtyping-report.xlsx'), emit: report
-  path('parse_influenza_blast_results.log'), emit: log
+  path('subtyping_report.log'), emit: log
   path "versions.yml", emit: versions
 
   script:
   """
-  parse_influenza_blast_results.py \\
+  subtyping_report.py \\
    --flu-metadata $genomeset \\
    --top ${params.max_top_blastn} \\
    --excel-report nf-flu-subtyping-report.xlsx \\
-   --pident-threshold $params.pident_threshold \\
+   --pident-threshold ${params.pident_threshold} \\
    --samplesheet $samplesheet \\
    $blastn_results
 
-  ln -s .command.log parse_influenza_blast_results.log
+  ln -s .command.log subtyping_report.log
 
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
