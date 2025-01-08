@@ -19,7 +19,7 @@ process PULL_TOP_REF_ID {
 
   script:
   """
-  parse_influenza_blast_results.py \\
+  subtyping_report.py \\
     --flu-metadata $genomeset \\
     --get-top-ref True \\
     --top 1 \\

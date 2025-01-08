@@ -3,6 +3,20 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.6.2](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.6.2)] - 2025-01-07
+
+This patch release fixes issues relating to subtype prediction (N5) (#100), Apptainer usage (#95) and IRMA read length threshold (#99).
+
+### Changes
+
+* chore: renamed: `bin/parse_influenza_blast_results.py` -> `bin/subtyping_report.py`
+* fix: N5 sequences being typed as N1 due to the high proportion of lower % identity hits to N1 sequences (#100). In `bin/subtyping_report.py`, H and N subtype is predicted based on determining what the subtype is using the BLAST analysis results starting at a % identity threshold of 99% and decrementing by 1% until a subtype or the minimum % identity is reached (default: 85%). At least 3 hits are required to determine a subtype at a particular threshold. If no subtype is determined, the subtype is set to "N/A".
+* fix: added back missing results columns to subtyping report H and N subtyping sheets.
+* fix: Added workflow parameter `--irma_min_len` to be able to change the minimum read length threshold for IRMA assembly (`MIN_LEN`) and set default to 50 instead of 125. nf-flu should now be compatible with BGI sequencing data producing shorter paired-end reads by running with `--platform illumina` (#99).
+* fix: `-profile apptainer` is functionally the same as `-profile singularity`. The same configuration is set for the Apptainer profile as for the Singularity one. If a user has Apptainer installed, running `$ singularity ...` and `$ apptainer ...` should be equivalent, e.g. both `$ apptainer --version` and `$ singularity --version` produce `apptainer version 1.3.6`. (#95)
+* ci: updated ci.yml for better cache handling and inter-job caching of VADR flu model tar.gz
+* config: `--max_top_blastn` default changed 3 -> 5. Top 5 BLASTN hits will be shown for each segment for each sample in subtyping report.
+
 ## [[3.6.1](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.6.1)] - 2024-12-13
 
 This patch release fixes an issue with Clair3 not producing variant calls for some regions due to full-alignment not being triggered. This issue was resolved by adding `--var_pct_phasing=1`, `--var_pct_full=1` and `--ref_pct_full=1` to the Clair3 command line.

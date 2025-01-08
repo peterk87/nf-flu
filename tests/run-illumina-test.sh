@@ -41,6 +41,7 @@ WORKFLOW_PATH="CFIA-NCFAD/nf-flu"
 SUBSAMPLE_INFLUENZA_FASTA=false
 CPU=$(nproc)
 MEMORY="8 GB"
+PROFILE="test_illumina,docker"
 
 print_help() {
     echo "Usage: $0 [-w WORKFLOW_PATH] [-m MEMORY] [-c CPU]"
@@ -52,15 +53,17 @@ print_help() {
     echo "  -s SUBSAMPLE_INFLUENZA_FASTA  Subsample the Influenza FASTA file the same way as GitHub Actions CI (default: ${SUBSAMPLE_INFLUENZA_FASTA})"
     echo "  -m MEMORY                     Memory allocation for the Nextflow run (default: ${MEMORY})"
     echo "  -c CPU                        CPU allocation for the Nextflow run (default: ${CPU})"
+    echo "  -p PROFILE                    Nextflow profile to use (default: ${PROFILE})"
     echo "  -h                            Display this help message"
 }
 
-while getopts "w:s:m:c:h" opt; do
+while getopts "w:s:m:c:p:h" opt; do
     case $opt in
         w) WORKFLOW_PATH=$OPTARG ;;
         s) SUBSAMPLE_INFLUENZA_FASTA=true ;;
         m) MEMORY=$OPTARG ;;
         c) CPU=$OPTARG ;;
+        p) PROFILE=$OPTARG ;;
         h) print_help; exit 0 ;;
         \?) error "Invalid option: -$OPTARG" >&2; print_help; exit 1 ;;
         :) error "Option -$OPTARG requires an argument." >&2; print_help; exit 1 ;;
@@ -109,7 +112,7 @@ else
 fi
 
 nextflow run "$WORKFLOW_PATH" \
-    -profile test_illumina,docker \
+    -profile $PROFILE \
     -resume \
     --ncbi_influenza_fasta $FASTA_ZST_FILE \
     --ncbi_influenza_metadata $CSV_ZST_FILE \
