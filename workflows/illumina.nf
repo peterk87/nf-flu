@@ -262,7 +262,7 @@ workflow ILLUMINA {
 
   // Pass consensus sequences to GENOFLU
   GENOFLU(ch_cat_consensus_fasta)
-  //ch_versions = ch_versions.mix(GENOFLU.out.versions)
+  ch_versions = ch_versions.mix(GENOFLU.out.versions)
 
   BLAST_BLASTN_CONSENSUS(ch_cat_consensus, BLAST_MAKEBLASTDB_NCBI.out.db)
   ch_versions = ch_versions.mix(BLAST_BLASTN_CONSENSUS.out.versions)
