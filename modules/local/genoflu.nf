@@ -4,7 +4,6 @@ process GENOFLU {
   conda 'bioconda::genoflu=1.05'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
     container 'https://depot.galaxyproject.org/singularity/genoflu:1.05--hdfd78af_0'
-    //container 'staphb/genoflu:1.05'
   } else {
     container 'quay.io/biocontainers/genoflu:1.05--hdfd78af_0'
   }
@@ -20,11 +19,11 @@ process GENOFLU {
   script:
   """
   genoflu.py \\
-    -f $consensus_fasta \
-	-n ${id}
-    
-	mv ${id}*tsv ${id}_genoflu.tsv
-	mv ${id}*xlsx ${id}_genoflu.xlsx
+    -f $consensus_fasta \\
+    -n ${id}
+
+  mv ${id}*.tsv ${id}_genoflu.tsv
+  mv ${id}*.xlsx ${id}_genoflu.xlsx
 
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
