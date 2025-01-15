@@ -1,4 +1,5 @@
 process GENOFLU {
+  tag "$sample"
   label 'process_low'
 
   conda 'bioconda::genoflu=1.05'
@@ -9,25 +10,25 @@ process GENOFLU {
   }
 
   input:
-  tuple val(id), path(consensus_fasta)
+  tuple val(sample), path(consensus_fasta)
 
   output:
-  tuple val(id), path("${id}*tsv"), optional: true, emit: tsv
-  tuple val(id), path("${id}*xlsx"), optional: true, emit: xlsx
+  tuple val(sample), path("${sample}.genoflu.tsv"), optional: true, emit: tsv
+  tuple val(sample), path("${sample}.genoflu.xlsx"), optional: true, emit: xlsx
   path "versions.yml" , emit: versions
 
   script:
   """
   genoflu.py \\
     -f $consensus_fasta \\
-    -n ${id}
+    -n ${sample}
 
-  mv ${id}*.tsv ${id}_genoflu.tsv
-  mv ${id}*.xlsx ${id}_genoflu.xlsx
+  mv ${sample}*.tsv ${sample}.genoflu.tsv
+  mv ${sample}*.xlsx ${sample}.genoflu.xlsx
 
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
-      genoflu: \$(genoflu.py --version 2>&1 | sed 's/^.*genoflu\.py: version //;s/, .*//')
+      genoflu: \$(genoflu.py --version 2>&1 | sed 's/^.*version //')
   END_VERSIONS
   """
 }
