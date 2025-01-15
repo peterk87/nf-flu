@@ -34,6 +34,7 @@ include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS_REF_DB       } from '../modules
 include { SETUP_FLU_VADR_MODEL; VADR; VADR_SUMMARIZE_ISSUES   } from '../modules/local/vadr'
 include { PRE_TABLE2ASN; TABLE2ASN; POST_TABLE2ASN            } from '../modules/local/table2asn'
 include { FLUMUT; PREP_FLUMUT_FASTA                           } from '../modules/local/flumut'
+include { GENOFLU                                             } from '../modules/local/genoflu'
 include { MULTIQC                                             } from '../modules/local/multiqc'
 include { MQC_VERSIONS_TABLE } from '../modules/local/mqc_versions_table'
 
@@ -262,6 +263,14 @@ workflow NANOPORE {
   CAT_CONSENSUS.out.fasta
     .map { [[id:it[0]], it[1]] }
     .set { ch_cat_consensus }
+	
+  CAT_CONSENSUS.out.consensus_fasta
+    .map { [it[0], it[1]] }
+    .set { ch_cat_consensus_fasta }
+
+  // Pass consensus sequences to GENOFLU
+  GENOFLU(ch_cat_consensus_fasta)
+  //ch_versions = ch_versions.mix(GENOFLU.out.versions)
 
   BLAST_BLASTN_CONSENSUS(ch_cat_consensus, BLAST_MAKEBLASTDB_NCBI.out.db)
   ch_versions = ch_versions.mix(BLAST_BLASTN_CONSENSUS.out.versions)

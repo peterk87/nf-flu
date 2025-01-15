@@ -53,6 +53,7 @@ include { TABLE2ASN as TABLE2ASN_BCFTOOLS                                       
 include { POST_TABLE2ASN as POST_TABLE2ASN_BCFTOOLS                                        } from '../modules/local/table2asn'
 include { MQC_VERSIONS_TABLE                                                               } from '../modules/local/mqc_versions_table'
 include { FLUMUT; PREP_FLUMUT_FASTA                                                        } from '../modules/local/flumut'
+include { GENOFLU                                                                          } from '../modules/local/genoflu'
 
 //=============================================================================
 // Workflow Params Setup
@@ -254,6 +255,14 @@ workflow ILLUMINA {
   CAT_CONSENSUS.out.fasta
     .map { [[id:it[0]], it[1]] }
     .set { ch_cat_consensus }
+	
+  CAT_CONSENSUS.out.consensus_fasta
+    .map { [it[0], it[1]] }
+    .set { ch_cat_consensus_fasta }
+
+  // Pass consensus sequences to GENOFLU
+  GENOFLU(ch_cat_consensus_fasta)
+  //ch_versions = ch_versions.mix(GENOFLU.out.versions)
 
   BLAST_BLASTN_CONSENSUS(ch_cat_consensus, BLAST_MAKEBLASTDB_NCBI.out.db)
   ch_versions = ch_versions.mix(BLAST_BLASTN_CONSENSUS.out.versions)
