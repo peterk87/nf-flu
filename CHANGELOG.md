@@ -3,6 +3,15 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.7.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.7.0)] - 2025
+
+This minor release adds GenoFLU for H5 genotyping and a script to find and classify HA cleavage sites (monobasic/multibasic, low/high pathogenicity) in Influenza A viruses.
+
+### Changes
+
+* feat: GenoFLU v1.05 for H5 genotyping.
+* feat: `bin/cleavage_site.py` to find and classify HA cleavage sites.
+
 ## [[3.6.2](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.6.2)] - 2025-01-07
 
 This patch release fixes issues relating to subtype prediction (N5) (#100), Apptainer usage (#95) and IRMA read length threshold (#99).

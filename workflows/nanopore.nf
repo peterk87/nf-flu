@@ -273,7 +273,7 @@ workflow NANOPORE {
   GENOFLU(ch_cat_consensus_fasta)
   ch_versions = ch_versions.mix(GENOFLU.out.versions)
   
-  CLEAVAGE_SITE(ch_cat_consensus_fasta)
+  CLEAVAGE_SITE(POST_TABLE2ASN.out.cds_aa_fasta)
   ch_versions = ch_versions.mix(CLEAVAGE_SITE.out.versions)
 
   BLAST_BLASTN_CONSENSUS(ch_cat_consensus, BLAST_MAKEBLASTDB_NCBI.out.db)

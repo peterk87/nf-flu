@@ -10,7 +10,7 @@ process CLEAVAGE_SITE {
   }
   
   input:
-  tuple val(sample), path(consensus_fasta)
+  tuple val(sample), path(cds_aa_fasta)
 
   output:
   path("${sample}.cleavage.tsv"), optional: true, emit: tsv
@@ -19,13 +19,12 @@ process CLEAVAGE_SITE {
   script:
   """
   cleavage_site.py \\
-    -i ${sample}.consensus.fasta \\
-    -o ${sample}.cleavage.tsv \\
-    -s ${sample}
+    -i $cds_aa_fasta \\
+    -o ${sample}.cleavage.tsv
   
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
-     python: \$(python --version | sed 's/Python //g')
+      cleavage_site.py: \$(cleavage_site.py --version 2>&1)
   END_VERSIONS
   """
 }

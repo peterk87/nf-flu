@@ -16,6 +16,9 @@ The directories listed below will be created in the results directory after the 
 - [H/N Subtyping](#hn-subtyping)
 - [Annotation](#annotation)
 - [FluMut](#flumut)
+- [GenoFLU](#genoflu)
+- [Cleavage Site Prediction](#cleavage-site-prediction)
+- [Pipeline Information](#pipeline-information)
 
 ### IRMA
 
@@ -278,6 +281,28 @@ Consensus sequences are analyzed using [FluMut] to identify mutations of interes
   - `flumut-markers.tsv`: Tab-separated file containing the list of detected markers by FluMut analysis.
   - `flumut-mutations.tsv`: Tab-separated file containing the list of amino acids present in the positions of mutations of interest for each sample by FluMut analysis.
   - `seqs-for-flumut.fasta`: FASTA file containing the sequences of the samples that were analyzed by FluMut.
+
+### GenoFLU
+
+[GenoFlu](https://github.com/USDA-VS/GenoFLU/) "was developed to classify HPAI H5N1 goose/Guangdong clade 2.3.4.4b viruses detected in North American flyways. This tool considers all eight gene segments and can classify clade 2.3.4.4b viruses that have reassorted with North American low pathogenic viruses. The GenoFLU tool was developed for North America utilizing references detected primarily within the United States. The A1 GenoFLU genotype corresponds to the European National Reference Laboratory (EURL) genotype “C”, which is Eurasian wigeon/Netherlands-like virus that was predominant at the time the A1 virus was initially identified in Newfoundland."
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `genoflu/`
+  - `<sample>.genoflu.tsv`: Tab-separated file containing the results of the GenoFLU analysis for each sample.
+  - `<sample>.genoflu.xlsx`: Excel file containing the results of the GenoFLU analysis for each sample.
+
+### Cleavage Site Prediction
+
+HA cleavage site prediction is performed using `bin/cleavage_site.py` with the [VADR][] annotation sequences. 
+The script will also classify the pathogenicity of the cleavage site based on the predicted cleavage site sequence.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `cleavage/`
+  - `<sample>.cleavage.tsv`: Tab-separated file containing the results of the cleavage site prediction analysis for each sample.
 
 ### Pipeline information
 
