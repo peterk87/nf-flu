@@ -19,8 +19,9 @@ process CLEAVAGE_SITE {
   script:
   """
   cleavage_site.py \\
-    -i $cds_aa_fasta \\
-    -o ${sample}.cleavage.tsv
+    $cds_aa_fasta \\
+    ${sample}.cleavage.tsv \\
+    --verbose
   
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
