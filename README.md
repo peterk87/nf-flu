@@ -248,6 +248,7 @@ Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney
 [Docker]: https://www.docker.com/
 [FluMut]: https://github.com/izsvenezie-virology/FluMut
 [Freebayes]: https://github.com/freebayes/freebayes
+[GenoFLU]: https://github.com/USDA-VS/GenoFLU
 [IRMA]: https://wonder.cdc.gov/amd/flu/irma/
 [Medaka]: https://github.com/nanoporetech/medaka
 [Minimap2]: https://github.com/lh3/minimap2/

@@ -295,7 +295,7 @@ Consensus sequences are analyzed using [FluMut] to identify mutations of interes
 
 ### Cleavage Site Prediction
 
-HA cleavage site prediction is performed using `bin/cleavage_site.py` with the [VADR][] annotation sequences. 
+HA cleavage site prediction is performed using `bin/cleavage_site.py` with the [VADR][] annotation sequences.
 The script will also classify the pathogenicity of the cleavage site based on the predicted cleavage site sequence.
 
 <details markdown="1">
