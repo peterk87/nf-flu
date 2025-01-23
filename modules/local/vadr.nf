@@ -10,6 +10,7 @@ process SETUP_FLU_VADR_MODEL {
 
   input:
   path(model_targz)
+  path(custom_flu_minfo)
 
   output:
   path("vadr-model/")
@@ -18,6 +19,9 @@ process SETUP_FLU_VADR_MODEL {
   """
   mkdir -p vadr-model
   tar -xzf $model_targz -C vadr-model --strip-components=1
+  if [ -f $custom_flu_minfo ]; then
+    cp $custom_flu_minfo vadr-model/flu.minfo
+  fi
   """
 }
 

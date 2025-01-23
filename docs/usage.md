@@ -304,6 +304,22 @@ Path/URL to Zstandard compressed NCBI Influenza virus sequences FASTA file.
 
 Path/URL to Zstandard compressed NCBI Influenza virus sequences metadata CSV file.
 
+### Annotation options
+
+#### `--vadr_model_targz`
+
+- Type: string
+- Default: `https://zenodo.org/records/13261208/files/vadr-models-flu-1.6.3-2.tar.gz`
+
+Path/URL to the VADR model tarball (.tar.gz) to use for annotation.
+
+#### `--custom_flu_minfo`
+
+- Type: string
+- Default: `https://gist.github.com/peterk87/0aed5662c55b12da80a86104a967099e/raw/d17b8d14224e29350a720d054543bf4540d41aa5/flu.minfo`
+
+Path/URL to the custom VADR flu.minfo file to use for annotation. Default is the same as flu model v1.6.3-2 except with cleavage site misc_features.
+
 ### Generic options
 
 Less common options for the pipeline, typically set in a config file.

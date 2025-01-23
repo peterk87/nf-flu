@@ -30,7 +30,9 @@ After reference sequence selection, the pipeline performs read mapping to each r
 7. Read mapping, variant calling and consensus sequence generation for each segment against top reference sequence based on BLAST results.
 8. Annotation of consensus sequences with [VADR][]
 9. [FluMut][] detection of molecular markers and mutation in Influenza A(H5N1) viruses.
-10. [MultiQC][] report generation.
+10. [GenoFLU][] genotyping of North American H5 viruses.
+11. HA cleavage site prediction and classification
+12. [MultiQC][] report generation.
 
 ## Quick Start
 
@@ -132,6 +134,17 @@ https://github.com/izsvenezie-virology/FluMut
 Garrison, E., Marth, G., 2012. Haplotype-based variant detection from short-read sequencing. arXiv:1207.3907 [q-bio]. https://doi.org/10.48550/arXiv.1207.3907
 ```
 
+### [GenoFLU][]
+
+[GenoFLU][] "identifies the genotype of North American H5 2.3.4.4b viruses as well as providing information on individual segments when a sequence does not belong to a defined genotype".
+
+```text
+Youk S, Torchetti MK, Lantz K, Lenoch JB, Killian ML, Leyson C, Bevins SN, Dilione K, Ip HS, Stallknecht DE, Poulson RL, Suarez DL, Swayne DE, Pantin-Jackwood MJ. 
+H5N1 highly pathogenic avian influenza clade 2.3.4.4b in wild and domestic birds: Introductions into the United States and reassortments, December 2021-April 2022. Virology. 2023 Oct;587:109860. doi: 10.1016/j.virol.2023.109860. Epub 2023 Aug 2. PMID: 37572517.
+```
+
+> **NOTE:** The authors recommend citing the [Youk et al paper](https://doi.org/10.1016/j.virol.2023.109860) according to [GenoFLU issue #10](https://github.com/USDA-VS/GenoFLU/issues/10).
+
 ### [IRMA][] Iterative Refinement Meta-Assembler
 
 ```text
@@ -219,6 +232,7 @@ Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney
 * [Peter Kruczkiewicz](https://github.com/peterk87) ([CFIA-NCFAD](https://github.com/CFIA-NCFAD)) - lead developer
 * [Hai Nguyen](https://github.com/nhhaidee) ([CFIA-NCFAD](https://github.com/CFIA-NCFAD)) - Nanopore workflow
 * [Abdallah Meknas](https://github.com/ameknas-phac) (Influenza, Respiratory Viruses, and Coronavirus Section (IRVC), Public Health Agency of Canada (PHAC)) - expansion of the Illumina workflow
+* [Cass Erdelyan](https://github.com/cerdelyan/) ([CFIA-NCFAD](https://github.com/CFIA-NCFAD)) - development, testing and valuable feedback
 
 ## Credits
 
@@ -234,6 +248,7 @@ Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney
 [Docker]: https://www.docker.com/
 [FluMut]: https://github.com/izsvenezie-virology/FluMut
 [Freebayes]: https://github.com/freebayes/freebayes
+[GenoFLU]: https://github.com/USDA-VS/GenoFLU
 [IRMA]: https://wonder.cdc.gov/amd/flu/irma/
 [Medaka]: https://github.com/nanoporetech/medaka
 [Minimap2]: https://github.com/lh3/minimap2/
