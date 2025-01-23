@@ -689,11 +689,13 @@ def report(
         df_all_blast_pandas = df_all_blast_pandas.rename(
             columns=dict(BLAST_RESULTS_REPORT_COLUMNS)
         )
-        df_subtype_predictions = df_subtype_results[SUBTYPE_RESULTS_SUMMARY_COLUMNS].rename(
-            columns=SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES
-        )
+        df_subtype_predictions = df_subtype_results[SUBTYPE_RESULTS_SUMMARY_COLUMNS]
         if vadr_sample_subtype:
-            df_subtype_predictions['VADR Subtype'] = df_subtype_predictions['Sample'].map(vadr_sample_subtype)
+            df_subtype_predictions['VADR Subtype'] = df_subtype_predictions['sample'].map(vadr_sample_subtype)
+            cols = [*SUBTYPE_RESULTS_SUMMARY_COLUMNS]
+            cols.insert(2, 'VADR Subtype')
+            df_subtype_predictions = df_subtype_predictions[cols]
+        df_subtype_predictions = df_subtype_predictions.rename(columns=SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES)
         df_H = df_H.rename(columns=SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES)
         df_N = df_N.rename(columns=SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES)
         # Write each dataframe to a separate sheet in the excel report
