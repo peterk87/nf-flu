@@ -172,6 +172,7 @@ workflow NANOPORE {
     SUBTYPING_REPORT_IRMA_CONSENSUS(
       ZSTD_DECOMPRESS_CSV.out.file,
       ch_blast_irma,
+      [],
       CHECK_SAMPLE_SHEET.out
     )
   }
@@ -280,9 +281,12 @@ workflow NANOPORE {
   ch_versions = ch_versions.mix(BLAST_BLASTN_CONSENSUS.out.versions)
 
   ch_blastn_consensus = BLAST_BLASTN_CONSENSUS.out.txt.collect({ it[1] })
+  ch_vadr_outdirs = VADR.out.vadr_outdir.collect({ it[1] })
+
   SUBTYPING_REPORT_BCF_CONSENSUS(
     ZSTD_DECOMPRESS_CSV.out.file, 
     ch_blastn_consensus,
+    ch_vadr_outdirs,
     CHECK_SAMPLE_SHEET.out
   )
   ch_versions = ch_versions.mix(SUBTYPING_REPORT_BCF_CONSENSUS.out.versions)

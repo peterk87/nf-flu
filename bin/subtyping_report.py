@@ -9,20 +9,25 @@ Segment 6 - neuraminidase (NA) gene
 """
 
 import logging
+import os
 import re
 import sys
 from collections import defaultdict
+from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union, Any
 
-import click
+import typer
 import numpy as np
 import pandas as pd
 import polars as pl
 from rich.logging import RichHandler
 
-LOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s [in %(filename)s:%(lineno)d]"
+VERSION = "2025.01.1"
+
 logger = logging.getLogger(__name__)
+
+app = typer.Typer()
 
 pl.enable_string_cache(True)
 
@@ -399,37 +404,185 @@ def find_h_or_n_type(
     return results_summary
 
 
-@click.command()
-@click.option("-m", "--flu-metadata", help="NCBI Influenza genomeset.dat metadata file")
-@click.option("-x", "--excel-report", default="report.xlsx", help="Excel report")
-@click.option("--top", default=3, help="Top N matches to each segment to report")
-@click.option(
-    "--pident-threshold", default=0.85, help="BLAST percent identity threshold"
-)
-@click.option('--min-aln-length', default=50, help="Min BLAST alignment length threshold")
-@click.option("--get-top-ref", default=False, help="Get top ref accession id from ncbi database.")
-@click.option("--sample-name", default="", help="Sample Name.")
-@click.option("--samplesheet", default="", help="samplesheet.csv to get order of samples.")
-@click.option("--verbose", is_flag=True, help="Enable verbose logging")
-@click.argument("blast_results", nargs=-1)
-def report(
+def write_top_segment_matches(
+        df_top_seg_matches: pl.DataFrame,
+        sample_name: str,
+        genus: str
+):
+    df_blast = df_top_seg_matches.rename(mapping=dict(BLAST_RESULTS_REPORT_COLUMNS))
+    df_ref_id = df_blast.select(
+        pl.col([
+            'Sample',
+            'Sample Genome Segment Number',
+            'Reference NCBI Accession',
+            'BLASTN Bitscore',
+            'Reference Sequence ID'
+        ])
+    )
+    df_ref_id = df_ref_id.with_columns(
+        pl.when(pl.col("Reference NCBI Accession").is_null())
+        .then(pl.col("Reference Sequence ID"))
+        .otherwise(pl.col("Reference NCBI Accession"))
+        .str.strip()
+        .alias('Reference NCBI Accession')
+    )
+    segment_names = get_segment_names(genus)
+    df_ref_id = df_ref_id.with_columns(
+        pl.col("Sample Genome Segment Number").apply(lambda x: segment_names.get(int(x), x))
+    )
+    df_ref_id.write_csv(
+        f"{sample_name}.topsegments.csv", separator=",", has_header=True
+    )
+
+
+def version_callback(value: bool):
+    if value:
+        typer.echo(f"{VERSION}")
+        raise typer.Exit()
+
+
+def get_segment_names(genus: str) -> Dict[int, str]:
+    segment_names = {}
+    if genus == 'Alphainfluenzavirus':
+        segment_names = IAV_SEGMENT_NAMES
+    elif genus == 'Betainfluenzavirus':
+        segment_names = IBV_SEGMENT_NAMES
+    return segment_names
+
+
+def read_refseq_metadata(flu_metadata):
+    return pl.read_csv(
         flu_metadata,
-        blast_results,
-        excel_report,
-        top,
-        pident_threshold,
-        min_aln_length,
-        get_top_ref,
-        sample_name,
-        samplesheet,
-        verbose,
+        has_header=True,
+        dtypes=dict(METADATA_COLUMNS),
+    )
+
+
+def init_logging(verbose: bool = False) -> None:
+    from rich.traceback import install
+    install(show_locals=True, width=120, word_wrap=True)
+    logging.basicConfig(
+        format="%(message)s",
+        datefmt="[%Y-%m-%d %X]",
+        level=logging.DEBUG if verbose else logging.INFO,
+        handlers=[RichHandler(rich_tracebacks=True, tracebacks_show_locals=False)],
+    )
+
+
+def get_col_widths(df, index=False):
+    """Calculate column widths based on column headers and contents"""
+    if index:
+        yield max(
+            [len(str(s)) for s in df.index.values] + [len(str(df.index.name))]
+        )
+    for c in df.columns:
+        # get max length of column contents and length of column header
+        yield np.max([df[c].astype(str).str.len().max() + 1, len(c) + 1])
+
+
+def write_excel(
+        name_dfs: List[Tuple[str, pd.DataFrame]],
+        output_dest: PathLike,
+        sheet_name_index: bool = True,
+) -> None:
+    logger.info("Starting to write tabular data to worksheets in Excel workbook")
+    with pd.ExcelWriter(output_dest, engine="xlsxwriter") as writer:
+        idx = 1
+        for name_df in name_dfs:
+            if not isinstance(name_df, (list, tuple)):
+                logger.error(
+                    'Input "%s" is not a list or tuple (type="%s"). Skipping...',
+                    name_df,
+                    type(name_df),
+                )
+                continue
+            sheetname, df = name_df
+            fixed_sheetname = REGEX_UNALLOWED_EXCEL_WS_CHARS.sub("_", sheetname)
+            # fixed max number of characters in sheet name due to compatibility
+            if sheet_name_index:
+                max_chars = 28
+                fixed_sheetname = f"{idx}_{fixed_sheetname[:max_chars]}"
+            else:
+                max_chars = 31
+                fixed_sheetname = fixed_sheetname[:max_chars]
+
+            if len(fixed_sheetname) > max_chars:
+                logger.warning(
+                    'Sheetname "%s" is >= %s characters so may be truncated (n=%s)',
+                    max_chars,
+                    fixed_sheetname,
+                    len(fixed_sheetname),
+                )
+
+            logger.info(f'Writing table to Excel sheet "{fixed_sheetname}"')
+            df.to_excel(
+                writer, sheet_name=fixed_sheetname, index=False, freeze_panes=(1, 1)
+            )
+            worksheet = writer.book.get_worksheet_by_name(fixed_sheetname)
+            for i, width in enumerate(get_col_widths(df, index=False)):
+                worksheet.set_column(i, i, width)
+            idx += 1
+    logger.info('Done writing worksheets to spreadsheet "%s".', output_dest)
+
+def get_vadr_mdl_subtype(mdl_path: Path):
+    vadr_h_subtype = ""
+    vadr_n_subtype = ""
+    with mdl_path.open() as f:
+        first_line = f.readline()
+        col_line = f.readline()
+        cols = col_line.strip().split()
+        for line in f:
+            if line.startswith("#"):
+                continue
+            line_dict = dict(zip(cols, line.strip().split()))
+            if line_dict["group"] == "fluA-seg4":
+                vadr_h_subtype = line_dict["subgroup"]
+            if line_dict["group"] == "fluA-seg6":
+                vadr_n_subtype = line_dict["subgroup"]
+    return vadr_h_subtype, vadr_n_subtype
+
+def find_matching_files(
+        directory: Path,
+        pattern: str,
+        recursive: bool = True,
+        ignore_case: bool = True,
+) -> List[Path]:
+    # Walk through the directory recursively, following symlinks
+    matching_files = []
+    for root, dirs, files in os.walk(directory, followlinks=True):
+        for file_name in files:
+            if file_name.endswith(pattern):
+                matching_files.append(Path(root) / file_name)
+    return matching_files
+
+@app.command()
+def report(
+        flu_metadata: Path = typer.Option(
+            ..., "--flu-metadata", "-m",
+            help="NCBI Influenza metadata tab-delimited TSV file"
+        ),
+        excel_report: Path = typer.Option(Path("nf-flu-subtyping-report.xlsx"), help="Excel report output path"),
+        outdir: Path = typer.Option(Path("subtyping_report"), help="Output directory"),
+        top: int = typer.Option(5, help="Top N matches to each segment to report"),
+        pident_threshold: float = typer.Option(0.85, help="BLAST percent identity threshold"),
+        min_aln_length: int = typer.Option(50, help="Min BLAST alignment length threshold"),
+        get_top_ref: bool = typer.Option(False, is_flag=True, help="Get top ref accession id from ncbi database."),
+        sample_name: str = typer.Option("", help="Sample Name."),
+        samplesheet: Path = typer.Option(None, help="samplesheet.csv to get order of samples."),
+        vadr_mdl_dir: Path = typer.Option(None, help="Directory with VADR .mdl files."),
+        verbose: bool = typer.Option(False, "--verbose", is_flag=True, help="Enable verbose logging"),
+        version: bool = typer.Option(None, "--version", callback=version_callback, is_eager=True, is_flag=True),
+        input_blast_results_dir: Path = typer.Option(..., "-i", "--input-blast-results-dir",
+                                                       dir_okay=True, help="Directory with BLAST results files")
 ):
     init_logging(verbose)
+    logger.info(f"nf-flu {__name__} version {VERSION}")
+    logger.info(f"Starting subtyping report generation with parameters: {locals()}")
+    blast_results: list[Path] = list(input_blast_results_dir.glob("*.blastn.txt"))
     logger.debug(f"{blast_results=}")
     if not blast_results:
-        logger.error("No BLAST results files specified!")
+        logger.error(f"No BLAST results files found in directory '{blast_results}'!")
         sys.exit(1)
-
     ordered_samples: Optional[List[str]] = None
     if samplesheet:
         samplesheet_path = Path(samplesheet)
@@ -438,6 +591,18 @@ def report(
             ordered_samples = pl.read_csv(samplesheet_path, dtypes=[pl.Utf8, pl.Utf8])['sample'].to_list()
             logger.info(f"Using samplesheet to order samples: {ordered_samples}")
 
+    vadr_sample_subtype = {}
+    if vadr_mdl_dir is not None:
+        logger.info(f"Reading VADR .mdl files from directory: {vadr_mdl_dir}")
+        mdl_paths = find_matching_files(vadr_mdl_dir, ".mdl")
+        sample_to_mdl = {p.name.replace(".vadr.mdl", ""): p for p in mdl_paths}
+        logger.info(f"Found {len(sample_to_mdl)} VADR .mdl files.")
+        for sample, mdl_path in sample_to_mdl.items():
+            vadr_h_subtype, vadr_n_subtype = get_vadr_mdl_subtype(mdl_path)
+            logger.info(f"{sample}: VADR H subtype: {vadr_h_subtype}, N subtype: {vadr_n_subtype}")
+            vadr_sample_subtype[sample] = f"{vadr_h_subtype}{vadr_n_subtype}"
+
+    logger.debug(f"{vadr_sample_subtype=}")
     logger.info(f'Parsing Influenza metadata file "{flu_metadata}"')
 
     df_md = read_refseq_metadata(flu_metadata)
@@ -527,6 +692,8 @@ def report(
         df_subtype_predictions = df_subtype_results[SUBTYPE_RESULTS_SUMMARY_COLUMNS].rename(
             columns=SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES
         )
+        if vadr_sample_subtype:
+            df_subtype_predictions['VADR Subtype'] = df_subtype_predictions['Sample'].map(vadr_sample_subtype)
         df_H = df_H.rename(columns=SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES)
         df_N = df_N.rename(columns=SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES)
         # Write each dataframe to a separate sheet in the excel report
@@ -539,122 +706,15 @@ def report(
             ],
             output_dest=excel_report,
         )
-
-
-def write_top_segment_matches(
-        df_top_seg_matches: pl.DataFrame,
-        sample_name: str,
-        genus: str
-):
-    df_blast = df_top_seg_matches.rename(mapping=dict(BLAST_RESULTS_REPORT_COLUMNS))
-    df_ref_id = df_blast.select(
-        pl.col([
-            'Sample',
-            'Sample Genome Segment Number',
-            'Reference NCBI Accession',
-            'BLASTN Bitscore',
-            'Reference Sequence ID'
-        ])
-    )
-    df_ref_id = df_ref_id.with_columns(
-        pl.when(pl.col("Reference NCBI Accession").is_null())
-        .then(pl.col("Reference Sequence ID"))
-        .otherwise(pl.col("Reference NCBI Accession"))
-        .str.strip()
-        .alias('Reference NCBI Accession')
-    )
-    segment_names = get_segment_names(genus)
-    df_ref_id = df_ref_id.with_columns(
-        pl.col("Sample Genome Segment Number").apply(lambda x: segment_names.get(int(x), x))
-    )
-    df_ref_id.write_csv(
-        f"{sample_name}.topsegments.csv", separator=",", has_header=True
-    )
-
-
-def get_segment_names(genus: str) -> Dict[int, str]:
-    segment_names = {}
-    if genus == 'Alphainfluenzavirus':
-        segment_names = IAV_SEGMENT_NAMES
-    elif genus == 'Betainfluenzavirus':
-        segment_names = IBV_SEGMENT_NAMES
-    return segment_names
-
-
-def read_refseq_metadata(flu_metadata):
-    return pl.read_csv(
-        flu_metadata,
-        has_header=True,
-        dtypes=dict(METADATA_COLUMNS),
-    )
-
-
-def init_logging(verbose: bool = False) -> None:
-    from rich.traceback import install
-    install(show_locals=True, width=120, word_wrap=True)
-    logging.basicConfig(
-        format="%(message)s",
-        datefmt="[%Y-%m-%d %X]",
-        level=logging.DEBUG if verbose else logging.INFO,
-        handlers=[RichHandler(rich_tracebacks=True, tracebacks_show_locals=False)],
-    )
-
-
-def get_col_widths(df, index=False):
-    """Calculate column widths based on column headers and contents"""
-    if index:
-        yield max(
-            [len(str(s)) for s in df.index.values] + [len(str(df.index.name))]
-        )
-    for c in df.columns:
-        # get max length of column contents and length of column header
-        yield np.max([df[c].astype(str).str.len().max() + 1, len(c) + 1])
-
-
-def write_excel(
-        name_dfs: List[Tuple[str, pd.DataFrame]],
-        output_dest: str,
-        sheet_name_index: bool = True,
-) -> None:
-    logger.info("Starting to write tabular data to worksheets in Excel workbook")
-    with pd.ExcelWriter(output_dest, engine="xlsxwriter") as writer:
-        idx = 1
-        for name_df in name_dfs:
-            if not isinstance(name_df, (list, tuple)):
-                logger.error(
-                    'Input "%s" is not a list or tuple (type="%s"). Skipping...',
-                    name_df,
-                    type(name_df),
-                )
-                continue
-            sheetname, df = name_df
-            fixed_sheetname = REGEX_UNALLOWED_EXCEL_WS_CHARS.sub("_", sheetname)
-            # fixed max number of characters in sheet name due to compatibility
-            if sheet_name_index:
-                max_chars = 28
-                fixed_sheetname = f"{idx}_{fixed_sheetname[:max_chars]}"
-            else:
-                max_chars = 31
-                fixed_sheetname = fixed_sheetname[:max_chars]
-
-            if len(fixed_sheetname) > max_chars:
-                logger.warning(
-                    'Sheetname "%s" is >= %s characters so may be truncated (n=%s)',
-                    max_chars,
-                    fixed_sheetname,
-                    len(fixed_sheetname),
-                )
-
-            logger.info(f'Writing table to Excel sheet "{fixed_sheetname}"')
-            df.to_excel(
-                writer, sheet_name=fixed_sheetname, index=False, freeze_panes=(1, 1)
-            )
-            worksheet = writer.book.get_worksheet_by_name(fixed_sheetname)
-            for i, width in enumerate(get_col_widths(df, index=False)):
-                worksheet.set_column(i, i, width)
-            idx += 1
-    logger.info('Done writing worksheets to spreadsheet "%s".', output_dest)
+        if not outdir.exists():
+            outdir.mkdir(parents=True)
+        df_all_blast.write_csv(outdir / "all_blast_results.csv")
+        df_subtype_results.to_csv(outdir / "subtype_results.csv")
+        df_subtype_predictions.to_csv(outdir / "subtype_predictions.csv")
+        df_H.to_csv(outdir / "H_segment_results.csv")
+        df_N.to_csv(outdir / "N_segment_results.csv")
+        logger.info(f"Results written to {outdir}")
 
 
 if __name__ == "__main__":
-    report()
+    app()

@@ -10,7 +10,7 @@ process PULL_TOP_REF_ID {
   }
 
   input:
-  tuple val(meta), path(blastn_results)
+  tuple val(meta), path(blastn_results, stageAs: "blastn_results/*")
   path(genomeset)
 
   output:
@@ -21,11 +21,11 @@ process PULL_TOP_REF_ID {
   """
   subtyping_report.py \\
     --flu-metadata $genomeset \\
-    --get-top-ref True \\
+    --get-top-ref \\
     --top 1 \\
     --pident-threshold $params.pident_threshold \\
     --sample-name ${meta.id} \\
-    $blastn_results
+    --input-blast-results-dir blastn_results/
 
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":

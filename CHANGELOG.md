@@ -12,6 +12,9 @@ This minor release adds GenoFLU for H5 genotyping and HA cleavage site output wi
 * feat: GenoFLU v1.05 for H5 genotyping.
 * feat: Added `--custom_flu_minfo` option to specify custom `flu.minfo` for VADR. The default `flu.minfo` is the same as the VADR flu v1.6.3-2 model except that it includes cleavage site info. Feature table, GenBank and GFF files should now have a `misc_feature` for HA cleavage site info.
 * feat: `bin/cleavage_site.py` to classify HA cleavage sites.
+* feat: Added VADR subtype prediction into subtyping report. VADR subtype predictions are pulled from the output `.mdl` files.
+* feat: Added subtyping report output directory containing CSV for each sheet in the Excel report.
+* fix: MultiQC converts the general info table into a violin plot if there are more than 500 rows in the table by default. Added `max_table_rows: 1000000` to `multiqc_config.yaml` to avoid this conversion in most cases.
 
 ## [[3.6.2](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.6.2)] - 2025-01-07
 

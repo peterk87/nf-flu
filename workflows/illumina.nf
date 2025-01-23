@@ -180,9 +180,11 @@ workflow ILLUMINA {
   ch_versions = ch_versions.mix(BLAST_BLASTN_IRMA.out.versions.first().ifEmpty(null))
 
   ch_blast = BLAST_BLASTN_IRMA.out.txt.collect({ it[1] })
+  ch_vadr_outdir_irma = VADR_IRMA.out.vadr_outdir.map { [it[1]] }.collect()
   SUBTYPING_REPORT_IRMA_CONSENSUS(
     ZSTD_DECOMPRESS_CSV.out.file,
     ch_blast,
+    ch_vadr_outdir_irma,
     CHECK_SAMPLE_SHEET.out
   )
   ch_versions = ch_versions.mix(SUBTYPING_REPORT_IRMA_CONSENSUS.out.versions)
@@ -273,9 +275,11 @@ workflow ILLUMINA {
   ch_versions = ch_versions.mix(BLAST_BLASTN_CONSENSUS.out.versions)
 
   ch_blastn_consensus = BLAST_BLASTN_CONSENSUS.out.txt.collect({ it[1] })
+  ch_vadr_outdir_bcftools = VADR_BCFTOOLS.out.vadr_outdir.map { [it[1]] }.collect()
   SUBTYPING_REPORT_BCF_CONSENSUS(
     ZSTD_DECOMPRESS_CSV.out.file, 
     ch_blastn_consensus,
+    ch_vadr_outdir_bcftools,
     CHECK_SAMPLE_SHEET.out
   )
   ch_versions = ch_versions.mix(SUBTYPING_REPORT_BCF_CONSENSUS.out.versions)

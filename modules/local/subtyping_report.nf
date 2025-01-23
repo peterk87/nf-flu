@@ -25,11 +25,13 @@ process SUBTYPING_REPORT {
 
   input:
   path(genomeset)
-  path(blastn_results)
+  path(blastn_results, stageAs: "blastn_results/*")
+  path(vadr_outdirs, stageAs: "vadr_outdirs/*")
   path(samplesheet)
 
   output:
   path('nf-flu-subtyping-report.xlsx'), emit: report
+  path('subtyping_report/'), emit: report_dir
   path('subtyping_report.log'), emit: log
   path "versions.yml", emit: versions
 
@@ -38,16 +40,18 @@ process SUBTYPING_REPORT {
   subtyping_report.py \\
    --flu-metadata $genomeset \\
    --top ${params.max_top_blastn} \\
+   --outdir subtyping_report \\
    --excel-report nf-flu-subtyping-report.xlsx \\
    --pident-threshold ${params.pident_threshold} \\
    --samplesheet $samplesheet \\
-   $blastn_results
+   --vadr-mdl-dir vadr_outdirs/ \\
+   --input-blast-results-dir blastn_results/
 
   ln -s .command.log subtyping_report.log
 
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
-     python: \$(python --version | sed 's/Python //g')
+      subtyping_report.py: \$(subtyping_report.py --version 2>&1)
   END_VERSIONS
   """
 }
