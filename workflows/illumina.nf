@@ -150,7 +150,7 @@ workflow ILLUMINA {
   ch_versions = ch_versions.mix(ZSTD_DECOMPRESS_CSV.out.versions)
   BLAST_MAKEBLASTDB_NCBI(ZSTD_DECOMPRESS_FASTA.out.file)
   ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB_NCBI.out.versions)
-  SETUP_FLU_VADR_MODEL(ch_vadr_model_targz)
+  SETUP_FLU_VADR_MODEL(ch_vadr_model_targz, params.custom_flu_minfo)
 
   // Use ch_input_sorted for CAT_ILLUMINA_FASTQ to ensure IRMA triggers
   CAT_ILLUMINA_FASTQ(ch_input_sorted)

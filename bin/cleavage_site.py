@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import logging
-import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -11,19 +10,6 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 from rich.logging import RichHandler
 
 VERSION = "2025.01.1"
-HA1_REGEX = re.compile(r"""
-    P            # Proline
-    (Q|L|E)      # Glutamine, Leucine, or Glutamic Acid
-    [A-Z]{1,10}  # Any character repeated 1-10 times
-    (R|K)        # Arginine or Lysine
-    (.*)         # Any character
-""", re.VERBOSE)
-
-HA1_REPLACE_REGEX = re.compile(r"""
-    P     # Proline
-    .     # Any character
-    (R|K) # Arginine or Lysine
-""", re.VERBOSE)
 
 logger = logging.getLogger(__name__)
 app = typer.Typer(rich_markup_mode="markdown")
@@ -41,17 +27,26 @@ def init_logging(verbose: bool) -> None:
     )
 
 
-def get_ha1_ha2_seqs(input_fasta: Path) -> dict[str, dict[str, tuple[str, str]]]:
+def get_ha_seqs_and_features(input_fasta: Path) -> dict[str, dict[str, tuple[str, str]]]:
     out = defaultdict(dict)
     with open(input_fasta) as fh:
         for header, seq in SimpleFastaParser(fh):
-            if not (header.endswith("HA1") or header.endswith("HA2")):
+            annotation = ""
+            if header.endswith("HA1"):
+                annotation = "HA1"
+            elif header.endswith("HA2"):
+                annotation = "HA2"
+            elif header.endswith("hemagglutinin"):
+                annotation = "hemagglutinin"
+            elif header.endswith("cleavage site"):
+                annotation = "cleavage site"
+            if not annotation:
                 continue
-            header_first_part, *_, header_last_part = header.split(" ")
+            header_first_part, *_ = header.split(" ")
             seqid = header_first_part.split("|")[0]
             seqid = seqid.replace('_segment4_HA', '')
             seq = seq.upper()
-            out[seqid][header_last_part] = (header, seq)
+            out[seqid][annotation] = (header, seq)
     return out
 
 
@@ -62,113 +57,90 @@ def find_cleavage_sites(sample_ha1_ha2_seqs: dict[str, dict[str, tuple[str, str]
         return None
 
     out = []
-    for sample, ha1_ha2_dict in sample_ha1_ha2_seqs.items():
-        ha1_header, ha1_sequence = ha1_ha2_dict.get("HA1", (None, None))
-        ha2_header, ha2_sequence = ha1_ha2_dict.get("HA2", (None, None))
-        if not (ha1_sequence and ha2_sequence):
-            logger.warning(f"HA1 or HA2 sequence missing for sample {sample}. Skipping.")
-            continue
-        logger.debug(f"{sample=} {ha1_header=} {ha2_header=}")
-        logger.debug(f"{ha1_sequence=}")
-        logger.debug(f"{ha2_sequence=}")
-        # look at last 15 residues of HA1
-        ha1_subseq = ha1_sequence[-15:]
-        # first 3 residues of HA2
-        ha2_subseq = ha2_sequence[:3]
-        ha1_match = HA1_REGEX.search(ha1_subseq)
+    for sample, ha_dict in sample_ha1_ha2_seqs.items():
+        cleavage_site_header, cleavage_site_seq = ha_dict.get("cleavage site", (None, None))
+        
         basic_residue_count = 0
-        if ha1_match:
-            ha1_motif_match = ha1_match[0]
-            cleavage_sequence = f"{ha1_motif_match}|{ha2_subseq}"
-            # Remove 'P.(R|K)' pattern from HA1 for residue counting
-            ha1_motif_match = HA1_REPLACE_REGEX.sub("", ha1_motif_match)
-            basic_residue_count, pathogenicity, residue_type = count_ha1_basic_residues(ha1_motif_match)
+        if cleavage_site_seq:
+            basic_residue_count, pathogenicity, residue_type = count_ha1_basic_residues(cleavage_site_seq)
             logger.info(
-                f"{sample}: cleavage sequence found '{cleavage_sequence}' ({residue_type=}; {basic_residue_count=}; {pathogenicity=})")
+                f"{sample}: cleavage sequence '{cleavage_site_seq}': {residue_type=}; {basic_residue_count=}; {pathogenicity=}")
         else:
-            logger.info(f"{sample}: No cleavage site detected in HA1 sequence.")
-            cleavage_sequence = "No cleavage site found"
-            residue_type = "No match"
-            pathogenicity = "check seq"
+            logger.info(f"{sample}: No cleavage site found")
+            residue_type = "N/A"
+            pathogenicity = "N/A"
 
         cleavage_site_search_result = {
             'sample': sample,
-            'cleavage_seq': cleavage_sequence,
+            'cleavage_seq': cleavage_site_seq or "No cleavage site found",
             'residue_type': residue_type,
             'basic_residue_count': basic_residue_count,
             'pathogenicity': pathogenicity,
-            'ha1_subseq': ha1_subseq,
-            'ha2_subseq': ha2_subseq,
-            'ha1_header': ha1_header,
-            'ha1_sequence': ha1_sequence,
-            'ha2_header': ha2_header,
-            'ha2_sequence': ha2_sequence,
+            'cleavage_site_header': cleavage_site_header or "N/A",
         }
         out.append(cleavage_site_search_result)
         logger.debug(f"{cleavage_site_search_result=}")
     return out
 
 
-def count_ha1_basic_residues(ha1_motif_match: str) -> tuple[int, str, str]:
+def count_ha1_basic_residues(ha_cleavage_site_seq: str) -> tuple[int, str, str]:
     """Count basic residues in HA1 motif and classify based on count.
 
-    >>> count_ha1_basic_residues("PQLLLLLLLLLR")
+    >>> count_ha1_basic_residues("PQLLLLLLLLLRGLF")
     (1, 'LPAI', 'Monobasic')
-    >>> count_ha1_basic_residues("PEIPKRRRR")
+    >>> count_ha1_basic_residues("PEIPKRRRRGIF")
     (5, 'HPAI', 'Multibasic')
-    >>> count_ha1_basic_residues("PEIPKRR")
+    >>> count_ha1_basic_residues("PEIPKRRGLF")
     (3, 'HPAI', 'Multibasic')
-    >>> count_ha1_basic_residues("PQIESR")
+    >>> count_ha1_basic_residues("PQIESRGLF")
     (1, 'LPAI', 'Monobasic')
-    >>> count_ha1_basic_residues("PQGERRRKKR")
+    >>> count_ha1_basic_residues("PQGERRRKKRGLF")
     (6, 'HPAI', 'Multibasic')
-    >>> count_ha1_basic_residues("PQERREKR")
+    >>> count_ha1_basic_residues("PQERREKRGLF")
     (4, 'HPAI', 'Multibasic')
-    >>> count_ha1_basic_residues("PQERER")
+    >>> count_ha1_basic_residues("PQERERGLF")
     (2, 'LP/HP', 'Multibasic')
-    >>> count_ha1_basic_residues("PQERREER")
+    >>> count_ha1_basic_residues("PQERREERGLF")
     (1, 'LPAI', 'Monobasic')
     """
+    if not ha_cleavage_site_seq:
+        return 0, "N/A", "N/A"
+    if ha_cleavage_site_seq[-4] not in "RK":
+        return 0, "N/A", "N/A"
+    # trim last 3 residues
+    ha_cleavage_site_seq = ha_cleavage_site_seq[:-3]
     basic_residue_count = 0
-    residue_type = ""
-    # Count basic residues in HA1 sequence
-    if ha1_motif_match[-1] not in "RK":
-        logger.info(
-            f"Last position ({len(ha1_motif_match)}:{ha1_motif_match[-1]}) is not basic! Labeling as 'check seq'.")
-        residue_type = "check seq"
-        basic_residue_count = 0
-    else:
-        consecutive_non_basic = 0
-        for i in range(len(ha1_motif_match) - 1, 0, -1):
-            residue = ha1_motif_match[i]
-            if residue in ("R", "K"):
-                basic_residue_count += 1
-                consecutive_non_basic = 0
-            else:
-                consecutive_non_basic += 1
-                # if more than one non-basic residue is found before the last 3 residues, break
-                # or if a non-basic residue is found after the last 3 residues, break
-                if (
-                        i > len(ha1_motif_match) - 4
-                        and consecutive_non_basic > 1
-                        or i <= len(ha1_motif_match) - 4
-                ):
-                    break
-        # Classify based on basic residue count
-        if basic_residue_count == 1:
-            residue_type = "Monobasic"
-        elif basic_residue_count > 1:
-            residue_type = "Multibasic"
+    consecutive_non_basic = 0
+    for i in range(len(ha_cleavage_site_seq) - 1, 0, -1):
+        residue = ha_cleavage_site_seq[i]
+        if residue in ("R", "K"):
+            basic_residue_count += 1
+            consecutive_non_basic = 0
         else:
-            residue_type = "No match"
+            consecutive_non_basic += 1
+            # if more than one non-basic residue is found before the last 3 residues, break
+            # or if a non-basic residue is found after the last 3 residues, break
+            if (
+                    i > len(ha_cleavage_site_seq) - 4
+                    and consecutive_non_basic > 1
+                    or i <= len(ha_cleavage_site_seq) - 4
+            ):
+                break
+    # Classify based on basic residue count
+    if basic_residue_count == 1:
+        residue_type = "Monobasic"
+    elif basic_residue_count > 1:
+        residue_type = "Multibasic"
+    else:
+        residue_type = "N/A"
     if basic_residue_count == 1:
         pathogenicity = "LPAI"
-    elif basic_residue_count == 2:
+    elif 1 < basic_residue_count <= 2:
         pathogenicity = "LP/HP"
     elif basic_residue_count >= 3:
         pathogenicity = "HPAI"
     else:
-        pathogenicity = "check seq"
+        pathogenicity = "N/A"
     return basic_residue_count, pathogenicity, residue_type
 
 
@@ -180,12 +152,7 @@ def write_sites(output_file: Path, sites: list[dict]) -> None:
         ('residue_type', 'Residue Type'),
         ('basic_residue_count', 'Basic Residue Count'),
         ('pathogenicity', 'Pathogenicity'),
-        ('ha1_subseq', 'HA1 Subsequence (Last 15 residues)'),
-        ('ha2_subseq', 'HA2 Subsequence (First 3 residues)'),
-        ('ha1_header', 'HA1 Sequence Header'),
-        ('ha1_sequence', 'HA1 Amino Acid Sequence'),
-        ('ha2_header', 'HA2 Sequence Header'),
-        ('ha2_sequence', 'HA2 Amino Acid Sequence'),
+        ('cleavage_site_header', 'Cleavage Site Sequence Header'),
     ]
 
     df = pd.DataFrame(sites)
@@ -213,15 +180,11 @@ def main(
         verbose: bool = typer.Option(False, "--verbose", "-v", is_flag=True, help="Enable verbose logging"),
         version: bool = typer.Option(None, "--version", callback=version_callback, is_eager=True),
 ):
-    """# cleavage_site.py: Find and classify Influenza A virus HA cleavage sites from amino acid sequences.
+    """# cleavage_site.py: classify Influenza A virus HA cleavage sites from VADR annotation amino acid sequences.
 
-    The script reads a FASTA file with HA1 and HA2 amino acid sequences and searches for the HA1 cleavage site motif.
-    The last 15 residues of HA1 are searched for the motif (regex: `P(Q|L|E)[A-Z]{1,10}(R|K)(.*)`). The number of basic
-    residues in the motif is counted and classified as 'Monobasic', 'Multibasic', or 'No match'. The pathogenicity is
-    classified as 'LPAI', 'LP/HP', 'HPAI', or 'check seq' depending on the number of basic residues.
-
-    > **NOTE:** Only sequences with sequence headers ending with 'HA1' or 'HA2' are processed, e.g.
-    `>SAMPLE|other_info HA1`. If either HA1 or HA2 is missing, the sequence is skipped.
+    The script reads a VADR annotation FASTA file amino acid sequences and classifies HA cleavage sites based on the
+    number of basic residues in the motif, i.e. 'Monobasic', 'Multibasic', or 'N/A' and pathogenicity ('LPAI', 'LP/HP',
+    'HPAI', or 'N/A').
 
     ## Output
 
@@ -236,18 +199,6 @@ def main(
     * **Basic Residue Count**: Number of basic residues in the HA1 motif
 
     * **Pathogenicity**: Classification of the pathogenicity based on the basic residue count
-
-    * HA1 Subsequence (Last 15 residues)
-
-    * HA2 Subsequence (First 3 residues)
-
-    * HA1 Sequence Header
-
-    * HA1 Amino Acid Sequence
-
-    * HA2 Sequence Header
-
-    * HA2 Amino Acid Sequence
     """
     init_logging(verbose)
     if output_tsv.exists() and not force:
@@ -255,11 +206,11 @@ def main(
         raise typer.Abort()
     logger.info(f"{input_fasta=}")
     # Step 1: Extract HA1 and HA2 sequences
-    ha1_ha2_seqs = get_ha1_ha2_seqs(input_fasta)
-    logger.info(f"Read {len(ha1_ha2_seqs)} HA1/HA2 sequences from '{input_fasta}'")
-    logger.debug(f"{ha1_ha2_seqs=}")
+    ha_seqs = get_ha_seqs_and_features(input_fasta)
+    logger.info(f"Read {len(ha_seqs)} HA sequences and features from '{input_fasta}'")
+    logger.debug(f"{ha_seqs=}")
     # Step 2: Process cleavage site analysis and classification
-    sites = find_cleavage_sites(ha1_ha2_seqs)
+    sites = find_cleavage_sites(ha_seqs)
     write_sites(output_tsv, sites)
 
 

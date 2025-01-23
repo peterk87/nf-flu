@@ -44,7 +44,7 @@ def write_aa_fasta(recs: list[SeqRecord], out_file: os.PathLike) -> None:
     with open(out_file, "w") as out_handle:
         for rec in recs:
             for feature in rec.features:
-                if feature.type not in {"CDS", "mat_peptide", "sig_peptide"}:
+                if feature.type not in {"CDS", "mat_peptide", "sig_peptide", "misc_feature"}:
                     continue
                 try:
                     translation = feature.qualifiers["translation"][0]
@@ -62,6 +62,11 @@ def write_aa_fasta(recs: list[SeqRecord], out_file: os.PathLike) -> None:
                     product = feature.qualifiers["product"][0]
                 except KeyError:
                     product = ""
+                if feature.type == "misc_feature" and product == "":
+                    try:
+                        product = feature.qualifiers["note"][0]
+                    except KeyError:
+                        pass
                 location_str = _insdc_location_string(
                     location=feature.location, rec_length=len(rec.seq)
                 )
@@ -75,7 +80,7 @@ def write_cds_nt_fasta(recs: list[SeqRecord], out_file: os.PathLike) -> None:
     with open(out_file, "w") as out_handle:
         for rec in recs:
             for feature in rec.features:
-                if feature.type not in {"CDS", "mat_peptide", "sig_peptide"}:
+                if feature.type not in {"CDS", "mat_peptide", "sig_peptide", "misc_feature"}:
                     continue
                 subseq = str(feature.location.extract(rec.seq))
                 try:
@@ -86,6 +91,11 @@ def write_cds_nt_fasta(recs: list[SeqRecord], out_file: os.PathLike) -> None:
                     product = feature.qualifiers["product"][0]
                 except KeyError:
                     product = ""
+                if feature.type == "misc_feature" and product == "":
+                    try:
+                        product = feature.qualifiers["note"][0]
+                    except KeyError:
+                        pass
                 location_str = _insdc_location_string(
                     location=feature.location, rec_length=len(rec.seq)
                 )

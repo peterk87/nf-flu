@@ -155,7 +155,7 @@ workflow NANOPORE {
   BLAST_MAKEBLASTDB_NCBI(ch_input_ref_db)
   ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB_NCBI.out.versions)
 
-  SETUP_FLU_VADR_MODEL(ch_vadr_model_targz)
+  SETUP_FLU_VADR_MODEL(ch_vadr_model_targz, params.custom_flu_minfo)
 
   CAT_NANOPORE_FASTQ(ch_reads)
 

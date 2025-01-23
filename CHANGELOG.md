@@ -5,12 +5,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [[3.7.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.7.0)] - 2025
 
-This minor release adds GenoFLU for H5 genotyping and a script to find and classify HA cleavage sites (monobasic/multibasic, low/high pathogenicity) in Influenza A viruses.
+This minor release adds GenoFLU for H5 genotyping and HA cleavage site output with VADR annotations. This release also adds a script to classify HA cleavage sites based on mono-/multibasicity and low/high pathogenicity.
 
 ### Changes
 
 * feat: GenoFLU v1.05 for H5 genotyping.
-* feat: `bin/cleavage_site.py` to find and classify HA cleavage sites.
+* feat: Added `--custom_flu_minfo` option to specify custom `flu.minfo` for VADR. The default `flu.minfo` is the same as the VADR flu v1.6.3-2 model except that it includes cleavage site info. Feature table, GenBank and GFF files should now have a `misc_feature` for HA cleavage site info.
+* feat: `bin/cleavage_site.py` to classify HA cleavage sites.
 
 ## [[3.6.2](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.6.2)] - 2025-01-07
 
