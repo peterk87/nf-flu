@@ -63,7 +63,7 @@ jobs:
         id: cache-vadr-models
         with:
           path: vadr-models-flu-1.6.3-2.tar.gz
-          key: vadr-models
+          key: vadr-models-tgz
       - name: Download VADR flu model tar.gz
         if: steps.cache-vadr-models.outputs.cache-hit != 'true'
         run: |
@@ -103,7 +103,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: vadr-models-flu-1.6.3-2.tar.gz
-          key: vadr-models
+          key: vadr-models-tgz
       - name: ls
         run: ls -laht
       - name: pre - df, Docker df, Docker images
@@ -195,7 +195,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: vadr-models-flu-1.6.3-2.tar.gz
-          key: vadr-models
+          key: vadr-models-tgz
       - name: ls
         run: ls -laht
       - name: pre - df, Docker df, Docker images
