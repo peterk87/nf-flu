@@ -15,6 +15,7 @@ read_count_desc: ''
 
 export_plots: true
 disable_version_detection: true
+max_table_rows: 1000000
 
 module_order:
     - samtools:

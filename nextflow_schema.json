@@ -260,6 +260,12 @@
                     "default": "https://zenodo.org/records/13261208/files/vadr-models-flu-1.6.3-2.tar.gz",
                     "description": "Path/URL to the VADR model tarball (.tar.gz) to use for annotation",
                     "fa_icon": "fas fa-file-import"
+                },
+                "custom_flu_minfo": {
+                    "type": "string",
+                    "default": "https://gist.github.com/peterk87/0aed5662c55b12da80a86104a967099e/raw/d17b8d14224e29350a720d054543bf4540d41aa5/flu.minfo",
+                    "description": "Path/URL to the custom VADR flu.minfo file to use for annotation. Default is the same as flu model v1.6.3-2 except with cleavage site misc_features.",
+                    "fa_icon": "fas fa-file-import"
                 }
             }
         },
