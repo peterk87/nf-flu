@@ -23,7 +23,7 @@ import pandas as pd
 import polars as pl
 from rich.logging import RichHandler
 
-VERSION = "2025.01.1"
+VERSION = "2025.03.1"
 
 logger = logging.getLogger(__name__)
 
@@ -217,6 +217,11 @@ SUBTYPE_RESULTS_SUMMARY_FINAL_NAMES = {
 # Regex to find unallowed characters in Excel worksheet names
 REGEX_UNALLOWED_EXCEL_WS_CHARS = re.compile(r"[\\:/?*\[\]]+")
 
+def most_frequent_segment():
+    return pl.col("Segment").value_counts(sort=True).first()
+
+def get_most_frequent_segment(sample_segment: dict) -> pl.Expr:
+    return pl.col("sample_segment").value_counts(sort=True).first()
 
 def parse_blast_result(
         blast_result: str,
@@ -274,6 +279,18 @@ def parse_blast_result(
         .otherwise(pl.col("Genotype"))
         .alias("Genotype")
     )
+    # if sample_segment is all null, then try to get the segment number the top matching ref seqs
+    if df_merge["sample_segment"].is_null().all():
+        df_merge = df_merge.with_columns(
+            pl.when(pl.col("sample_segment").is_null())
+            .then(pl.col("Segment"))
+            .otherwise(pl.col("sample_segment"))
+            .alias("sample_segment")
+        )
+
+        df_merge = df_merge.filter(pl.col("sample_segment").is_not_null() & pl.col("sample_segment").is_in(["1", "2", "3", "4", "5", "6", "7", "8"]))
+
+
     df_merge = df_merge.sort(
         by=["sample_segment", "bitscore"], descending=[False, True]
     )
@@ -347,6 +364,34 @@ def find_h_or_n_type(
     }, "Can only determine H or N type from segments 4 or 6, respectively!"
     h_or_n, type_name = ("H", "H_type") if seg == "4" else ("N", "N_type")
     df_segment = df_merge.filter(pl.col("sample_segment") == seg)
+    if df_segment.shape[0] == 0:
+        return {
+            f"{h_or_n}_type": "N/A",
+            f"{h_or_n}_sample_segment_length": "N/A",
+            f"{h_or_n}_top_pident": "N/A",
+            f"{h_or_n}_top_mismatch": "N/A",
+            f"{h_or_n}_top_gaps": "N/A",
+            f"{h_or_n}_top_bitscore": "N/A",
+            f"{h_or_n}_top_align_length": "N/A",
+            f"{h_or_n}_top_accession": "N/A",
+            f"{h_or_n}_top_host": "N/A",
+            f"{h_or_n}_top_country": "N/A",
+            f"{h_or_n}_top_date": "N/A",
+            f"{h_or_n}_top_seq_length": "N/A",
+            f"{h_or_n}_virus_name": "N/A",
+            f"{h_or_n}_NCBI_Influenza_DB_subtype_matches": "N/A",
+            f"{h_or_n}_NCBI_Influenza_DB_total_matches": "N/A",
+            f"{h_or_n}_NCBI_Influenza_DB_proportion_matches": "N/A",
+            f"{h_or_n}_NCBI_Influenza_DB_pident_threshold": "N/A",
+        }
+    reg_h_or_n_type = "[Hh]" if h_or_n == "H" else "[Nn]"
+    df_segment = df_segment.with_columns(
+        pl.col("Genotype").str.extract(reg_h_or_n_type + r"(\d+)").alias(type_name)
+    )
+    top_match = df_segment.head(1)
+    top_match_query = top_match["qaccver"][0]
+    top_match_pident = top_match["pident"][0]
+    top_match_aln_length = top_match["length"][0]
     pident_threshold = None
     top_type = "N/A"
     top_type_count = "N/A"
@@ -355,32 +400,61 @@ def find_h_or_n_type(
         # Low quality matches may lead to incorrect subtyping so we try to first filter for high quality matches
         # start at 99% identity and work down to minimum threshold by 1% increments
         for pident_threshold in range(99, int(min_pident * 100) - 1, -1):
-            df_filt = df_segment.filter((pl.col("pident") >= pident_threshold) & ~(pl.col("Genotype").is_null()))
-            if df_filt.shape[0] <= 2:
+            df_filt = df_segment.filter((pl.col("pident") >= pident_threshold) & ~(pl.col(type_name).is_null()))
+            if df_filt.shape[0] == 0:
                 continue
-            type_counts = df_filt["Genotype"].value_counts(sort=True)
-            type_counts = type_counts.filter(~pl.col("Genotype").is_null())
-            reg_h_or_n_type = "[Hh]" if h_or_n == "H" else "[Nn]"
-            df_type_counts = type_counts.with_columns(
-                pl.lit(type_counts["Genotype"].str.extract(reg_h_or_n_type + r"(\d+)").alias(type_name)))
-            df_type_counts = df_type_counts.filter(~pl.col(type_name).is_null())
+
+            if df_filt.shape[0] <= 2:
+                logger.info(f'{top_match_query}| Segment {seg} top match at {top_match_pident}% identity with alignment length {top_match_aln_length}.')
+                # if the rest of the hits are low alignment length, e.g. < 200, then use the top match and skip the rest
+                df_filt_rest = df_segment.filter(
+                    (pl.col("pident") < pident_threshold)
+                    & ~(pl.col(type_name).is_null())
+                    & (pl.col("length") > 200)
+                )
+                if df_filt_rest.shape[0] == 0:
+                    df_type_counts = df_filt.filter(~pl.col(type_name).is_null())[type_name].value_counts(sort=True)
+                    logger.info(f"{top_match_query}| {df_type_counts=}")
+                    type_to_count = defaultdict(int)
+                    for x in df_type_counts.iter_rows(named=True):
+                        type_to_count[x[type_name]] += x["counts"]
+                    type_to_count = list(type_to_count.items())
+                    type_to_count.sort(key=lambda x: x[1], reverse=True)
+                    if not type_to_count:
+                        break
+                    if len(type_to_count) > 1:
+                        logger.warning(f'{top_match_query}| Segment {seg} top match at {top_match_pident}% identity with alignment length {top_match_aln_length} but multiple subtypes found: {type_to_count}.')
+                    top_type = top_match[type_name][0]
+                    logger.info(f'{top_match_query}| {type_to_count=} {top_match=} {top_type=}')
+                    top_type_count = 1
+                    total_count = df_filt.shape[0]
+                    logger.info(
+                        f"{top_match_query}| {h_or_n}{top_type} n={top_type_count}/{total_count} ({top_type_count / total_count:.1%}) at {pident_threshold}% identity."
+                    )
+                    break
+            type_counts = df_filt[type_name].value_counts(sort=True)
+            df_type_counts = type_counts.filter(~pl.col(type_name).is_null())
             logger.debug(f"{df_type_counts=}")
             type_to_count = defaultdict(int)
             for x in df_type_counts.iter_rows(named=True):
                 type_to_count[x[type_name]] += x["counts"]
-            if len(type_to_count) == 0 and pident_threshold > min_pident * 100:
-                continue
             type_to_count = list(type_to_count.items())
             type_to_count.sort(key=lambda x: x[1], reverse=True)
             logger.debug(f"{type_to_count=}")
+            if not type_to_count:
+                if pident_threshold >= min_pident * 100:
+                    continue
+                logger.info(f"No {h_or_n} type found at {pident_threshold}% identity.")
+                break
             top_type, top_type_count = type_to_count[0]
             total_count = type_counts["counts"].sum()
             logger.info(
-                f"{h_or_n}{top_type} n={top_type_count}/{total_count} ({top_type_count / total_count:.1%}) at {pident_threshold}% identity."
+                f"{top_match_query}| {h_or_n}{top_type} n={top_type_count}/{total_count} ({top_type_count / total_count:.1%}) at {pident_threshold}% identity."
             )
             break
 
     top_result: Dict[str, Any] = list(df_segment.head(1).iter_rows(named=True))[0]
+    db_prop_matches = top_type_count / total_count if is_iav and not isinstance(top_type_count, str) and not isinstance(total_count, str) else "N/A"
     results_summary = {
         f"{h_or_n}_type": top_type if is_iav else "N/A",
         f"{h_or_n}_sample_segment_length": top_result["qlen"],
@@ -397,7 +471,7 @@ def find_h_or_n_type(
         f"{h_or_n}_virus_name": top_result["GenBank_Title"],
         f"{h_or_n}_NCBI_Influenza_DB_subtype_matches": top_type_count,
         f"{h_or_n}_NCBI_Influenza_DB_total_matches": total_count,
-        f"{h_or_n}_NCBI_Influenza_DB_proportion_matches": top_type_count / total_count if is_iav else "N/A",
+        f"{h_or_n}_NCBI_Influenza_DB_proportion_matches": db_prop_matches,
         f"{h_or_n}_NCBI_Influenza_DB_pident_threshold": pident_threshold,
     }
     logger.info(f"Seg {seg} results: {results_summary}")
@@ -641,6 +715,9 @@ def report(
                 # Replace segment number with segment name, i.e. 1 with "1_PB2" for IAV, 1 with "1_PB1" for IBV.
                 # No replacement for all other genera.
                 segment_names = get_segment_names(genus)
+                if df_blast["sample_segment"].is_null().all():
+                    logger.info(f"No segment information found for {subtype_results_summary['sample']}.")
+
                 df_blast = df_blast.with_columns(pl.col("sample_segment").apply(lambda x: segment_names.get(int(x), x)))
                 dfs_blast.append(df_blast)
             sample = subtype_results_summary["sample"]

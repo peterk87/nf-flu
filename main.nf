@@ -37,6 +37,8 @@ if (params.platform == 'illumina'){
     include { ILLUMINA } from './workflows/illumina'
 } else if (params.platform == 'nanopore'){
     include { NANOPORE } from './workflows/nanopore'
+} else if (params.platform == 'assemblies'){
+    include { ASSEMBLIES } from './workflows/assemblies'
 }
 
 workflow NF_FLU {
@@ -44,6 +46,8 @@ workflow NF_FLU {
         ILLUMINA ()
     } else if (params.platform == 'nanopore') {
         NANOPORE ()
+    } else if (params.platform == 'assemblies') {
+        ASSEMBLIES ()
     }
 }
 

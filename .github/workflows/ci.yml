@@ -21,6 +21,50 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  nftest:
+    name: Run nf-test
+    runs-on: ubuntu-latest
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
+    strategy:
+      matrix:
+        # Nextflow versions: check pipeline minimum and current latest
+        nxf_ver: ['22.10.1', '24.10.3']
+    steps:
+      - name: Check out pipeline code
+        uses: actions/checkout@v4
+      - name: Cache Nextflow binary
+        uses: actions/cache@v4
+        id: cache-nextflow
+        with:
+          path: |
+            /usr/local/bin/nextflow
+            ~/.nextflow
+          key: nextflow-${{ matrix.nxf_ver }}
+      - name: Install Nextflow
+        if: steps.cache-nextflow.outputs.cache-hit != 'true'
+        env:
+          CAPSULE_LOG: none
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Cache nf-test
+        id: cache-nf-test
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/bin/nf-test
+            /home/runner/.nf-test/nf-test.jar
+          key: nf-test
+      - name: Install nf-test
+        if: steps.cache-nf-test.outputs.cache-hit != 'true'
+        run: |
+          wget -qO- https://code.askimed.com/install/nf-test | bash
+          sudo mv nf-test /usr/local/bin/
+      - name: Run nf-test
+        run: |
+          nf-test test
   cacheroni:
     runs-on: ubuntu-latest
     steps:
@@ -68,12 +112,87 @@ jobs:
         if: steps.cache-vadr-models.outputs.cache-hit != 'true'
         run: |
           curl --silent -SLk ${VADR_MODEL_URL} > vadr-models-flu-1.6.3-2.tar.gz
+  test_assemblies:
+    name: Run assemblies subworkflow test
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'CFIA-NCFAD/nf-flu') }}
+    runs-on: ubuntu-latest
+    needs: [cacheroni, nftest]
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
+    strategy:
+        matrix:
+            # Nextflow versions: check pipeline minimum and current latest
+            nxf_ver: ['22.10.1', '24.10.3']
+    steps:
+      - name: Check out pipeline code
+        uses: actions/checkout@v4
+      - name: restore cached influenza-10k.fna.zst
+        uses: actions/cache/restore@v4
+        with:
+          path: influenza-10k.fna.zst
+          key: influenza-fna
+      - name: restore cached influenza.csv.zst
+        uses: actions/cache/restore@v4
+        with:
+          path: influenza.csv.zst
+          key: influenza-csv
+      - name: restore cached vadr-models-flu-1.6.3-2.tar.gz
+        uses: actions/cache/restore@v4
+        with:
+          path: vadr-models-flu-1.6.3-2.tar.gz
+          key: vadr-models-tgz
+      - name: Cache Nextflow binary
+        uses: actions/cache@v4
+        id: cache-nextflow
+        with:
+          path: |
+            /usr/local/bin/nextflow
+            ~/.nextflow
+          key: nextflow-${{ matrix.nxf_ver }}
+      - name: Install Nextflow
+        if: steps.cache-nextflow.outputs.cache-hit != 'true'
+        env:
+          CAPSULE_LOG: none
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Setup test data
+        run: |
+          curl -SLk --silent https://github.com/CFIA-NCFAD/nf-test-datasets/raw/refs/heads/nf-flu/fastas.tar.gz | tar -xzf -
+      - name: Run pipeline with test data
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} \
+            -profile test_assemblies,docker \
+            --ncbi_influenza_fasta influenza-10k.fna.zst \
+            --ncbi_influenza_metadata influenza.csv.zst \
+            --vadr_model_targz vadr-models-flu-1.6.3-2.tar.gz
+      - name: Upload .nextflow.log
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextflow-log-assemblies-${{ matrix.nxf_ver }}
+          path: .nextflow.log
+          include-hidden-files: true
+      - name: Upload pipeline_info/
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assemblies-test-results-pipline_info-${{ matrix.nxf_ver }}
+          path: results/pipeline_info
+      - name: Upload nf-flu-subtyping-report.xlsx
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assemblies-test-results-subtyping-report-${{ matrix.nxf_ver }}
+          path: results/nf-flu-subtyping-report.xlsx
+
   test_illumina:
     name: Run Illumina test
     # Only run on push if this is the nf-flu dev branch (merged PRs)
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'CFIA-NCFAD/nf-flu') }}
     runs-on: ubuntu-latest
-    needs: cacheroni
+    needs: [cacheroni, nftest]
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
@@ -165,7 +284,7 @@ jobs:
     # Only run on push if this is the nf-flu dev branch (merged PRs)
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'CFIA-NCFAD/nf-flu') }}
     runs-on: ubuntu-latest
-    needs: cacheroni
+    needs: [cacheroni, nftest]
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false

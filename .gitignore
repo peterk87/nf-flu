@@ -8,3 +8,5 @@ work/*
 .nextflow.log*
 test/
 .idea/
+.nf-test/
+.nf-test.log

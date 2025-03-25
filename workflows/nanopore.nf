@@ -225,13 +225,10 @@ workflow NANOPORE {
     ch_vcf_filter = BCF_FILTER_MEDAKA.out.vcf
   }
 
-  VCF_FILTER_FRAMESHIFT(ch_vcf_filter)
-  ch_versions = ch_versions.mix(VCF_FILTER_FRAMESHIFT.out.versions)
-
-  BCFTOOLS_STATS(VCF_FILTER_FRAMESHIFT.out.vcf)
+  BCFTOOLS_STATS(ch_vcf_filter)
   ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions)
 
-  VCF_FILTER_FRAMESHIFT.out.vcf
+  ch_vcf_filter
     .combine(MOSDEPTH_GENOME.out.bedgz, by: [0, 1, 2]) // combine channels based on sample_name, segment and accession_id
     .set { ch_bcf_consensus } // ch_bcf_consensus: [sample_name, segment, id, fasta, filt_vcf, mosdepth_per_base]
 
@@ -239,7 +236,7 @@ workflow NANOPORE {
   ch_versions = ch_versions.mix(COVERAGE_PLOT.out.versions)
 
   // Generate consensus sequences
-  BCF_CONSENSUS(ch_bcf_consensus, params.low_coverage)
+  BCF_CONSENSUS(ch_bcf_consensus, params.low_coverage, params.major_allele_fraction)
   ch_versions = ch_versions.mix(BCF_CONSENSUS.out.versions)
 
   BCF_CONSENSUS.out.fasta
