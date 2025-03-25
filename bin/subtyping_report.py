@@ -252,7 +252,11 @@ def parse_blast_result(
     except pl.exceptions.NoDataError:
         logger.warning(f"No BLAST results found in {blast_result}")
         return None
-
+    if df_filtered.shape[0] == 0:
+        logger.warning(
+            f"No BLAST results found in {blast_result} >= {pident_threshold}% identity and alignment length >= {min_aln_length}"
+        )
+        return None
     first_qaccver = df_filtered["qaccver"][0]
     sample_name: str = re.sub(r"^([\w\-]+)_\d$", r"\1", first_qaccver)
     if first_qaccver == sample_name:
