@@ -10,7 +10,6 @@ include { SUBTYPING_REPORT as SUBTYPING_REPORT_IRMA_CONSENSUS } from '../modules
 include { SUBTYPING_REPORT as SUBTYPING_REPORT_BCF_CONSENSUS  } from '../modules/local/subtyping_report'
 include { COVERAGE_PLOT                                       } from '../modules/local/coverage_plot'
 include { BLASTN_REPORT                                       } from '../modules/local/blastn_report'
-include { VCF_FILTER_FRAMESHIFT                               } from '../modules/local/vcf_filter_frameshift'
 include { MEDAKA                                              } from '../modules/local/medaka'
 include { MINIMAP2                                            } from '../modules/local/minimap2'
 include { BCF_FILTER as BCF_FILTER_CLAIR3                     } from '../modules/local/bcftools'
