@@ -15,6 +15,7 @@ process BCF_CONSENSUS {
   input:
   tuple val(sample), val(segment), val(ref_id) , path(fasta), path(vcf), path(mosdepth_per_base)
   val(low_coverage)
+  val(major_allele_fraction)
 
   output:
   tuple val(sample), path(consensus), emit: fasta
@@ -25,19 +26,23 @@ process BCF_CONSENSUS {
   consensus    = "${prefix}.bcftools.consensus.fasta"
   sequenceID   = "${sample}_${segment}"
   """
-  bgzip -c $vcf > ${vcf}.gz
-  tabix ${vcf}.gz
-
   # get low coverage depth mask BED file by filtering for regions with less than ${low_coverage}X
   zcat $mosdepth_per_base | awk '\$4<${low_coverage}' > low_cov.bed
 
   awk '/^>/ {print; next} {gsub(/[RYSWKMBDHVryswkmbdhv]/, "N"); print}' $fasta > ${fasta}.no_ambiguous.fasta
 
+  bcftools filter \\
+    -Oz \\
+    -o no_low_af_indels.vcf.gz \\
+    -e "TYPE != 'SNP' && FMT/VAF < ${major_allele_fraction}" \\
+    $vcf
+
+  tabix no_low_af_indels.vcf.gz
 
   bcftools consensus \\
     -f ${fasta}.no_ambiguous.fasta \\
     -m low_cov.bed \\
-    ${vcf}.gz > $consensus
+    no_low_af_indels.vcf.gz > $consensus
 
   sed -i -E "s/^>(.*)/>$sequenceID/g" $consensus
 
@@ -101,8 +106,16 @@ process BCF_FILTER {
   bcftools +setGT \\
     setGT.minor.vcf \\
     -Ov \\
-    -o $bcftools_filt_vcf \\
+    -o setGT.final.vcf \\
     -- -t q -n 'c:0/0' -i 'FMT/VAF < ${minor_allele_fraction}'
+
+  bcftools filter \\
+    setGT.final.vcf \\
+    -e "TYPE != 'SNP' && ( (STRLEN(ALT) - STRLEN(REF)) % 3 ) != 0 
+    || TYPE != 'SNP' && ( (STRLEN(ALT) - STRLEN(REF)) % 3 == 0 
+    && FMT/VAF < ${minor_allele_fraction})" \\
+    -Ov \\
+    -o $bcftools_filt_vcf 
 
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":

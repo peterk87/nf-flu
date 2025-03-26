@@ -1,0 +1,32 @@
+##fileformat=VCFv4.2
+##source=Clair3
+##clair3_version=1.0.10
+##cmdline=/usr/local/bin/run_clair3.sh --bam_fn=ERR6359501-10k.Segment_1_PB2.FB701709.1.bam --ref_fn=ERR6359501-10k.Segment_1_PB2.FB701709.1.reference.fasta --model_path=/usr/local/bin/models/r941_prom_sup_g5014 --threads=2 --platform=ont --output=ERR6359501-10k.Segment_1_PB2.FB701709.1.clair3 --haploid_sensitive --enable_long_indel --keep_iupac_bases --include_all_ctgs --var_pct_phasing=1 --var_pct_full=1 --ref_pct_full=1
+##reference=FB701709.1.fasta
+##FILTER=<ID=PASS,Description="All filters passed">
+##FILTER=<ID=LowQual,Description="Low quality variant">
+##FILTER=<ID=RefCall,Description="Reference call">
+##INFO=<ID=P,Number=0,Type=Flag,Description="Result from pileup calling">
+##INFO=<ID=F,Number=0,Type=Flag,Description="Result from full-alignment calling">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth (reads 1. with MQ below 5 or an user-specified threshold, or 2. selected by 'samtools view -F 2316', are filtered)">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allelic depths for the ref and alt alleles in the order listed">
+##FORMAT=<ID=PL,Number=G,Type=Integer,Description="Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification">
+##FORMAT=<ID=AF,Number=A,Type=Float,Description="Observed allele frequency in reads, for each ALT allele, in the same order as listed, or the REF allele for a RefCall">
+##contig=<ID=FB701709.1,length=2341>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE
+FB701709.1	4	.	G	T	7.52	PASS	F	GT:GQ:DP:AD:AF	1:7:4:0,4:1.0
+FB701709.1	83	.	TACTCACAAA	T	7.52	PASS	F	GT:GQ:DP:AD:AF	1:7:10:6,4:0.4
+FB701709.1	1831	.	C	T	7.52	PASS	F	GT:GQ:DP:AD:AF	1:7:50:25,25:0.5000
+FB701709.1	1861	.	A	GATCATG	9.87	PASS	F	GT:GQ:DP:AD:AF	1:9:100:50,50:0.5000
+FB701709.1	1900	.	C	CCTTTG	0.00	LowQual	F	GT:GQ:DP:AD:AF	1:0:50:25,25:0.5000
+FB701709.1	1940	.	T	C	7.15	PASS	F	GT:GQ:DP:AD:AF	1:7:30:20,10:0.3333
+FB701709.1	1952	.	G	A	9.41	PASS	F	GT:GQ:DP:AD:AF	1:9:30:20,10:0.3333
+FB701709.1	2025	.	A	T	8.88	PASS	F	GT:GQ:DP:AD:AF	1:8:60:0,60:1.0000
+FB701709.1	2048	.	C	A	9.59	PASS	F	GT:GQ:DP:AD:AF	1:9:90:60,20:0.2222
+FB701709.1	2061	.	C	G	8.75	PASS	F	GT:GQ:DP:AD:AF	1:8:90:60,30:0.3333
+FB701709.1	2076	.	A	T	10.25	PASS	F	GT:GQ:DP:AD:AF	1:10:90:0,70:0.7778
+FB701709.1	2117	.	T	C	10.63	PASS	F	GT:GQ:DP:AD:AF	1:10:100:90,10:0.1000
+FB701709.1	2238	.	A	G	14.65	PASS	P	GT:GQ:DP:AD:AF	1:14:120:0,110:0.9167
+FB701709.1	2243	.	G	A	5.42	PASS	F	GT:GQ:DP:AD:AF	1:5:120:80,10:0.0833

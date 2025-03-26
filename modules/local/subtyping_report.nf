@@ -36,6 +36,7 @@ process SUBTYPING_REPORT {
   path "versions.yml", emit: versions
 
   script:
+  samplesheet_opt = samplesheet ? "--samplesheet $samplesheet" : ""
   """
   subtyping_report.py \\
    --flu-metadata $genomeset \\
@@ -43,7 +44,7 @@ process SUBTYPING_REPORT {
    --outdir subtyping_report \\
    --excel-report nf-flu-subtyping-report.xlsx \\
    --pident-threshold ${params.pident_threshold} \\
-   --samplesheet $samplesheet \\
+   $samplesheet_opt \\
    --vadr-mdl-dir vadr_outdirs/ \\
    --input-blast-results-dir blastn_results/
 
@@ -51,7 +52,7 @@ process SUBTYPING_REPORT {
 
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
-      subtyping_report.py: \$(subtyping_report.py --version 2>&1)
+      subtyping_report.py: \$(subtyping_report.py --version)
   END_VERSIONS
   """
 }
