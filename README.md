@@ -12,7 +12,7 @@
 
 ## Introduction
 
-**nf-flu** is a [Nextflow][] bioinformatics analysis pipeline for assembly and H/N subtyping of Influenza A and B viruses from Illumina or Nanopore sequencing data.
+**nf-flu** is a [Nextflow][] bioinformatics analysis pipeline for assembly and analysis of Influenza A and B viruses from Illumina or Nanopore sequencing data or previously assembled FASTA sequences.
 Since Influenza has a segmented genome consisting of 8 gene segments, the pipeline will automatically select the top matching reference sequence from NCBI for each gene segment based on [IRMA][] assembly and nucleotide [BLAST][] against all Influenza sequences from NCBI.
 Users can also provide their own reference sequences to include in the top reference sequence selection process.
 After reference sequence selection, the pipeline performs read mapping to each reference sequence, variant calling and depth-masked consensus sequence generation.
@@ -33,6 +33,8 @@ After reference sequence selection, the pipeline performs read mapping to each r
 10. [GenoFLU][] genotyping of North American H5 viruses.
 11. HA cleavage site prediction and classification
 12. [MultiQC][] report generation.
+
+![nf-flu workflow](assets/nf-flu-pipeline-diagram.svg)
 
 ## Quick Start
 
@@ -67,7 +69,7 @@ After reference sequence selection, the pipeline performs read mapping to each r
           -o samplesheet.csv
         ```
 
-    * Typical command for Illumina Platform
+    * Typical command for Illumina sequencing data
 
         ```bash
         nextflow run CFIA-NCFAD/nf-flu \
@@ -76,12 +78,21 @@ After reference sequence selection, the pipeline performs read mapping to each r
           --profile <docker/apptainer/singularity/podman/shifter/charliecloud/conda>
         ```
 
-    * Typical command for Nanopore Platform
+    * Typical command for Nanopore sequencing data
 
       ```bash
       nextflow run CFIA-NCFAD/nf-flu \
         --input samplesheet.csv \
         --platform nanopore \
+        --profile <docker/apptainer/singularity/conda>
+      ```
+
+    * Run analysis on FASTA files within a directory
+
+      ```bash
+      nextflow run CFIA-NCFAD/nf-flu \
+        --input /path/to/fasta_files/ \
+        --platform assemblies \
         --profile <docker/apptainer/singularity/conda>
       ```
 

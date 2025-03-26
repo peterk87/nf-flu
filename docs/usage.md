@@ -10,6 +10,8 @@ You will need to create a samplesheet with information about the samples you wou
 --input '[path to samplesheet file]'
 ```
 
+> **NOTE:** When running the pipeline with `--platform assemblies`, the path for `--input` should be the directory containing the FASTA sequences you wish to perform analysis on. 
+
 #### Illumina samplesheet
 
 The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once (e.g. to increase sequencing depth). The pipeline will concatenate the raw reads before performing any downstream analysis.
@@ -116,7 +118,7 @@ Sample sheet with sample names and paths to reads.
 - Type: string
 - Default: illumina
 
-Specify the platform for Illumina or Nanopore data
+NGS platform used to sequence the samples (i.e. Illumina or Nanopore), or if you wish to run nf-flu analysis on FASTA sequences, specify 'assemblies'.
 
 #### `--ref_db`
 

@@ -19,7 +19,7 @@
                 "platform": {
                     "type": "string",
                     "fa_icon": "fas fa-hdd",
-                    "description": "NGS platform used to sequence the samples.",
+                    "description": "NGS platform used to sequence the samples (i.e. Illumina or Nanopore), or if you wish to run nf-flu analysis on FASTA sequences, specify 'assemblies'.",
                     "enum": [
                         "illumina",
                         "nanopore",
