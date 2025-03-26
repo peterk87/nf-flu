@@ -10,7 +10,7 @@ You will need to create a samplesheet with information about the samples you wou
 --input '[path to samplesheet file]'
 ```
 
-> **NOTE:** When running the pipeline with `--platform assemblies`, the path for `--input` should be the directory containing the FASTA sequences you wish to perform analysis on. 
+> **NOTE:** When running the pipeline with `--platform assemblies`, the path for `--input` should be the directory containing the FASTA sequences you wish to perform analysis on.
 
 #### Illumina samplesheet
 
