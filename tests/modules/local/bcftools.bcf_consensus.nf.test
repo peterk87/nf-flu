@@ -1,0 +1,31 @@
+nextflow_process {
+  name "Test BCF_CONSENSUS"
+  script "modules/local/bcftools.nf"
+  process "BCF_CONSENSUS"
+  config "nextflow.config"
+
+  test("Should create a depth-masked consensus sequence with low AF indels removed") {
+    when {
+      process {
+        """
+        input[0] = Channel.of([
+          'ERR6359501-10k',
+          '1_PB2',
+          'FB701709.1',
+          file("$projectDir/tests/data/fasta/FB701709.1.fasta"),
+          file("$projectDir/tests/data/vcf/ERR6359501-10k.Segment_1_PB2.FB701709.1.bcftools_filt.vcf"),
+          file("$projectDir/tests/data/mosdepth/ERR6359501.1_PB2.FB701709.1.per-base.bed.gz")
+        ])
+        input[1] = Channel.of(10)
+        input[2] = Channel.of(0.75)
+        """
+      }
+    }
+    then {
+      assert process.success
+      assert process.trace.tasks().size() == 1
+      assert path(process.out.fasta.get(0)[1]).exists()
+      assert path(process.out.fasta.get(0)[1]).md5 == "23d3ef3bba3cd9c149d1f8d889c201b6"
+    }
+  }
+}

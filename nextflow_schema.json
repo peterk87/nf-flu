@@ -19,10 +19,11 @@
                 "platform": {
                     "type": "string",
                     "fa_icon": "fas fa-hdd",
-                    "description": "NGS platform used to sequence the samples.",
+                    "description": "NGS platform used to sequence the samples (i.e. Illumina or Nanopore), or if you wish to run nf-flu analysis on FASTA sequences, specify 'assemblies'.",
                     "enum": [
                         "illumina",
-                        "nanopore"
+                        "nanopore",
+                        "assemblies"
                     ]
                 },
                 "ref_db": {
@@ -266,6 +267,19 @@
                     "default": "https://gist.github.com/peterk87/0aed5662c55b12da80a86104a967099e/raw/d17b8d14224e29350a720d054543bf4540d41aa5/flu.minfo",
                     "description": "Path/URL to the custom VADR flu.minfo file to use for annotation. Default is the same as flu model v1.6.3-2 except with cleavage site misc_features.",
                     "fa_icon": "fas fa-file-import"
+                }
+            }
+        },
+        "skipping_options": {
+            "title": "Skipping options",
+            "type": "object",
+            "description": "Options for skipping parts of the pipeline",
+            "properties": {
+                "skip_flumut": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip the Flumut analysis.",
+                    "fa_icon": "fas fa-fast-forward"
                 }
             }
         },

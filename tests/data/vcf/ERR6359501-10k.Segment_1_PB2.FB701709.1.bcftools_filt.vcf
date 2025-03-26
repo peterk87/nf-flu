@@ -1,0 +1,53 @@
+##fileformat=VCFv4.2
+##FILTER=<ID=PASS,Description="All filters passed">
+##source=Clair3
+##clair3_version=1.0.10
+##cmdline=/usr/local/bin/run_clair3.sh --bam_fn=ERR6359501-10k.Segment_1_PB2.FB701709.1.bam --ref_fn=ERR6359501-10k.Segment_1_PB2.FB701709.1.reference.fasta --model_path=/usr/local/bin/models/r941_prom_sup_g5014 --threads=2 --platform=ont --output=ERR6359501-10k.Segment_1_PB2.FB701709.1.clair3 --haploid_sensitive --enable_long_indel --keep_iupac_bases --include_all_ctgs --var_pct_phasing=1 --var_pct_full=1 --ref_pct_full=1
+##reference=FB701709.1.fasta
+##FILTER=<ID=LowQual,Description="Low quality variant">
+##FILTER=<ID=RefCall,Description="Reference call">
+##INFO=<ID=P,Number=0,Type=Flag,Description="Result from pileup calling">
+##INFO=<ID=F,Number=0,Type=Flag,Description="Result from full-alignment calling">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth (reads 1. with MQ below 5 or an user-specified threshold, or 2. selected by 'samtools view -F 2316', are filtered)">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allelic depths for the ref and alt alleles in the order listed">
+##FORMAT=<ID=PL,Number=G,Type=Integer,Description="Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification">
+##FORMAT=<ID=AF,Number=A,Type=Float,Description="Observed allele frequency in reads, for each ALT allele, in the same order as listed, or the REF allele for a RefCall">
+##contig=<ID=FB701709.1,length=2341>
+##bcftools_normVersion=1.20+htslib-1.20
+##bcftools_normCommand=norm --check-ref w -Ov -m- -f FB701709.1.fasta ERR6359501-10k.Segment_1_PB2.FB701709.1.clair3.vcf; Date=Tue Feb 25 21:53:12 2025
+##INFO=<ID=F_MISSING,Number=.,Type=Float,Description="Added by +fill-tags expression F_MISSING=F_MISSING">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Allele count in genotypes">
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of samples with data">
+##INFO=<ID=AC_Hom,Number=A,Type=Integer,Description="Allele counts in homozygous genotypes">
+##INFO=<ID=AC_Het,Number=A,Type=Integer,Description="Allele counts in heterozygous genotypes">
+##INFO=<ID=AC_Hemi,Number=A,Type=Integer,Description="Allele counts in hemizygous genotypes">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele frequency">
+##INFO=<ID=MAF,Number=1,Type=Float,Description="Frequency of the second most common allele">
+##INFO=<ID=HWE,Number=A,Type=Float,Description="HWE test (PMID:15789306); 1=good, 0=bad">
+##INFO=<ID=ExcHet,Number=A,Type=Float,Description="Test excess heterozygosity; 1=good, 0=bad">
+##FORMAT=<ID=VAF,Number=A,Type=Float,Description="The fraction of reads with alternate allele (nALT/nSumAll)">
+##FORMAT=<ID=VAF1,Number=1,Type=Float,Description="The fraction of reads with alternate alleles (nSumALT/nSumAll)">
+##bcftools_pluginVersion=1.20+htslib-1.20
+##bcftools_pluginCommand=plugin fill-tags -Ov -o filled.vcf -- norm.vcf -t all; Date=Tue Feb 25 21:53:12 2025
+##bcftools_pluginCommand=plugin setGT -Ov -o setGT.major.vcf -- filled.vcf -t q -n c:1/1 -i 'FMT/VAF >= 0.75'; Date=Tue Feb 25 21:53:12 2025
+##bcftools_pluginCommand=plugin setGT -Ov -o setGT.minor.vcf -- setGT.major.vcf -t q -n c:0/1 -i 'FMT/VAF >= 0.25 && FMT/VAF < 0.75'; Date=Tue Feb 25 21:53:12 2025
+##bcftools_pluginCommand=plugin setGT -Ov -o setGT.final.vcf -- setGT.minor.vcf -t q -n c:0/0 -i 'FMT/VAF < 0.25'; Date=Tue Feb 25 21:53:12 2025
+##bcftools_filterVersion=1.20+htslib-1.20
+##bcftools_filterCommand=filter -e 'TYPE='indel' && ( (STRLEN(ALT) - STRLEN(REF)) % 3 ) != 0 
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE
+FB701709.1	4	.	G	T	7.52	PASS	F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	1/1:7:4:0,4:1:1:1
+FB701709.1	83	.	TACTCACAAA	T	7.52	PASS	F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	0/1:7:10:6,4:0.4:0.4:0.4
+FB701709.1	1831	.	C	T	7.52	PASS	F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	0/1:7:50:25,25:0.5:0.5:0.5
+FB701709.1	1861	.	A	GATCATG	9.87	PASS	F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	0/1:9:100:50,50:0.5:0.5:0.5
+FB701709.1	1940	.	T	C	7.15	PASS	F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	0/1:7:30:20,10:0.3333:0.333333:0.333333
+FB701709.1	1952	.	G	A	9.41	PASS	F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	0/1:9:30:20,10:0.3333:0.333333:0.333333
+FB701709.1	2025	.	A	T	8.88	PASS	F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	1/1:8:60:0,60:1:1:1
+FB701709.1	2048	.	C	A	9.59	PASS	F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	0/1:9:90:60,20:0.2222:0.25:0.25
+FB701709.1	2061	.	C	G	8.75	PASS	F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	0/1:8:90:60,30:0.3333:0.333333:0.333333
+FB701709.1	2076	.	A	T	10.25	PASS	F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	1/1:10:90:0,70:0.7778:1:1
+FB701709.1	2117	.	T	C	10.63	PASS	F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	0/0:10:100:90,10:0.1:0.1:0.1
+FB701709.1	2238	.	A	G	14.65	PASS	P;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	1/1:14:120:0,110:0.9167:1:1
+FB701709.1	2243	.	G	A	5.42	PASS	F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1	GT:GQ:DP:AD:AF:VAF:VAF1	0/0:5:120:80,10:0.0833:0.111111:0.111111

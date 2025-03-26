@@ -102,8 +102,20 @@ def count_ha1_basic_residues(ha_cleavage_site_seq: str) -> tuple[int, str, str]:
     (2, 'LP/HP', 'Multibasic')
     >>> count_ha1_basic_residues("PQERREERGLF")
     (1, 'LPAI', 'Monobasic')
+    >>> count_ha1_basic_residues("R")
+    (0, 'N/A', 'N/A')
+    >>> count_ha1_basic_residues("RK")
+    (0, 'N/A', 'N/A')
+    >>> count_ha1_basic_residues("RKK")
+    (0, 'N/A', 'N/A')
+    >>> count_ha1_basic_residues("RRKK")
+    (0, 'N/A', 'N/A')
+    >>> count_ha1_basic_residues("RRRKK")
+    (1, 'LPAI', 'Monobasic')
     """
     if not ha_cleavage_site_seq:
+        return 0, "N/A", "N/A"
+    if len(ha_cleavage_site_seq) < 4:
         return 0, "N/A", "N/A"
     if ha_cleavage_site_seq[-4] not in "RK":
         return 0, "N/A", "N/A"

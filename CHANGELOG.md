@@ -3,6 +3,20 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.8.0]](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.7.0)] - 2025-03-25
+
+This release adds the `--platform assemblies` mode for analysis of FASTA sequences along with `--input /path/to/fasta-dir/` to specify the directory containing the FASTA sequences.
+
+### Changes
+
+* feat: analysis of previously assembled IAV FASTA sequences with the addition of a new analysis mode via `--platform assemblies`. Use along with `--input /path/to/fasta-dir/` to specify the directory containing the FASTA sequences.
+* fix: `bin/cleavage_site.py` short cleavage site index access error (#106)
+* fix: `cleavage_site.nf` version output issue (#105)
+* fix: low abundance indels appearing in consensus sequences despite major/minor allele frequency thresholds. Explicitly excluding non-SNP variants below the major allele fraction prior to consensus sequence generation with Bcftools consensus.
+* fix: subtyping report issue with some poor quality IBV sequences (#107)
+* dev: add nf-test for VCF filtering and consensus sequence generation from VCF with low AF indels.
+* dev: replaced `vcf_filter_frameshift.py` with Bcftools filter commands.
+
 ## [[3.7.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.7.0)] - 2025
 
 This minor release adds GenoFLU for H5 genotyping and HA cleavage site output with VADR annotations. This release also adds a script to classify HA cleavage sites based on mono-/multibasicity and low/high pathogenicity.

@@ -38,7 +38,6 @@ include { SEQTK_SEQ                                                             
 include { PULL_TOP_REF_ID                                                                  } from '../modules/local/pull_top_ref_id'
 include { BCF_FILTER as BCF_FILTER_FREEBAYES                                               } from '../modules/local/bcftools'
 include { BCF_CONSENSUS                                                                    } from '../modules/local/bcftools'
-include { VCF_FILTER_FRAMESHIFT                                                            } from '../modules/local/vcf_filter_frameshift'
 include { COVERAGE_PLOT                                                                    } from '../modules/local/coverage_plot'
 include { CAT_CONSENSUS                                                                    } from '../modules/local/misc'
 include { FREEBAYES                                                                        } from '../modules/local/freebayes'
@@ -217,15 +216,11 @@ workflow ILLUMINA {
 
   BCF_FILTER_FREEBAYES(FREEBAYES.out.vcf, params.major_allele_fraction, params.minor_allele_fraction)
   ch_versions = ch_versions.mix(BCF_FILTER_FREEBAYES.out.versions)
-  ch_vcf_filter = BCF_FILTER_FREEBAYES.out.vcf
 
-  VCF_FILTER_FRAMESHIFT(ch_vcf_filter)
-  ch_versions = ch_versions.mix(VCF_FILTER_FRAMESHIFT.out.versions)
-
-  BCFTOOLS_STATS(VCF_FILTER_FRAMESHIFT.out.vcf)
+  BCFTOOLS_STATS(BCF_FILTER_FREEBAYES.out.vcf)
   ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions)
 
-  VCF_FILTER_FRAMESHIFT.out.vcf
+  BCF_FILTER_FREEBAYES.out.vcf
     .combine(MOSDEPTH_GENOME.out.bedgz, by: [0, 1, 2]) // combine channels based on sample_name, segment and accession_id
     .set { ch_bcf_consensus } // ch_bcf_consensus: [sample_name, segment, id, fasta, filt_vcf, mosdepth_per_base]
 
@@ -233,7 +228,7 @@ workflow ILLUMINA {
   ch_versions = ch_versions.mix(COVERAGE_PLOT.out.versions)
 
   // Generate consensus sequences 
-  BCF_CONSENSUS(ch_bcf_consensus, params.low_coverage)
+  BCF_CONSENSUS(ch_bcf_consensus, params.low_coverage, params.major_allele_fraction)
   ch_versions = ch_versions.mix(BCF_CONSENSUS.out.versions)
 
   BCF_CONSENSUS.out.fasta

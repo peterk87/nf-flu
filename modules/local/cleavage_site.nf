@@ -25,7 +25,7 @@ process CLEAVAGE_SITE {
   
   cat <<-END_VERSIONS > versions.yml
   "${task.process}":
-      cleavage_site.py: \$(cleavage_site.py --version 2>&1)
+      cleavage_site.py: \$(cleavage_site.py --version)
   END_VERSIONS
   """
 }

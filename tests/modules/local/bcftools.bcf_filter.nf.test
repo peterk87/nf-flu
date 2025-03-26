@@ -1,0 +1,56 @@
+nextflow_process {
+  name "Test BCF_FILTER"
+  script "modules/local/bcftools.nf"
+  process "BCF_FILTER"
+  config "nextflow.config"
+
+  test("Should set genotype (GT) for low AF variants and remove frameshift variants") {
+    when {
+      process {
+        """
+        input[0] = Channel.of([
+          'ERR6359501-10k',
+          '1_PB2',
+          'FB701709.1',
+          file("$projectDir/tests/data/fasta/FB701709.1.fasta"),
+          file("$projectDir/tests/data/vcf/ERR6359501-10k.Segment_1_PB2.FB701709.1.clair3.vcf")
+        ])
+        input[1] = Channel.of(0.75)
+        input[2] = Channel.of(0.25)
+        """
+      }
+    }
+    then {
+      assert process.success
+      assert process.trace.tasks().size() == 1
+      def lines = path(process.out.vcf.get(0)[4]).toFile().readLines()
+      assert !lines.contains(["FB701709.1", "1900"].join("\t"))
+      def indelLowAF = [
+        "FB701709.1",
+        "83",
+        ".",
+        "TACTCACAAA",
+        "T",
+        "7.52",
+        "PASS",
+        "F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1",
+        "GT:GQ:DP:AD:AF:VAF:VAF1",
+        "0/1:7:10:6,4:0.4:0.4:0.4"
+      ].join("\t")
+      assert lines.contains(indelLowAF)
+      def varGT_1_1 = [
+        "FB701709.1",
+        "2076",
+        ".",
+        "A",
+        "T",
+        "10.25",
+        "PASS",
+        "F;F_MISSING=0;NS=1;AN=1;AF=1;MAF=0;AC=1;AC_Het=0;AC_Hom=0;AC_Hemi=1;HWE=1;ExcHet=1",
+        "GT:GQ:DP:AD:AF:VAF:VAF1",
+        "1/1:10:90:0,70:0.7778:1:1"
+      ].join("\t")
+      assert lines.contains(varGT_1_1)
+    }
+  }
+}
