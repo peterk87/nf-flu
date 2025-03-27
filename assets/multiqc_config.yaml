@@ -34,6 +34,8 @@ module_order:
 extra_fn_clean_exts:
     - type: remove
       pattern: .no_frameshifts
+    - type: remove
+      pattern: .bcftools_filt
 
 mosdepth_config:
     general_stats_coverage:

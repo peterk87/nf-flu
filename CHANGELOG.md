@@ -3,7 +3,21 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [[3.8.0]](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.7.0)] - 2025-03-25
+## [[3.8.1](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.8.1)] - 2025-03-26
+
+This patch release updates Clair3, the variant caller for Nanopore sequence data, to 1.0.11. Clair 1.0.11 adds an option to enable variant calling at the head and tail 16bp of each sequence (`--enable_variant_calling_at_sequence_head_and_tail`). This option is enabled by default in the nf-flu workflow to ensure that the 16bp at the start and end of each of the 8 segments of IAV and IBV are variant called. It should be noted that the developers of Clair3 note that results are used "with caution because alignments are less reliable in the regions, and there would be insufficient context to be fed to the neural network for reliable calling".
+
+A minor issue with the MultiQC report was also fixed where sample names were not cleaned properly. The `.bcftools_filt` extension was added to `extra_fn_clean_exts` in `assets/multiqc_config.yaml`.
+
+### Changes
+
+* fix: MultiQC report sample name cleaning. Added `.bcftools_filt` to `extra_fn_clean_exts` in `assets/multiqc_config.yaml`.
+* update: Clair3 1.0.10 -> 1.0.11
+* fix: Clair3 not variant calling the ends of each segment enable variant calling at the head and tail 16bp of each sequence (`--enable_variant_calling_at_sequence_head_and_tail`) (#61)
+* dev: move Clair3 arguments and options to `conf/modules_nanopore.config`. This should allow users to change Clair3 options more easily using custom Nextflow config files (e.g. `nextflow run CFIA-NCFAD/nf-flu -c clair3-custom.config ...`).
+* test: added nf-test for `clair3.nf` to with simulated test data for head and tail variant calling with the `--enable_variant_calling_at_sequence_head_and_tail` option.
+
+## [[3.8.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.8.0)] - 2025-03-25
 
 This release adds the `--platform assemblies` mode for analysis of FASTA sequences along with `--input /path/to/fasta-dir/` to specify the directory containing the FASTA sequences.
 
