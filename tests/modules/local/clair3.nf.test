@@ -1,0 +1,60 @@
+nextflow_process {
+  name "Test CLAIR3"
+  script "modules/local/clair3.nf"
+  process "CLAIR3"
+  config "nextflow.config"
+
+  test("Should call variants in the 16bp head and tail of a sequence") {
+    when {
+      params {
+        platform = "nanopore"
+      }
+      process {
+        """
+        input[0] = Channel.of([
+          'Sample1',
+          '1_PB2',
+          'FB701709.1',
+          file("$projectDir/tests/data/fasta/FB701709.1.fasta"),
+          [
+            file("$projectDir/tests/data/bam/FB701709.1-with-end-snps.badread.bam"),
+            file("$projectDir/tests/data/bam/FB701709.1-with-end-snps.badread.bam.bai")
+          ]
+        ])
+        input[1] = Channel.of([])
+        """
+      }
+    }
+    then {
+      assert process.success
+      assert process.trace.tasks().size() == 1
+      def lines = path(process.out.vcf.get(0)[4]).linesGzip
+      def snpA5C = [
+        "FB701709.1",
+        "5",
+        ".",
+        "A",
+        "C",
+        "22.77",
+        "PASS",
+        "P",
+        "GT:GQ:DP:AD:AF",
+        "1:22:25:0,25:1.0000"
+      ].join("\t")
+      assert lines.contains(snpA5C)
+      def snpC2337A = [
+        "FB701709.1",
+        "2337",
+        ".",
+        "C",
+        "A",
+        "15.91",
+        "PASS",
+        "F",
+        "GT:GQ:DP:AD:AF",
+        "1:15:23:0,23:1.0000"
+      ].join("\t")
+      assert lines.contains(snpC2337A)
+    }
+  }
+}

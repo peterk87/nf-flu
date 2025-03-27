@@ -1,15 +1,15 @@
 // Import generic module functions
-include { getSoftwareName; fluPrefix } from './functions'
+include { fluPrefix } from './functions'
 
 process CLAIR3 {
   tag "$sample|$segment|$ref_id"
   label 'process_low'
 
-  conda 'bioconda::clair3==1.0.10'
+  conda 'bioconda::clair3==1.0.11'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/clair3:1.0.10--py39h46983ab_0'
+    container 'https://depot.galaxyproject.org/singularity/clair3:1.0.11--py39hd649744_0'
   } else {
-    container 'quay.io/biocontainers/clair3:1.0.10--py39h46983ab_0'
+    container 'quay.io/biocontainers/clair3:1.0.11--py39hd649744_0'
   }
 
   input:
@@ -24,13 +24,13 @@ process CLAIR3 {
   path "versions.yml" , emit: versions
 
   script:
-  def software = getSoftwareName(task.process)
+  def args = task.ext.args ?: ''
   def prefix   = fluPrefix(sample, segment, ref_id)
   vcf          = "${prefix}.clair3.vcf.gz"
   clair3_dir   = "${prefix}.clair3"
   clair3_log   = "${clair3_dir}/run_clair3.log"
-  model_suffix = "models/${params.clair3_variant_model}"
-  using_conda = (workflow.containerEngine == null || workflow.containerEngine == '')
+  def model_suffix = "models/${params.clair3_variant_model}"
+  def using_conda = (workflow.containerEngine == null || workflow.containerEngine == '')
   """
   CLAIR_BIN_DIR=\$(dirname \$(which run_clair3.sh))
   if [[ "${params.clair3_user_variant_model}" != "" ]] ; then
@@ -55,19 +55,12 @@ process CLAIR3 {
   samtools faidx $ref_fasta
 
   run_clair3.sh \\
+    ${args} \\
     --bam_fn=${bam[0]} \\
     --ref_fn=$ref_fasta \\
     --model_path="\$MODEL_PATH"\\
     --threads=${task.cpus} \\
-    --platform="ont" \\
-    --output=${clair3_dir} \\
-    --haploid_sensitive \\
-    --enable_long_indel \\
-    --keep_iupac_bases \\
-    --include_all_ctgs \\
-    --var_pct_phasing=1 \\
-    --var_pct_full=1 \\
-    --ref_pct_full=1
+    --output=${clair3_dir}
 
   ln -s ${clair3_dir}/merge_output.vcf.gz ${vcf}
 
