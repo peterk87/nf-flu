@@ -2,7 +2,7 @@
 
 Simulated Nanopore reads with [Badread](https://github.com/rrwick/Badread) from modified reference sequence for FB701709.1 where 2 SNP were introduced within the first and last 16bp (A5C, C2337A):
 
-```
+```text
 $ badread simulate --reference ../fasta/FB701709.1-with-end-snps.fasta --quantity 30x | pigz > FB701709.1-with-end-snps.badread.fastq.gz
 
 Badread v0.4.1
@@ -85,13 +85,18 @@ Simulating: 35 reads  72,294 bp  100.0%
 Reads were aligned to original FB701709.1 sequence with Minimap2:
 
 ```bash
-$ minimap2 -t 4 -ax map-ont ../fasta/FB701709.1.fasta FB701709.1-with-end-snps.badread.fastq.gz | samtools sort | samtools view -F4 -b > FB701709.1-with-end-snps.badread.bam
+minimap2 -t 4 -ax map-ont \
+  ../fasta/FB701709.1.fasta \
+  FB701709.1-with-end-snps.badread.fastq.gz \
+  | samtools sort \
+  | samtools view -F4 -b \
+  > FB701709.1-with-end-snps.badread.bam
 ```
 
 Testing that variants within the 16bp of each end are called by Clair3 with the new `--enable_variant_calling_at_sequence_head_and_tail` option:
 
-```
-$ run_clair3.sh \
+```bash
+run_clair3.sh \
   --haploid_sensitive \
   --enable_long_indel \
   --keep_iupac_bases \
@@ -109,7 +114,7 @@ $ run_clair3.sh \
 
 The `merge_output.vcf.gz` should contain the 2 artificially introduced SNPs:
 
-```
+```text
 ##fileformat=VCFv4.2
 ##source=Clair3
 ##clair3_version=1.0.11
