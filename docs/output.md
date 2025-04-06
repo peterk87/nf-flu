@@ -18,6 +18,7 @@ The directories listed below will be created in the results directory after the 
 - [FluMut](#flumut)
 - [GenoFLU](#genoflu)
 - [Cleavage Site Prediction](#cleavage-site-prediction)
+- [Nextclade](#nextclade)
 - [Pipeline Information](#pipeline-information)
 
 ### IRMA
@@ -282,6 +283,8 @@ Consensus sequences are analyzed using [FluMut] to identify mutations of interes
   - `flumut-mutations.tsv`: Tab-separated file containing the list of amino acids present in the positions of mutations of interest for each sample by FluMut analysis.
   - `seqs-for-flumut.fasta`: FASTA file containing the sequences of the samples that were analyzed by FluMut.
 
+</details>
+
 ### GenoFLU
 
 [GenoFlu](https://github.com/USDA-VS/GenoFLU/) "was developed to classify HPAI H5N1 goose/Guangdong clade 2.3.4.4b viruses detected in North American flyways. This tool considers all eight gene segments and can classify clade 2.3.4.4b viruses that have reassorted with North American low pathogenic viruses. The GenoFLU tool was developed for North America utilizing references detected primarily within the United States. The A1 GenoFLU genotype corresponds to the European National Reference Laboratory (EURL) genotype “C”, which is Eurasian wigeon/Netherlands-like virus that was predominant at the time the A1 virus was initially identified in Newfoundland."
@@ -293,6 +296,8 @@ Consensus sequences are analyzed using [FluMut] to identify mutations of interes
   - `<sample>.genoflu.tsv`: Tab-separated file containing the results of the GenoFLU analysis for each sample.
   - `<sample>.genoflu.xlsx`: Excel file containing the results of the GenoFLU analysis for each sample.
 
+</details>
+
 ### Cleavage Site Prediction
 
 HA cleavage site prediction is performed using `bin/cleavage_site.py` with the [VADR][] annotation sequences.
@@ -303,6 +308,23 @@ The script will also classify the pathogenicity of the cleavage site based on th
 
 - `cleavage/`
   - `<sample>.cleavage.tsv`: Tab-separated file containing the results of the cleavage site prediction analysis for each sample.
+
+</details>
+
+### Nextclade
+
+[Nextclade][] performs clade assignment, mutation calling and sequence quality checks.
+In nf-flu, Nextclade analysis of assembled Influenza sequences is performed against 30 Nextclade datasets for different subtypes and lineages of Influenza A and B virus.
+
+The specific Nextclade datasets and optionally versions (tags) can be configured with a headerless CSV file. Nextclade results are aggregrated across samples and datasets and filtered for positive results into a single Nextclade TSV (tab-separated values) report with additional fields capturing sample, dataset name and dataset version/tag information as well as Nextclade and Nextclade dataset specific results.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `nextclade/`
+  - `nextclade.tsv`: Tab-separated file containing the results of Nextclade analysis across all assembled sample sequences and Nextclade datasets filtered for positive results.
+
+</details>
 
 ### Pipeline information
 
@@ -323,4 +345,5 @@ The script will also classify the pathogenicity of the cleavage site based on th
 [FluMut]: https://github.com/izsvenezie-virology/FluMut
 [IRMA]: https://wonder.cdc.gov/amd/flu/irma/
 [NCBI Influenza DB]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
+[Nextclade]: https://clades.nextstrain.org/
 [VADR]: https://github.com/ncbi/vadr

@@ -55,6 +55,7 @@ include { FLUMUT; PREP_FLUMUT_FASTA                                             
 include { GENOFLU                                                                          } from '../modules/local/genoflu'
 include { CLEAVAGE_SITE                                                                    } from '../modules/local/cleavage_site'
 
+include { NEXTCLADE } from '../subworkflows/nextclade'
 
 //=============================================================================
 // Workflow Params Setup
@@ -279,9 +280,18 @@ workflow ILLUMINA {
   )
   ch_versions = ch_versions.mix(SUBTYPING_REPORT_BCF_CONSENSUS.out.versions)
 
-  PREP_FLUMUT_FASTA(CAT_CONSENSUS.out.consensus_fasta.collect({ it[1] }))
-  FLUMUT(PREP_FLUMUT_FASTA.out.fasta)
-  ch_versions = ch_versions.mix(FLUMUT.out.versions)
+  if (!params.skip_flumut) {
+    PREP_FLUMUT_FASTA(CAT_CONSENSUS.out.consensus_fasta.collect({ it[1] }))
+    FLUMUT(PREP_FLUMUT_FASTA.out.fasta)
+    ch_versions = ch_versions.mix(FLUMUT.out.versions)
+  }
+  if (!params.skip_nextclade) {
+    NEXTCLADE(
+      ch_cat_consensus_fasta,
+      params.nextclade_datasets_csv
+    )
+    ch_versions = ch_versions.mix(NEXTCLADE.out.versions)
+  }
 
   workflow_summary    = Schema.params_summary_multiqc(workflow, summary_params)
   ch_workflow_summary = Channel.value(workflow_summary)

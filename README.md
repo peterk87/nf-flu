@@ -21,7 +21,7 @@ After reference sequence selection, the pipeline performs read mapping to each r
 
 ## Pipeline summary
 
-1. Download latest [NCBI Orthomyxoviridae sequences](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Undef&id=11308&lvl=3&keep=1&srchmode=1&unlock) and metadata (parsed from [NCBI Viruses FTP data](https://ftp.ncbi.nlm.nih.gov/genomes/Viruses/AllNucleotide/)).
+1. Download latest NCBI Influenza virus sequences and metadata (see [docs](docs/update_seqs_db.md) for more details).
 2. Merge reads of re-sequenced samples ([`cat`](http://www.linfo.org/cat.html)) (if needed).
 3. Assembly of Influenza gene segments with [IRMA][] using the built-in FLU module
 4. Nucleotide [BLAST][] search against [NCBI Influenza DB][] sequences
@@ -32,7 +32,8 @@ After reference sequence selection, the pipeline performs read mapping to each r
 9. [FluMut][] detection of molecular markers and mutation in Influenza A(H5N1) viruses.
 10. [GenoFLU][] genotyping of North American H5 viruses.
 11. HA cleavage site prediction and classification
-12. [MultiQC][] report generation.
+12. [Nextclade][] clade assignment, mutation calling and sequence quality checks.
+13. [MultiQC][] report generation.
 
 ![nf-flu workflow](assets/nf-flu-pipeline-diagram.svg)
 
@@ -203,7 +204,17 @@ Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Zaslavsky, L., Tatusova, T., O
 NCBI Influenza Virus Sequence Annotation Tool:
 
 ```text
-Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Tatusova, T., 2007. FLAN: a web server for influenza virus genome annotation. Nucleic Acids Res 35, W280-284. https://doi.org/10.1093/nar/gkm354
+Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Tatusova, T., 2007. FLAN: a web server for influenza virus genome annotation. Nucleic Acids Res 35, W280-284.
+https://doi.org/10.1093/nar/gkm354
+```
+
+### [Nextclade][]
+
+**nf-flu** performs Nextclade clade assignment, mutation calling and sequence quality checks of assembled Influenza sequences against 30 Nextclade datasets for different subtypes and lineages of Influenza A and B virus.
+
+```
+Aksamentov, I., Roemer, C., Hodcroft, E. B., & Neher, R. A., (2021). Nextclade: clade assignment, mutation calling and quality control for viral genomes. Journal of Open Source Software, 6(67), 3773,
+https://doi.org/10.21105/joss.03773
 ```
 
 ### [Nextflow][]
@@ -267,6 +278,7 @@ Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney
 [MultiQC]: https://multiqc.info/
 [NCBI Influenza DB]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
 [NCBI Influenza Virus Resource]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
+[Nextclade]: https://clades.nextstrain.org/
 [Nextflow]: https://www.nextflow.io/
 [nf-core]: https://nf-co.re/
 [Samtools]: https://www.htslib.org/

@@ -294,7 +294,7 @@ Maximum of top blastn result reported
 
 - Optional
 - Type: string
-- Default: `https://api.figshare.com/v2/file/download/41415330`
+- Default: `https://api.figshare.com/v2/file/download/53449877`
 
 Path/URL to Zstandard compressed NCBI Influenza virus sequences FASTA file.
 
@@ -302,7 +302,7 @@ Path/URL to Zstandard compressed NCBI Influenza virus sequences FASTA file.
 
 - Optional
 - Type: string
-- Default: `https://api.figshare.com/v2/file/download/41415333`
+- Default: `https://api.figshare.com/v2/file/download/53449874`
 
 Path/URL to Zstandard compressed NCBI Influenza virus sequences metadata CSV file.
 
@@ -321,6 +321,31 @@ Path/URL to the VADR model tarball (.tar.gz) to use for annotation.
 - Default: `https://gist.github.com/peterk87/0aed5662c55b12da80a86104a967099e/raw/d17b8d14224e29350a720d054543bf4540d41aa5/flu.minfo`
 
 Path/URL to the custom VADR flu.minfo file to use for annotation. Default is the same as flu model v1.6.3-2 except with cleavage site misc_features.
+
+### Nextclade analysis options
+
+#### `--nextclade_datasets_csv`
+
+- Type: string
+- Default: `${projectDir}/assets/nextclade-datasets.csv`
+
+CSV containing Nextclade datasets and optionally tags (versions) to run against assembled Influenza genomes.
+
+### Skipping options
+
+#### `--skip_flumut`
+
+- Type: boolean
+- Default: `false`
+
+Skip the Flumut analysis.
+
+#### `--skip_nextclade`
+
+- Type: boolean
+- Default: `false`
+
+Skip the Nextclade analysis.
 
 ### Generic options
 

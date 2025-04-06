@@ -54,7 +54,8 @@
             "required": [
                 "input"
             ]
-        },"variant_calling_options": {
+        },
+        "variant_calling_options": {
             "title": "Variant calling options",
             "type": "object",
             "description": "Various options for the variant calling branch of the pipeline.",
@@ -179,7 +180,8 @@
                 }
             },
             "fa_icon": "fas fa-cogs"
-        },"nanopore_illumina_options": {
+        },
+        "nanopore_illumina_options": {
             "title": "Nanopore/Illumina options",
             "type": "object",
             "description": "Options common to both the Nanopore and Illumina workflows in the pipeline.",
@@ -199,7 +201,8 @@
                 }
             },
             "fa_icon": "fas fa-retweet"
-        },"mismatch_report_option": {
+        },
+        "mismatch_report_option": {
             "title": "Mistmatch report options",
             "type": "object",
             "description": "Reporting option.",
@@ -238,13 +241,13 @@
                 },
                 "ncbi_influenza_fasta": {
                     "type": "string",
-                    "default": "https://api.figshare.com/v2/file/download/41415330",
+                    "default": "https://api.figshare.com/v2/file/download/53449877",
                     "description": "Path/URL to Zstandard compressed NCBI Influenza virus sequences FASTA file.",
                     "fa_icon": "fas fa-file-alt"
                 },
                 "ncbi_influenza_metadata": {
                     "type": "string",
-                    "default": "https://api.figshare.com/v2/file/download/41415333",
+                    "default": "https://api.figshare.com/v2/file/download/53449874",
                     "description": "Path/URL to Zstandard compressed NCBI Influenza virus sequences metadata CSV file.",
                     "fa_icon": "fas fa-file-csv"
                 }
@@ -270,6 +273,19 @@
                 }
             }
         },
+        "nextclade_options": {
+            "title": "Nextclade analysis options",
+            "type": "object",
+            "description": "Options for Nextclade analysis",
+            "properties": {
+                "nextclade_datasets_csv": {
+                    "type": "string",
+                    "default": "${projectDir}/assets/nextclade-datasets.csv",
+                    "description": "CSV containing Nextclade datasets and optionally tags (versions) to run against assembled Influenza genomes.",
+                    "fa_icon": "fas fa-virus"
+                }
+            }
+        },
         "skipping_options": {
             "title": "Skipping options",
             "type": "object",
@@ -279,6 +295,12 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Skip the Flumut analysis.",
+                    "fa_icon": "fas fa-fast-forward"
+                },
+                "skip_nextclade": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip the Nextclade analysis.",
                     "fa_icon": "fas fa-fast-forward"
                 }
             }
@@ -409,10 +431,31 @@
             "$ref": "#/definitions/input_output_options"
         },
         {
+            "$ref": "#/definitions/variant_calling_options"
+        },
+        {
+            "$ref": "#/definitions/nanopore_options"
+        },
+        {
             "$ref": "#/definitions/irma_assembly_options"
         },
         {
+            "$ref": "#/definitions/nanopore_illumina_options"
+        },
+        {
+            "$ref": "#/definitions/mismatch_report_option"
+        },
+        {
             "$ref": "#/definitions/h_n_subtyping_options"
+        },
+        {
+            "$ref": "#/definitions/annotation_options"
+        },
+        {
+            "$ref": "#/definitions/nextclade_options"
+        },
+        {
+            "$ref": "#/definitions/skipping_options"
         },
         {
             "$ref": "#/definitions/generic_options"
