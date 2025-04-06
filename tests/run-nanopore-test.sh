@@ -73,8 +73,10 @@ fi
 
 info "Starting nf-flu Nanopore test execution script with ${CPU} CPU cores and ${MEMORY} memory..."
 
-FASTA_ZST_URL="https://api.figshare.com/v2/file/download/41415330"
-CSV_ZST_URL="https://api.figshare.com/v2/file/download/41415333"
+FASTA_ZST_URL="https://api.figshare.com/v2/file/download/53449877"
+CSV_ZST_URL="https://api.figshare.com/v2/file/download/53449874"
+FASTA_ZST_FILE="influenza.fna.zst"
+CSV_ZST_FILE="influenza.csv.zst"
 
 download_file() {
     local url=$1
@@ -100,9 +102,6 @@ create_samplesheet() {
     echo "ntc-bc31,$(realpath reads/ntc-bc31.fastq.gz)" | tee -a "$samplesheet"
     echo "ntc-bc47,$(realpath reads/ntc-bc47.fastq.gz)" | tee -a "$samplesheet"
 }
-
-FASTA_ZST_FILE="influenza.fna.zst"
-CSV_ZST_FILE="influenza.csv.zst"
 
 # Create directories
 mkdir -p reads/{run1,run2}

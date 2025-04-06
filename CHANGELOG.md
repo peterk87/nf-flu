@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.9.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.9.0)] - 2025-04-07
+
+This minor release adds Nextclade analysis of assembled Influenza genome sequences against 30 Nextclade Influenza-related datasets by default and updates the Influenza sequences used by nf-flu (downloaded from NCBI 2025-04-04; 809,739 unique sequences and metadata).
+
+The specific Nextclade datasets and optionally versions (tags) can be configured with a headerless CSV file. Nextclade results are aggregrated across samples and datasets and filtered for positive results into a single Nextclade TSV (tab-separated values) report with additional fields capturing sample, dataset name and dataset version/tag information as well as Nextclade and Nextclade dataset specific results.
+
+### Changes
+
+* update: Influenza sequences and metadata from NCBI (2025-04-04). 809,739 non-redundant, unique sequences were retrieved along with their metadata. Added documentation for how to update Influenza sequences for use with nf-flu (see [docs/update_seqs_db.md](docs/update_seqs_db.md))
+* feat: added Nextclade (v3.12.0) analysis subworkflow against 30 Influenza-related Nextclade datasets with a convenient aggregation and summarization of useful results into a single Nextclade TSV report.
+* update: GenoFLU 1.05 -> 1.06 (#112)
+
 ## [[3.8.1](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.8.1)] - 2025-03-26
 
 This patch release updates Clair3, the variant caller for Nanopore sequence data, to 1.0.11. Clair 1.0.11 adds an option to enable variant calling at the head and tail 16bp of each sequence (`--enable_variant_calling_at_sequence_head_and_tail`). This option is enabled by default in the nf-flu workflow to ensure that the 16bp at the start and end of each of the 8 segments of IAV and IBV are variant called. It should be noted that the developers of Clair3 note that results are used "with caution because alignments are less reliable in the regions, and there would be insufficient context to be fed to the neural network for reliable calling".

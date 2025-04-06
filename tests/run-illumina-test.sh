@@ -70,10 +70,16 @@ while getopts "w:s:m:c:p:h" opt; do
     esac
 done
 
+shift $((OPTIND-1))
+
+if [[ "${1:-}" == "--" ]]; then
+    shift
+fi
+
 info "Starting nf-flu Illumina test execution script with ${CPU} CPU cores and ${MEMORY} memory..."
 
-FASTA_ZST_URL="https://api.figshare.com/v2/file/download/41415330"
-CSV_ZST_URL="https://api.figshare.com/v2/file/download/41415333"
+FASTA_ZST_URL="https://api.figshare.com/v2/file/download/53449877"
+CSV_ZST_URL="https://api.figshare.com/v2/file/download/53449874"
 FASTA_ZST_FILE="influenza.fna.zst"
 CSV_ZST_FILE="influenza.csv.zst"
 
@@ -116,4 +122,4 @@ nextflow run "$WORKFLOW_PATH" \
     -resume \
     --ncbi_influenza_fasta $FASTA_ZST_FILE \
     --ncbi_influenza_metadata $CSV_ZST_FILE \
-    --max_cpus $CPU --max_memory "$MEMORY"
+    --max_cpus $CPU --max_memory "$MEMORY" $@
