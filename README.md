@@ -221,7 +221,7 @@ https://doi.org/10.1093/nar/gkm354
 
 **nf-flu** performs Nextclade clade assignment, mutation calling and sequence quality checks of assembled Influenza sequences against 30 Nextclade datasets for different subtypes and lineages of Influenza A and B virus.
 
-```
+```text
 Aksamentov, I., Roemer, C., Hodcroft, E. B., & Neher, R. A., (2021). Nextclade: clade assignment, mutation calling and quality control for viral genomes. Journal of Open Source Software, 6(67), 3773,
 https://doi.org/10.21105/joss.03773
 ```

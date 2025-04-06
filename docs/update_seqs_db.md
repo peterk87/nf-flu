@@ -58,8 +58,11 @@ The BLAST `blastdbcmd` may skip several thousand sequences, however, most of tho
 blastdbcmd -entry_batch 2025-04-04-influenza-accessions.txt -db ~/blast-nt_viruses/nt_viruses -out 2025-04-04-influenza.fasta
 ```
 
-    Error: [blastdbcmd] Skipped PV440337.1
-    ... skipping of likely patent seqs
+This command will output the following message for several thousand likely patent sequences:
+
+```text
+Error: [blastdbcmd] Skipped PV440337.1
+```
 
 Select and output metadata for sequences that were successfully retrieved from the `nt_viruses` BLAST DB and ensure that only unique and non-redundant sequences are output for use with nf-flu:
 
