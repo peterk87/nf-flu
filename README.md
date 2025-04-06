@@ -1,6 +1,6 @@
 # CFIA-NCFAD/nf-flu - Influenza A and B Virus Genome Assembly Nextflow Workflow
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14268099.svg)](https://doi.org/10.5281/zenodo.14268099)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15093332.svg)](https://doi.org/10.5281/zenodo.15093332)
 [![CI](https://github.com/CFIA-NCFAD/nf-flu/actions/workflows/ci.yml/badge.svg)](https://github.com/CFIA-NCFAD/nf-flu/actions/workflows/ci.yml)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.04.0-23aa62.svg?labelColor=000000)](https://www.nextflow.io/)
@@ -21,7 +21,7 @@ After reference sequence selection, the pipeline performs read mapping to each r
 
 ## Pipeline summary
 
-1. Download latest [NCBI Orthomyxoviridae sequences](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Undef&id=11308&lvl=3&keep=1&srchmode=1&unlock) and metadata (parsed from [NCBI Viruses FTP data](https://ftp.ncbi.nlm.nih.gov/genomes/Viruses/AllNucleotide/)).
+1. Download latest NCBI Influenza virus sequences and metadata (see [docs](docs/update_seqs_db.md) for more details).
 2. Merge reads of re-sequenced samples ([`cat`](http://www.linfo.org/cat.html)) (if needed).
 3. Assembly of Influenza gene segments with [IRMA][] using the built-in FLU module
 4. Nucleotide [BLAST][] search against [NCBI Influenza DB][] sequences
@@ -32,7 +32,8 @@ After reference sequence selection, the pipeline performs read mapping to each r
 9. [FluMut][] detection of molecular markers and mutation in Influenza A(H5N1) viruses.
 10. [GenoFLU][] genotyping of North American H5 viruses.
 11. HA cleavage site prediction and classification
-12. [MultiQC][] report generation.
+12. [Nextclade][] clade assignment, mutation calling and sequence quality checks.
+13. [MultiQC][] report generation.
 
 ![nf-flu workflow](assets/nf-flu-pipeline-diagram.svg)
 
@@ -108,23 +109,27 @@ The nf-flu pipeline comes with:
 ### [BcfTools][] and [Samtools][]
 
 ```text
-Danecek, P., Bonfield, J.K., Liddle, J., Marshall, J., Ohan, V., Pollard, M.O., Whitwham, A., Keane, T., McCarthy, S.A., Davies, R.M., Li, H., 2021. Twelve years of SAMtools and BCFtools. Gigascience 10, giab008. https://doi.org/10.1093/gigascience/giab008
+Danecek, P., Bonfield, J.K., Liddle, J., Marshall, J., Ohan, V., Pollard, M.O., Whitwham, A., Keane, T., McCarthy, S.A., Davies, R.M., Li, H., 2021. Twelve years of SAMtools and BCFtools. Gigascience 10, giab008.
+https://doi.org/10.1093/gigascience/giab008
 ```
 
 ### [BLAST][] Basic Local Alignment Search Tool
 
 ```text
-Altschul, S.F., Gish, W., Miller, W., Myers, E.W., Lipman, D.J., 1990. Basic local alignment search tool. J. Mol. Biol. 215, 403–410. https://doi.org/10.1016/S0022-2836(05)80360-2
+Altschul, S.F., Gish, W., Miller, W., Myers, E.W., Lipman, D.J., 1990. Basic local alignment search tool. J. Mol. Biol. 215, 403–410.
+https://doi.org/10.1016/S0022-2836(05)80360-2
 ```
 
 ```text
-Camacho, C., Coulouris, G., Avagyan, V., Ma, N., Papadopoulos, J., Bealer, K., Madden, T.L., 2009. BLAST+: architecture and applications. BMC Bioinformatics 10, 421. https://doi.org/10.1186/1471-2105-10-421
+Camacho, C., Coulouris, G., Avagyan, V., Ma, N., Papadopoulos, J., Bealer, K., Madden, T.L., 2009. BLAST+: architecture and applications. BMC Bioinformatics 10, 421.
+https://doi.org/10.1186/1471-2105-10-421
 ```
 
 ### [Clair3][]
 
 ```text
-Zheng, Z., Li, S., Su, J., Leung, A.W.-S., Lam, T.-W., Luo, R., 2022. Symphonizing pileup and full-alignment for deep learning-based long-read variant calling. Nat Comput Sci 2, 797–803. https://doi.org/10.1038/s43588-022-00387-x
+Zheng, Z., Li, S., Su, J., Leung, A.W.-S., Lam, T.-W., Luo, R., 2022. Symphonizing pileup and full-alignment for deep learning-based long-read variant calling. Nat Comput Sci 2, 797–803.
+https://doi.org/10.1038/s43588-022-00387-x
 ```
 
 ### [FluMut][]
@@ -132,17 +137,17 @@ Zheng, Z., Li, S., Su, J., Leung, A.W.-S., Lam, T.-W., Luo, R., 2022. Symphonizi
 [FluMut][] is used to "search for molecular markers with potential impact on the biological characteristics of Influenza A viruses of the A(H5N1) subtype, starting from complete or partial nucleotide genome sequences".
 
 ```text
-https://github.com/izsvenezie-virology/FluMut
+Edoardo Giussani, Alessandro Sartori, Angela Salomoni, Lara Cavicchio, Cristian de Battisti, Ambra Pastori, Maria Varotto, Bianca Zecchin, Joseph Hughes, Isabella Monne, Alice Fusaro. FluMut: a tool for mutation surveillance in highly pathogenic H5N1 genomes. Virus Evolution, Volume 11, Issue 1, 2025, veaf011.
+https://doi.org/10.1093/ve/veaf011
 ```
-
-> **NOTE:** Since the FluMut paper has not been published yet, the authors [recommend](https://github.com/izsvenezie-virology/FluMut?tab=readme-ov-file#cite-flumut) citing the GitHub repository as of 2024-12-02.
 
 ### [Freebayes][]
 
 [Freebayes][] is used for variant calling.
 
 ```text
-Garrison, E., Marth, G., 2012. Haplotype-based variant detection from short-read sequencing. arXiv:1207.3907 [q-bio]. https://doi.org/10.48550/arXiv.1207.3907
+Garrison, E., Marth, G., 2012. Haplotype-based variant detection from short-read sequencing. arXiv:1207.3907 [q-bio].
+https://doi.org/10.48550/arXiv.1207.3907
 ```
 
 ### [GenoFLU][]
@@ -159,7 +164,8 @@ H5N1 highly pathogenic avian influenza clade 2.3.4.4b in wild and domestic birds
 ### [IRMA][] Iterative Refinement Meta-Assembler
 
 ```text
-Shepard, S.S., Meno, S., Bahl, J., Wilson, M.M., Barnes, J., Neuhaus, E., 2016. Viral deep sequencing needs an adaptive approach: IRMA, the iterative refinement meta-assembler. BMC Genomics 17, 708. https://doi.org/10.1186/s12864-016-3030-6
+Shepard, S.S., Meno, S., Bahl, J., Wilson, M.M., Barnes, J., Neuhaus, E., 2016. Viral deep sequencing needs an adaptive approach: IRMA, the iterative refinement meta-assembler. BMC Genomics 17, 708.
+https://doi.org/10.1186/s12864-016-3030-6
 ```
 
 ### [Medaka][]
@@ -171,7 +177,8 @@ Shepard, S.S., Meno, S., Bahl, J., Wilson, M.M., Barnes, J., Neuhaus, E., 2016. 
 [Minimap2][] is used for rapid and accurate read alignment to reference sequences.
 
 ```text
-Li, H., 2018. Minimap2: pairwise alignment for nucleotide sequences. Bioinformatics 34, 3094–3100. https://doi.org/10.1093/bioinformatics/bty191
+Li, H., 2018. Minimap2: pairwise alignment for nucleotide sequences. Bioinformatics 34, 3094–3100.
+https://doi.org/10.1093/bioinformatics/bty191
 ```
 
 ### [Mosdepth][]
@@ -179,7 +186,8 @@ Li, H., 2018. Minimap2: pairwise alignment for nucleotide sequences. Bioinformat
 [Mosdepth][] is used for rapid sequencing coverage calculation and summary statistics.
 
 ```text
-Pedersen, B.S., Quinlan, A.R., 2017. Mosdepth: quick coverage calculation for genomes and exomes. Bioinformatics 34, 867–868. https://doi.org/10.1093/bioinformatics/btx699
+Pedersen, B.S., Quinlan, A.R., 2017. Mosdepth: quick coverage calculation for genomes and exomes. Bioinformatics 34, 867–868.
+https://doi.org/10.1093/bioinformatics/btx699
 ```
 
 ### [MultiQC][]
@@ -187,7 +195,8 @@ Pedersen, B.S., Quinlan, A.R., 2017. Mosdepth: quick coverage calculation for ge
 [MultiQC][] is used for generation of a single report for multiple tools.
 
 ```text
-Ewels, P., Magnusson, M., Lundin, S., Käller, M., 2016. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics 32, 3047–3048. https://doi.org/10.1093/bioinformatics/btw354
+Ewels, P., Magnusson, M., Lundin, S., Käller, M., 2016. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics 32, 3047–3048.
+https://doi.org/10.1093/bioinformatics/btw354
 ```
 
 ### [NCBI Influenza Virus Resource][]
@@ -197,13 +206,24 @@ Ewels, P., Magnusson, M., Lundin, S., Käller, M., 2016. MultiQC: summarize anal
 NCBI Influenza Virus Resource:
 
 ```text
-Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Zaslavsky, L., Tatusova, T., Ostell, J., Lipman, D., 2008. The influenza virus resource at the National Center for Biotechnology Information. J Virol 82, 596–601. https://doi.org/10.1128/JVI.02005-07
+Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Zaslavsky, L., Tatusova, T., Ostell, J., Lipman, D., 2008. The influenza virus resource at the National Center for Biotechnology Information. J Virol 82, 596–601.
+https://doi.org/10.1128/JVI.02005-07
 ```
 
 NCBI Influenza Virus Sequence Annotation Tool:
 
 ```text
-Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Tatusova, T., 2007. FLAN: a web server for influenza virus genome annotation. Nucleic Acids Res 35, W280-284. https://doi.org/10.1093/nar/gkm354
+Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Tatusova, T., 2007. FLAN: a web server for influenza virus genome annotation. Nucleic Acids Res 35, W280-284.
+https://doi.org/10.1093/nar/gkm354
+```
+
+### [Nextclade][]
+
+**nf-flu** performs Nextclade clade assignment, mutation calling and sequence quality checks of assembled Influenza sequences against 30 Nextclade datasets for different subtypes and lineages of Influenza A and B virus.
+
+```text
+Aksamentov, I., Roemer, C., Hodcroft, E. B., & Neher, R. A., (2021). Nextclade: clade assignment, mutation calling and quality control for viral genomes. Journal of Open Source Software, 6(67), 3773,
+https://doi.org/10.21105/joss.03773
 ```
 
 ### [Nextflow][]
@@ -211,7 +231,8 @@ Bao, Y., Bolotov, P., Dernovoy, D., Kiryutin, B., Tatusova, T., 2007. FLAN: a we
 **nf-flu** is implemented in [Nextflow][].
 
 ```text
-Tommaso, P.D., Chatzou, M., Floden, E.W., Barja, P.P., Palumbo, E., Notredame, C., 2017. Nextflow enables reproducible computational workflows. Nat Biotechnol 35, 316–319. https://doi.org/10.1038/nbt.3820
+Tommaso, P.D., Chatzou, M., Floden, E.W., Barja, P.P., Palumbo, E., Notredame, C., 2017. Nextflow enables reproducible computational workflows. Nat Biotechnol 35, 316–319.
+https://doi.org/10.1038/nbt.3820
 ```
 
 ### [nf-core][]
@@ -219,7 +240,8 @@ Tommaso, P.D., Chatzou, M., Floden, E.W., Barja, P.P., Palumbo, E., Notredame, C
 [nf-core][] is a great resource for building robust and reproducible bioinformatics pipelines.
 
 ```text
-Ewels, P.A., Peltzer, A., Fillinger, S., Patel, H., Alneberg, J., Wilm, A., Garcia, M.U., Di Tommaso, P., Nahnsen, S., 2020. The nf-core framework for community-curated bioinformatics pipelines. Nat Biotechnol 38, 276–278. https://doi.org/10.1038/s41587-020-0439-x
+Ewels, P.A., Peltzer, A., Fillinger, S., Patel, H., Alneberg, J., Wilm, A., Garcia, M.U., Di Tommaso, P., Nahnsen, S., 2020. The nf-core framework for community-curated bioinformatics pipelines. Nat Biotechnol 38, 276–278.
+https://doi.org/10.1038/s41587-020-0439-x
 ```
 
 ### [seqtk][]
@@ -231,7 +253,8 @@ Ewels, P.A., Peltzer, A., Fillinger, S., Patel, H., Alneberg, J., Wilm, A., Garc
 [VADR][] is used for annotation of Influenza virus sequences.
 
 ```text
-Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney Brister, Ilene Karsch-Mizrachi, Eric P Nawrocki; VADR: validation and annotation of virus sequence submissions to GenBank. BMC Bioinformatics 21, 211 (2020). https://doi.org/10.1186/s12859-020-3537-3
+Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney Brister, Ilene Karsch-Mizrachi, Eric P Nawrocki; VADR: validation and annotation of virus sequence submissions to GenBank. BMC Bioinformatics 21, 211 (2020).
+https://doi.org/10.1186/s12859-020-3537-3
 ```
 
 ### [table2asn][]
@@ -267,6 +290,7 @@ Alejandro A Schäffer, Eneida L Hatcher, Linda Yankie, Lara Shonkwiler, J Rodney
 [MultiQC]: https://multiqc.info/
 [NCBI Influenza DB]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
 [NCBI Influenza Virus Resource]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
+[Nextclade]: https://clades.nextstrain.org/
 [Nextflow]: https://www.nextflow.io/
 [nf-core]: https://nf-co.re/
 [Samtools]: https://www.htslib.org/

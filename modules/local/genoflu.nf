@@ -2,11 +2,11 @@ process GENOFLU {
   tag "$sample"
   label 'process_low'
 
-  conda 'bioconda::genoflu=1.05'
+  conda 'bioconda::genoflu=1.06'
   if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-    container 'https://depot.galaxyproject.org/singularity/genoflu:1.05--hdfd78af_0'
+    container 'https://depot.galaxyproject.org/singularity/genoflu:1.06--hdfd78af_0'
   } else {
-    container 'quay.io/biocontainers/genoflu:1.05--hdfd78af_0'
+    container 'quay.io/biocontainers/genoflu:1.06--hdfd78af_0'
   }
 
   input:

@@ -12,8 +12,8 @@ env:
   NXF_ANSI_LOG: false
   # URLs to Influenza ref data should be updated in step with nextflow.config
   # default ncbi_influenza_fasta and ncbi_influenza_metadata params
-  FASTA_ZST_URL: https://api.figshare.com/v2/file/download/41415330
-  CSV_ZST_URL: https://api.figshare.com/v2/file/download/41415333
+  FASTA_ZST_URL: https://api.figshare.com/v2/file/download/53449877
+  CSV_ZST_URL: https://api.figshare.com/v2/file/download/53449874
   VADR_MODEL_URL: https://ftp.ncbi.nlm.nih.gov/pub/nawrocki/vadr-models/flu/1.6.3-2/vadr-models-flu-1.6.3-2.tar.gz
 
 concurrency:

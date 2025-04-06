@@ -38,6 +38,8 @@ include { CLEAVAGE_SITE                                       } from '../modules
 include { MULTIQC                                             } from '../modules/local/multiqc'
 include { MQC_VERSIONS_TABLE } from '../modules/local/mqc_versions_table'
 
+include { NEXTCLADE } from '../subworkflows/nextclade'
+
 def pass_sample_reads = [:]
 def fail_sample_reads = [:]
 ch_influenza_db_fasta = file(params.ncbi_influenza_fasta)
@@ -298,9 +300,18 @@ workflow NANOPORE {
     ch_versions = ch_versions.mix(BLASTN_REPORT.out.versions)
   }
 
-  PREP_FLUMUT_FASTA(CAT_CONSENSUS.out.consensus_fasta.collect({ it[1] }))
-  FLUMUT(PREP_FLUMUT_FASTA.out.fasta)
-  ch_versions = ch_versions.mix(FLUMUT.out.versions)
+  if (!params.skip_flumut) {
+    PREP_FLUMUT_FASTA(CAT_CONSENSUS.out.consensus_fasta.collect({ it[1] }))
+    FLUMUT(PREP_FLUMUT_FASTA.out.fasta)
+    ch_versions = ch_versions.mix(FLUMUT.out.versions)
+  }
+  if (!params.skip_nextclade) {
+    NEXTCLADE(
+      ch_cat_consensus_fasta,
+      params.nextclade_datasets_csv
+    )
+    ch_versions = ch_versions.mix(NEXTCLADE.out.versions)
+  }
 
   workflow_summary    = Schema.params_summary_multiqc(workflow, summary_params)
   ch_workflow_summary = Channel.value(workflow_summary)

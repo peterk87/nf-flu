@@ -34,6 +34,8 @@ include { FLUMUT; VADR2FLUMUT } from '../modules/local/flumut'
 include { GENOFLU } from '../modules/local/genoflu'
 include { CLEAVAGE_SITE } from '../modules/local/cleavage_site'
 
+include { NEXTCLADE } from '../subworkflows/nextclade'
+
 //=============================================================================
 // Workflow Params Setup
 //=============================================================================
@@ -105,5 +107,12 @@ workflow ASSEMBLIES {
     FLUMUT(VADR2FLUMUT.out.fasta)
     ch_versions = ch_versions.mix(FLUMUT.out.versions)
   }
-
+  if (!params.skip_nextclade) {
+    NEXTCLADE(
+      ch_input_fasta,
+      params.nextclade_datasets_csv
+    )
+    ch_versions = ch_versions.mix(NEXTCLADE.out.versions)
+  }
+  MQC_VERSIONS_TABLE(ch_versions.unique().collectFile(name: 'collated_versions.yml'))
 }
