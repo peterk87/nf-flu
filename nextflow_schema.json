@@ -297,6 +297,12 @@
                     "description": "Skip the Flumut analysis.",
                     "fa_icon": "fas fa-fast-forward"
                 },
+                "skip_genin2": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip the Genin2 analysis.",
+                    "fa_icon": "fas fa-fast-forward"
+                },
                 "skip_nextclade": {
                     "type": "boolean",
                     "default": false,

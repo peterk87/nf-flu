@@ -22,7 +22,15 @@ workflow NEXTCLADE {
     .filter { it != null }
   NEXTCLADE_DATASET_GET(ch_nextclade_datasets)
   ch_versions = ch_versions.mix(NEXTCLADE_DATASET_GET.out.versions)
-  NEXTCLADE_RUN(ch_input_fasta.combine(NEXTCLADE_DATASET_GET.out.dir))
+  ch_datasets = NEXTCLADE_DATASET_GET.out.dir
+    .map { dataset, dataset_dir ->
+      // get the actual version tag from the pathogen.json file
+      def jsonFile = file("${dataset_dir}/pathogen.json")
+      def json = new groovy.json.JsonSlurper().parseText(jsonFile.text)
+      dataset.tag = json.version.tag
+      return [dataset, dataset_dir]
+    }
+  NEXTCLADE_RUN(ch_input_fasta.combine(ch_datasets))
   ch_versions = ch_versions.mix(NEXTCLADE_RUN.out.versions)
   ch_nextclade_outputs_csv = NEXTCLADE_RUN.out.tsv
     .map { sample, dataset, nextclade_tsv ->

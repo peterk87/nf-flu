@@ -150,6 +150,16 @@ Garrison, E., Marth, G., 2012. Haplotype-based variant detection from short-read
 https://doi.org/10.48550/arXiv.1207.3907
 ```
 
+### [Genin2][]
+
+[Genin2][] "predicts genotypes for clade 2.3.4.4b H5Nx viruses collected in Europe since October 2020".
+
+```text
+https://github.com/izsvenezie-virology/genin2
+```
+
+> **NOTE:** Authors [suggest citing the GitHub repo](https://github.com/izsvenezie-virology/genin2?tab=readme-ov-file#cite-genin2) at this time.
+
 ### [GenoFLU][]
 
 [GenoFLU][] "identifies the genotype of North American H5 2.3.4.4b viruses as well as providing information on individual segments when a sequence does not belong to a defined genotype".
@@ -282,6 +292,7 @@ https://doi.org/10.1186/s12859-020-3537-3
 [Docker]: https://www.docker.com/
 [FluMut]: https://github.com/izsvenezie-virology/FluMut
 [Freebayes]: https://github.com/freebayes/freebayes
+[Genin2]: https://github.com/izsvenezie-virology/genin2
 [GenoFLU]: https://github.com/USDA-VS/GenoFLU
 [IRMA]: https://wonder.cdc.gov/amd/flu/irma/
 [Medaka]: https://github.com/nanoporetech/medaka
