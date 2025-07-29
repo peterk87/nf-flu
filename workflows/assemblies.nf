@@ -19,22 +19,24 @@ ch_vadr_model_targz = file(params.vadr_model_targz)
 // MODULES
 //=============================================================================
 
-include { SUBTYPING_REPORT } from '../modules/local/subtyping_report'
+include { SUBTYPING_REPORT                            } from '../modules/local/subtyping_report'
 include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI } from '../modules/local/blast_makeblastdb'
-include { BLAST_BLASTN } from '../modules/local/blastn'
-include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA; ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_CSV } from '../modules/local/zstd_decompress'
-include { SETUP_FLU_VADR_MODEL } from '../modules/local/vadr'
-include { VADR; VADR_SUMMARIZE_ISSUES } from '../modules/local/vadr'
-include { VADR2BLASTN } from '../modules/local/vadr'
-include { PRE_TABLE2ASN } from '../modules/local/table2asn'
-include { POST_TABLE2ASN } from '../modules/local/table2asn'
-include { TABLE2ASN } from '../modules/local/table2asn'
-include { MQC_VERSIONS_TABLE } from '../modules/local/mqc_versions_table'
-include { FLUMUT; VADR2FLUMUT } from '../modules/local/flumut'
-include { GENOFLU } from '../modules/local/genoflu'
-include { CLEAVAGE_SITE } from '../modules/local/cleavage_site'
-
-include { NEXTCLADE } from '../subworkflows/nextclade'
+include { BLAST_BLASTN                                } from '../modules/local/blastn'
+include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA    } from '../modules/local/zstd_decompress'
+include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_CSV      } from '../modules/local/zstd_decompress'
+include { SETUP_FLU_VADR_MODEL                        } from '../modules/local/vadr'
+include { VADR; VADR_SUMMARIZE_ISSUES                 } from '../modules/local/vadr'
+include { VADR2BLASTN                                 } from '../modules/local/vadr'
+include { PRE_TABLE2ASN                               } from '../modules/local/table2asn'
+include { POST_TABLE2ASN                              } from '../modules/local/table2asn'
+include { TABLE2ASN                                   } from '../modules/local/table2asn'
+include { MQC_VERSIONS_TABLE                          } from '../modules/local/mqc_versions_table'
+include { FLUMUT; VADR2FLUMUT                         } from '../modules/local/flumut'
+include { GENOFLU                                     } from '../modules/local/genoflu'
+include { CLEAVAGE_SITE                               } from '../modules/local/cleavage_site'
+include { GENIN2                                      } from '../modules/local/genin2'
+// SUBWORKFLOWS
+include { NEXTCLADE                                   } from '../subworkflows/nextclade'
 
 //=============================================================================
 // Workflow Params Setup
