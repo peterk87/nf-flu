@@ -9,7 +9,7 @@ This minor release adds Genin2, updates Clair3 and fixes Nextclade consolidated 
 
 ### Changes
 
-* add Genin2 for European clade 2.3.4.4b H5Nx genotype prediction.
+* add Genin2 for European clade 2.3.4.4b H5Nx genotype prediction to the `illumina`, `nanopore` and `assemblies` workflows (i.e. `--platform illumina/nanopore/assemblies`).
 * update Clair3 to 1.1.2 to fix a potential issue when using the `--enable_variant_calling_at_sequence_head_and_tail` option (#116)
 * fix Nextclade dataset tag/version used in consolidated tabular output file.
 

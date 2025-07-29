@@ -102,10 +102,16 @@ workflow ASSEMBLIES {
   CLEAVAGE_SITE(POST_TABLE2ASN.out.cds_aa_fasta)
   ch_versions = ch_versions.mix(CLEAVAGE_SITE.out.versions)
 
-  if (!params.skip_flumut) {
+  if (!params.skip_flumut || !params.skip_genin2) {
     VADR2FLUMUT(POST_TABLE2ASN.out.genbank.collect({ it[1] }))
+  }
+  if (!params.skip_flumut) {
     FLUMUT(VADR2FLUMUT.out.fasta)
     ch_versions = ch_versions.mix(FLUMUT.out.versions)
+  }
+  if (!params.skip_genin2) {
+    GENIN2(VADR2FLUMUT.out.fasta)
+    ch_versions = ch_versions.mix(GENIN2.out.versions)
   }
   if (!params.skip_nextclade) {
     NEXTCLADE(
