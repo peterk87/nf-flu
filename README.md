@@ -17,7 +17,7 @@ Since Influenza has a segmented genome consisting of 8 gene segments, the pipeli
 Users can also provide their own reference sequences to include in the top reference sequence selection process.
 After reference sequence selection, the pipeline performs read mapping to each reference sequence, variant calling and depth-masked consensus sequence generation.
 
-> **Note:** The officially supported version of the pipeline is [CFIA-NCFAD/nf-flu](https://github.com/CFIA-NCFAD/nf-flu). If you have issues with using the pipeline, please create an issue [here](https://github.com/CFIA-NCFAD/nf-flu/issues/new/choose) on [CFIA-NCFAD/nf-flu](https://github.com/CFIA-NCFAD/nf-flu) repo.
+> **Note:** The officially supported version of the pipeline is [CFIA-NCFAD/nf-flu](https://github.com/CFIA-NCFAD/nf-flu). If you have issues with using the pipeline, please [create an issue](https://github.com/CFIA-NCFAD/nf-flu/issues/new/choose) on [CFIA-NCFAD/nf-flu](https://github.com/CFIA-NCFAD/nf-flu) repo.
 
 ## Pipeline summary
 
@@ -30,7 +30,7 @@ After reference sequence selection, the pipeline performs read mapping to each r
 7. Read mapping, variant calling and consensus sequence generation for each segment against top reference sequence based on BLAST results.
 8. Annotation of consensus sequences with [VADR][]
 9. [FluMut][] detection of molecular markers and mutation in Influenza A(H5N1) viruses.
-10. [GenoFLU][] genotyping of North American H5 viruses.
+10. [GenoFLU][] genotyping of North American H5 viruses. [Genin2][] genotyping using information from clade 2.3.4.4b H5Nx viruses collected in Europe since October 2020.
 11. HA cleavage site prediction and classification
 12. [Nextclade][] clade assignment, mutation calling and sequence quality checks.
 13. [MultiQC][] report generation.

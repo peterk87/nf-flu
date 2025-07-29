@@ -16,6 +16,7 @@ The directories listed below will be created in the results directory after the 
 - [H/N Subtyping](#hn-subtyping)
 - [Annotation](#annotation)
 - [FluMut](#flumut)
+- [Genin2](#genin2)
 - [GenoFLU](#genoflu)
 - [Cleavage Site Prediction](#cleavage-site-prediction)
 - [Nextclade](#nextclade)
@@ -285,6 +286,18 @@ Consensus sequences are analyzed using [FluMut] to identify mutations of interes
 
 </details>
 
+### Genin2
+
+[Genin2] genotypes consensus sequences based on information from clade 2.3.4.4b H5Nx viruses collected in Europe since October 2020.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `genin2/`
+  - `genin2.tsv`: Tab-separated file containing the Genin2 genotyping results.
+
+</details>
+
 ### GenoFLU
 
 [GenoFlu](https://github.com/USDA-VS/GenoFLU/) "was developed to classify HPAI H5N1 goose/Guangdong clade 2.3.4.4b viruses detected in North American flyways. This tool considers all eight gene segments and can classify clade 2.3.4.4b viruses that have reassorted with North American low pathogenic viruses. The GenoFLU tool was developed for North America utilizing references detected primarily within the United States. The A1 GenoFLU genotype corresponds to the European National Reference Laboratory (EURL) genotype “C”, which is Eurasian wigeon/Netherlands-like virus that was predominant at the time the A1 virus was initially identified in Newfoundland."
@@ -343,6 +356,7 @@ The specific Nextclade datasets and optionally versions (tags) can be configured
 
 [BLAST]: https://blast.ncbi.nlm.nih.gov/Blast.cgi
 [FluMut]: https://github.com/izsvenezie-virology/FluMut
+[Genin2]: https://github.com/izsvenezie-virology/genin2
 [IRMA]: https://wonder.cdc.gov/amd/flu/irma/
 [NCBI Influenza DB]: https://www.ncbi.nlm.nih.gov/genomes/FLU/Database/nph-select.cgi?go=database
 [Nextclade]: https://clades.nextstrain.org/
