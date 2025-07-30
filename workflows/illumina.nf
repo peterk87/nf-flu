@@ -19,42 +19,46 @@ ch_vadr_model_targz = file(params.vadr_model_targz)
 // MODULES
 //=============================================================================
 
-include { IRMA                                                                             } from '../modules/local/irma'
-include { CHECK_SAMPLE_SHEET                                                               } from '../modules/local/check_sample_sheet'
-include { SUBTYPING_REPORT as SUBTYPING_REPORT_IRMA_CONSENSUS                              } from '../modules/local/subtyping_report'
-include { SUBTYPING_REPORT as SUBTYPING_REPORT_BCF_CONSENSUS                               } from '../modules/local/subtyping_report'
-include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI                                      } from '../modules/local/blast_makeblastdb'
-include { BLAST_BLASTN as BLAST_BLASTN_IRMA                                                } from '../modules/local/blastn'
-include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS                                           } from '../modules/local/blastn'
-include { CAT_ILLUMINA_FASTQ                                                               } from '../modules/local/cat_illumina_fastq'
-include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA; ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_CSV } from '../modules/local/zstd_decompress'
-include { MULTIQC                                                                          } from '../modules/local/multiqc'
-include { MULTIQC_TSV_FROM_LIST as READ_COUNT_FAIL_TSV                                     } from '../modules/local/multiqc_tsv_from_list'
-include { MULTIQC_TSV_FROM_LIST as READ_COUNT_PASS_TSV                                     } from '../modules/local/multiqc_tsv_from_list'
-include { MINIMAP2                                                                         } from '../modules/local/minimap2'
-include { MOSDEPTH_GENOME                                                                  } from '../modules/local/mosdepth'
-include { BCFTOOLS_STATS                                                                   } from '../modules/local/bcftools'
-include { SEQTK_SEQ                                                                        } from '../modules/local/seqtk_seq'
-include { PULL_TOP_REF_ID                                                                  } from '../modules/local/pull_top_ref_id'
-include { BCF_FILTER as BCF_FILTER_FREEBAYES                                               } from '../modules/local/bcftools'
-include { BCF_CONSENSUS                                                                    } from '../modules/local/bcftools'
-include { COVERAGE_PLOT                                                                    } from '../modules/local/coverage_plot'
-include { CAT_CONSENSUS                                                                    } from '../modules/local/misc'
-include { FREEBAYES                                                                        } from '../modules/local/freebayes'
-include { SETUP_FLU_VADR_MODEL                                                             } from '../modules/local/vadr'
-include { VADR as VADR_IRMA; VADR_SUMMARIZE_ISSUES as VADR_SUMMARIZE_ISSUES_IRMA           } from '../modules/local/vadr'
-include { VADR as VADR_BCFTOOLS; VADR_SUMMARIZE_ISSUES as VADR_SUMMARIZE_ISSUES_BCFTOOLS   } from '../modules/local/vadr'
-include { PRE_TABLE2ASN as PRE_TABLE2ASN_IRMA                                              } from '../modules/local/table2asn'
-include { TABLE2ASN as TABLE2ASN_IRMA                                                      } from '../modules/local/table2asn'
-include { POST_TABLE2ASN as POST_TABLE2ASN_IRMA                                            } from '../modules/local/table2asn'
-include { PRE_TABLE2ASN as PRE_TABLE2ASN_BCFTOOLS                                          } from '../modules/local/table2asn'
-include { TABLE2ASN as TABLE2ASN_BCFTOOLS                                                  } from '../modules/local/table2asn'
-include { POST_TABLE2ASN as POST_TABLE2ASN_BCFTOOLS                                        } from '../modules/local/table2asn'
-include { MQC_VERSIONS_TABLE                                                               } from '../modules/local/mqc_versions_table'
-include { FLUMUT; PREP_FLUMUT_FASTA                                                        } from '../modules/local/flumut'
-include { GENOFLU                                                                          } from '../modules/local/genoflu'
-include { CLEAVAGE_SITE                                                                    } from '../modules/local/cleavage_site'
-
+include { IRMA                                                    } from '../modules/local/irma'
+include { CHECK_SAMPLE_SHEET                                      } from '../modules/local/check_sample_sheet'
+include { SUBTYPING_REPORT as SUBTYPING_REPORT_IRMA_CONSENSUS     } from '../modules/local/subtyping_report'
+include { SUBTYPING_REPORT as SUBTYPING_REPORT_BCF_CONSENSUS      } from '../modules/local/subtyping_report'
+include { BLAST_MAKEBLASTDB as BLAST_MAKEBLASTDB_NCBI             } from '../modules/local/blast_makeblastdb'
+include { BLAST_BLASTN as BLAST_BLASTN_IRMA                       } from '../modules/local/blastn'
+include { BLAST_BLASTN as BLAST_BLASTN_CONSENSUS                  } from '../modules/local/blastn'
+include { CAT_ILLUMINA_FASTQ                                      } from '../modules/local/cat_illumina_fastq'
+include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_FASTA                } from '../modules/local/zstd_decompress'
+include { ZSTD_DECOMPRESS as ZSTD_DECOMPRESS_CSV                  } from '../modules/local/zstd_decompress'
+include { MULTIQC                                                 } from '../modules/local/multiqc'
+include { MULTIQC_TSV_FROM_LIST as READ_COUNT_FAIL_TSV            } from '../modules/local/multiqc_tsv_from_list'
+include { MULTIQC_TSV_FROM_LIST as READ_COUNT_PASS_TSV            } from '../modules/local/multiqc_tsv_from_list'
+include { MINIMAP2                                                } from '../modules/local/minimap2'
+include { MOSDEPTH_GENOME                                         } from '../modules/local/mosdepth'
+include { BCFTOOLS_STATS                                          } from '../modules/local/bcftools'
+include { SEQTK_SEQ                                               } from '../modules/local/seqtk_seq'
+include { PULL_TOP_REF_ID                                         } from '../modules/local/pull_top_ref_id'
+include { BCF_FILTER as BCF_FILTER_FREEBAYES                      } from '../modules/local/bcftools'
+include { BCF_CONSENSUS                                           } from '../modules/local/bcftools'
+include { COVERAGE_PLOT                                           } from '../modules/local/coverage_plot'
+include { CAT_CONSENSUS                                           } from '../modules/local/misc'
+include { FREEBAYES                                               } from '../modules/local/freebayes'
+include { SETUP_FLU_VADR_MODEL                                    } from '../modules/local/vadr'
+include { VADR as VADR_IRMA                                       } from '../modules/local/vadr'
+include { VADR_SUMMARIZE_ISSUES as VADR_SUMMARIZE_ISSUES_IRMA     } from '../modules/local/vadr'
+include { VADR as VADR_BCFTOOLS                                   } from '../modules/local/vadr'
+include { VADR_SUMMARIZE_ISSUES as VADR_SUMMARIZE_ISSUES_BCFTOOLS } from '../modules/local/vadr'
+include { PRE_TABLE2ASN as PRE_TABLE2ASN_IRMA                     } from '../modules/local/table2asn'
+include { TABLE2ASN as TABLE2ASN_IRMA                             } from '../modules/local/table2asn'
+include { POST_TABLE2ASN as POST_TABLE2ASN_IRMA                   } from '../modules/local/table2asn'
+include { PRE_TABLE2ASN as PRE_TABLE2ASN_BCFTOOLS                 } from '../modules/local/table2asn'
+include { TABLE2ASN as TABLE2ASN_BCFTOOLS                         } from '../modules/local/table2asn'
+include { POST_TABLE2ASN as POST_TABLE2ASN_BCFTOOLS               } from '../modules/local/table2asn'
+include { MQC_VERSIONS_TABLE                                      } from '../modules/local/mqc_versions_table'
+include { FLUMUT; PREP_FLUMUT_FASTA                               } from '../modules/local/flumut'
+include { GENOFLU                                                 } from '../modules/local/genoflu'
+include { CLEAVAGE_SITE                                           } from '../modules/local/cleavage_site'
+include { GENIN2                                                  } from '../modules/local/genin2'
+// SUBWORKFLOWS
 include { NEXTCLADE } from '../subworkflows/nextclade'
 
 //=============================================================================
@@ -280,10 +284,16 @@ workflow ILLUMINA {
   )
   ch_versions = ch_versions.mix(SUBTYPING_REPORT_BCF_CONSENSUS.out.versions)
 
-  if (!params.skip_flumut) {
+  if (!params.skip_flumut || !params.skip_genin2) {
     PREP_FLUMUT_FASTA(CAT_CONSENSUS.out.consensus_fasta.collect({ it[1] }))
+  }
+  if (!params.skip_flumut) {
     FLUMUT(PREP_FLUMUT_FASTA.out.fasta)
     ch_versions = ch_versions.mix(FLUMUT.out.versions)
+  }
+  if (!params.skip_genin2) {
+    GENIN2(PREP_FLUMUT_FASTA.out.fasta)
+    ch_versions = ch_versions.mix(GENIN2.out.versions)
   }
   if (!params.skip_nextclade) {
     NEXTCLADE(

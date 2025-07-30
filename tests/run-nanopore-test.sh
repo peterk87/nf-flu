@@ -73,6 +73,8 @@ fi
 
 info "Starting nf-flu Nanopore test execution script with ${CPU} CPU cores and ${MEMORY} memory..."
 
+VADR_MODEL_TARGZ_URL="https://ftp.ncbi.nlm.nih.gov/pub/nawrocki/vadr-models/flu/1.6.3-2/vadr-models-flu-1.6.3-2.tar.gz"
+VADR_MODEL_TARGZ="vadr-models-flu-1.6.3-2.tar.gz"
 FASTA_ZST_URL="https://api.figshare.com/v2/file/download/53449877"
 CSV_ZST_URL="https://api.figshare.com/v2/file/download/53449874"
 FASTA_ZST_FILE="influenza.fna.zst"
@@ -129,6 +131,9 @@ info "Download FASTA and CSV files"
 download_file "$FASTA_ZST_URL" "$FASTA_ZST_FILE"
 download_file "$CSV_ZST_URL" "$CSV_ZST_FILE"
 
+info "Download VADR model tar.gz"
+download_file "$VADR_MODEL_TARGZ_URL" "$VADR_MODEL_TARGZ"
+
 if [ -d "$WORKFLOW_PATH" ]; then
  info "Running Nextflow pipeline from local path: $WORKFLOW_PATH"
 else
@@ -143,4 +148,5 @@ nextflow run "$WORKFLOW_PATH" \
     --input samplesheet.csv \
     --ncbi_influenza_fasta $FASTA_ZST_FILE \
     --ncbi_influenza_metadata $CSV_ZST_FILE \
+    --vadr_model_targz $VADR_MODEL_TARGZ \
     --max_cpus $CPU --max_memory "$MEMORY" $@
