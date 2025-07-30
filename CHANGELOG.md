@@ -3,15 +3,16 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [[3.10.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.10.0)] - 2025-07-29
+## [[3.10.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.10.0)] - 2025-07-30
 
 This minor release adds Genin2, updates Clair3 and fixes Nextclade consolidated output to use the correct Nextclade dataset tag/version.
 
 ### Changes
 
-* add Genin2 for European clade 2.3.4.4b H5Nx genotype prediction to the `illumina`, `nanopore` and `assemblies` workflows (i.e. `--platform illumina/nanopore/assemblies`).
-* update Clair3 to 1.1.2 to fix a potential issue when using the `--enable_variant_calling_at_sequence_head_and_tail` option (#116)
-* fix Nextclade dataset tag/version used in consolidated tabular output file.
+* feat: add Genin2 for European clade 2.3.4.4b H5Nx genotype prediction to the `illumina`, `nanopore` and `assemblies` workflows (i.e. `--platform illumina/nanopore/assemblies`).
+* update: update Clair3 to 1.1.2 to fix a potential issue when using the `--enable_variant_calling_at_sequence_head_and_tail` option (#116)
+* fix: Nextclade dataset tag/version used in consolidated tabular output file.
+* dev: add `run-assemblies-test.sh` and update `run-*-test.sh` scripts in `tests/`. Better default `--outdir` for each test script and downloading of VADR model prior to running workflow to allow sharing of model tar.gz between different tests.
 
 ## [[3.9.0](https://github.com/CFIA-NCFAD/nf-flu/releases/tag/3.9.0)] - 2025-04-07
 
