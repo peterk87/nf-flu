@@ -340,6 +340,13 @@ CSV containing Nextclade datasets and optionally tags (versions) to run against 
 
 Skip the Flumut analysis.
 
+#### `--skip_genin2`
+
+- Type: boolean
+- Default: `false`
+
+Skip the Genin2 analysis.
+
 #### `--skip_nextclade`
 
 - Type: boolean

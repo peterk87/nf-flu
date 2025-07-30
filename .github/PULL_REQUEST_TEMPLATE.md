@@ -18,7 +18,10 @@ Learn more about contributing: [CONTRIBUTING.md](https://github.com/CFIA-NCFAD/n
   - [ ] If you've added a new tool - ensure that you've added the version info to a `versions.yml` and added it to the `ch_versions` channel in the workflow you added the tool to.
   - [ ] If you've added a new tool - have you followed the pipeline conventions in the [contribution docs](https://github.com/CFIA-NCFAD/nf-flu/tree/master/.github/CONTRIBUTING.md)
   - [ ] If necessary, also make a PR on [the CFIA-NCFAD/nf-test-datasets repo](https://github.com/CFIA-NCFAD/nf-test-datasets/pull/new)
+  - [ ] If appropriate, ensure that the `illumina`, `nanopore` and `assemblies` workflows have been updated to use the new tool.
+  - [ ] Add or update an [`nf-test`](https://github.com/askimed/nf-test) for the module/workflow/etc.
 - [ ] Ensure the test suite passes (`nextflow run . -profile test_{illumina,nanopore},docker`).
+- [ ] Ensure that the [`nf-test`](https://github.com/askimed/nf-test) tests pass.
 - [ ] Usage Documentation in `docs/usage.md` is updated.
 - [ ] Output Documentation in `docs/output.md` is updated.
 - [ ] `CHANGELOG.md` is updated.
